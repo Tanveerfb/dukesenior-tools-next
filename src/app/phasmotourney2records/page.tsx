@@ -51,3 +51,4 @@ export default function PhasmoTourney2RecordsPage() {
     </Container>
   );
 }
+

@@ -1,6 +1,7 @@
-@import url("https://fonts.googleapis.com/css2?family=Red+Hat+Display:ital,wght@0,300..900;1,300..900&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Dongle&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap");
-@import url("https://fonts.cdnfonts.com/css/gagalin");
+@use "sass:color";
+@use "sass:math";
+
+// Theme variable definitions (must precede bootstrap for customization)
 
 // Phasmo Tourney 4 Theme Colors
 $primary: #6c1e70; // Dark Purple
@@ -18,130 +19,22 @@ $light: #f2eefb; // Soft Lavender Tint
 $text-color: #212121; // Neutral dark for text
 $background-color: #eef4fa; // Subtle off-white for background
 
-// Dark Theme Colors
-$dark-bg: #101c2c; // Deep Space Blue
-$dark-text: #d6a2ff; // Soft Lavender for readability
-$dark-accent: #f7c600; // Bright Yellow-Green for highlights
-
-// Genshin Colors remain unchanged
-$pyro: #d64a3d;
-$hydro: #52a7e8;
-$anemo: #79bba8;
-$electro: #b183c9;
-$dendro: #a3bd4a;
-$cryo: #6bb8e8;
-$geo: #e8a340;
-
-$theme-colors: (
-  "primary": $primary,
-  "secondary": $secondary,
-  "tertiary": $tertiary,
-  "success": $success,
-  "warning": $warning,
-  "info": $info,
-  "danger": $danger,
-  "dark": $dark,
-  "light": $light,
-  "pyro": $pyro,
-  "hydro": $hydro,
-  "anemo": $anemo,
-  "electro": $electro,
-  "dendro": $dendro,
-  "cryo": $cryo,
-  "geo": $geo,
-);
-
-$body-color: $text-color;
-$body-bg: $background-color;
-
-[data-theme="dark"] {
-  $body-color: $dark-text;
-  $body-bg: $dark-bg;
-}
-
-//............................................
-
-html {
-  scroll-behavior: smooth;
-}
-
-a {
-  text-decoration: none !important;
-  font-weight: bolder;
-}
-
-#root {
-  font-family: "Noto Sans", sans-serif;
-  font-optical-sizing: auto;
-  font-weight: 400;
-  font-style: normal;
-}
-
-.brandName {
-  font-family: "Gagalin", sans-serif;
-  font-size: large;
-}
-
-tr {
-  margin: auto;
-}
-
-#winner {
-  background-color: $success;
-  color: $light; // White text for better readability
-}
-
-.gagalin {
-  font-family: "Gagalin", sans-serif;
-}
-
-.alert {
-  text-align: center;
-  background-color: lighten($info, 30); // Softer blue for alerts
-}
-
-.avatar {
-  vertical-align: middle;
-  width: 156px;
-  height: 156px;
-  border-radius: 50%;
-  border: 2px solid $primary;
-}
-
-li {
-  list-style-type: none;
-}
-
-.AIBox {
-  height: 50vh;
-  max-height: 50vh;
-  overflow-y: auto;
-  padding: 10px;
-}
-
-form {
-  margin: auto;
-  border-radius: 8px;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); // Added subtle shadow
-}
-
-table {
-  text-align: center;
-  border: 1px solid $primary;
-}
-
-.matchGroup {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 1rem; // Space between cards
-  padding: 1rem;
-
-  .matchCard {
-    max-width: 100%;
-    border: 1px solid #333; // Subtle border
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); // Shadow for elevation
-  }
-}
-
+// (All previous custom navbar/mobile styles removed intentionally)
 @import "~bootstrap/scss/bootstrap";
+
+// Runtime accessibility scaling (controlled via ThemeProvider)
+:root {
+	--font-scale: 1; // default; ThemeProvider updates at runtime
+}
+html {
+	font-size: calc(16px * var(--font-scale, 1));
+	transition: font-size 0.15s ease-in-out;
+}
+body {
+	font-size: 1rem; // keep base context; rem units scale via html font-size
+}
+
+// Optionally scale headings slightly less aggressively (clamp effect)
+h1,h2,h3,h4,h5,h6 {
+	line-height: 1.15;
+}

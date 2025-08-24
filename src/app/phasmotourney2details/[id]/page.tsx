@@ -64,3 +64,4 @@ export default function PhasmoTourney2RunDetailsPage() {
     </Container>
   );
 }
+

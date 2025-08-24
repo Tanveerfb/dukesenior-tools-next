@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from 'react';
+import { Badge } from 'react-bootstrap';
 import { getTeamRedemptionScores, getTeamScores } from '@/lib/services/phasmoTourney3';
 
 interface Props { team1: string; team2: string; roundnumber: number; redemption?: boolean; }
@@ -35,11 +36,8 @@ export default function BracketMatchInfo({team1,team2,roundnumber,redemption}:Pr
     team1Line = `${team1} [${firstRedemption? firstRedemption[roundnumber-1] + ' points':'N/A'}]`;
     team2Line = `${team2} [${secondRedemption? secondRedemption[roundnumber-1] + ' points':'N/A'}]`;
   }
-  return (
-    <>
-      {winner==='first'? <span className="text-dendro fw-bold">{team1Line}</span>: team1Line}
-      <b>&nbsp;vs&nbsp;</b>
-      {winner==='second'? <span className="text-dendro fw-bold">{team2Line}</span>: team2Line}
-    </>
-  );
+  const renderTeam = (line:string, isWinner:boolean) => isWinner ? (
+    <Badge bg="success" className="fw-semibold" aria-label="Winner team">{line}</Badge>
+  ) : <span>{line}</span>;
+  return <>{renderTeam(team1Line, winner==='first')} <span className="fw-bold mx-1">vs</span> {renderTeam(team2Line, winner==='second')}</>;
 }

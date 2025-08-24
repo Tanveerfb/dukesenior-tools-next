@@ -1,5 +1,5 @@
 import { db } from '@/lib/firebase/client';
-import { collection, doc, getDoc, getDocs, setDoc } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs } from 'firebase/firestore';
 
 const WIKI_ROOT = 'GenshinWiki';
 const TEVYAT_DOC_ID = 'Tevyat';

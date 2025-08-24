@@ -1,5 +1,5 @@
 import { db } from "@/lib/firebase/client";
-import { addDoc, arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, increment, limit, orderBy, query, setDoc, updateDoc, where, writeBatch } from "firebase/firestore";
+import { addDoc, arrayUnion, collection, doc, getDoc, getDocs, increment, limit, orderBy, query, setDoc, where, writeBatch } from "firebase/firestore";
 
 const TOURNEY4_BASE = "Phasmophobia Tourney#4"; // player docs & bracket docs (players, bracket 1, bracket 2, individual players by name)
 const TOURNEY4_RECORDS = "Phasmophobia Tourney#4 Records"; // run records

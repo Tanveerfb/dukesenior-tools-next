@@ -1,97 +1,38 @@
 "use client";
-import Link from "next/link";
-import { Alert, Accordion, Button, ButtonGroup, Container, Tab, Tabs } from "react-bootstrap";
+import { useEffect, useState } from 'react';
+import { Container, Row, Col, Card, Badge, Spinner, Button } from 'react-bootstrap';
+import Link from 'next/link';
+import { listPosts } from '@/lib/services/cms';
+import { samplePosts } from '@/lib/content/samplePosts';
 
-export default function HomePage() {
+export default function HomePage(){
+  const [posts,setPosts] = useState<any[]>([]); const [loading,setLoading]=useState(false);
+  useEffect(()=> { (async()=> { setLoading(true); try { const dbPosts = await listPosts(12); setPosts(dbPosts.length? dbPosts : samplePosts); } finally { setLoading(false);} })(); },[]);
+  const pinned = posts.filter(p=> p.pinned);
+  const rest = posts.filter(p=> !p.pinned);
   return (
-    <>
-      <Container fluid className="p-3">
-        <Container>
-      <Tabs defaultActiveKey="current" className="mb-3" fill>
-            <Tab eventKey="current" title="Current Events">
-              <ButtonGroup className="flex-wrap flex-row p-2 align-items-center">
-        <Button variant="primary" className="m-1"><Link className="text-light text-decoration-none" href="/tourney4">Phasmo Tourney 4</Link></Button>
-        <Button variant="primary" className="m-1"><Link className="text-light text-decoration-none" href="/phasmoTourney3">Phasmo Tourney 3</Link></Button>
-              </ButtonGroup>
-            </Tab>
-            <Tab eventKey="tools" title="Tools">
-              <ButtonGroup className="flex-wrap flex-row p-2 align-items-center">
-                <Button variant="primary" className="m-1"><Link className="text-light text-decoration-none" href="/todolist">To Do List</Link></Button>
-                <Button variant="success" className="m-1"><Link className="text-light text-decoration-none" href="/GeminiAI">Gemini AI</Link></Button>
-              </ButtonGroup>
-            </Tab>
-            <Tab eventKey="wiki" title="Wiki">
-              <ButtonGroup className="flex-wrap flex-row p-2 align-items-center">
-                <Button variant="primary" className="m-1"><Link className="text-light text-decoration-none" href="/genshin">Genshin Impact</Link></Button>
-                <Button variant="tertiary" className="m-1"><Link className="text-light text-decoration-none" href="/phasmowiki">Phasmophobia</Link></Button>
-              </ButtonGroup>
-            </Tab>
-            <Tab eventKey="contact" title="Feedback">
-              <ButtonGroup className="d-flex flex-wrap flex-row p-1">
-                <Button variant="info" className="m-1"><Link className="text-light text-decoration-none" href="/suggestionsform">Suggestions form</Link></Button>
-              </ButtonGroup>
-            </Tab>
-          </Tabs>
-        </Container>
-      </Container>
-      <Container fluid className="p-3">
-        <Alert variant="info">Past Events</Alert>
-        <Accordion defaultActiveKey="99" alwaysOpen>
-          <Accordion.Item eventKey="1">
-            <Accordion.Header>[Past] [Closed] Dukesenior's Phasmo Tourney #1</Accordion.Header>
-            <Accordion.Body>
-              <Button variant="dark" className="mx-1">
-                <Link className="text-white text-decoration-none" href="/phasmotourneyData">Phasmo Tourney #1 Recorded runs</Link>
-              </Button>
-            </Accordion.Body>
-          </Accordion.Item>
-          <Accordion.Item eventKey="2">
-            <Accordion.Header>[Past] [Closed] Dukesenior's Phasmo Tourney #2</Accordion.Header>
-            <Accordion.Body>
-              <Button variant="dark" className="mx-1">
-                <Link className="text-white text-decoration-none" href="/phasmotourney2records">Recorded runs</Link>
-              </Button>
-              <Button variant="dark" className="mx-1">
-                <Link className="text-white text-decoration-none" href="/phasmotourney2standings">Standings</Link>
-              </Button>
-              <Button variant="dark" className="mx-1">
-                <Link className="text-white text-decoration-none" href="/phasmotourney2bracket">Bracket</Link>
-              </Button>
-            </Accordion.Body>
-          </Accordion.Item>
-          <Accordion.Item eventKey="3">
-            <Accordion.Header>[Past] [Closed] Dukesenior's Phasmo Tourney #3</Accordion.Header>
-            <Accordion.Body>
-              <Button variant="dark" className="mx-1">
-                <Link className="text-white text-decoration-none" href="/tourney3recordedruns">Recorded runs</Link>
-              </Button>
-              <Button variant="dark" className="mx-1">
-                <Link className="text-white text-decoration-none" href="/tourney3standings">Standings</Link>
-              </Button>
-              <Button variant="dark" className="mx-1">
-                <Link className="text-white text-decoration-none" href="/phasmoTourney3">Bracket</Link>
-              </Button>
-            </Accordion.Body>
-          </Accordion.Item>
-          <Accordion.Item eventKey="4">
-            <Accordion.Header>[Past] [Closed] Dukesenior's Phasmo Tourney #4</Accordion.Header>
-            <Accordion.Body>
-              <Button variant="dark" className="mx-1">
-                <Link className="text-white text-decoration-none" href="/tourney4recordedruns">Recorded runs</Link>
-              </Button>
-              <Button variant="dark" className="mx-1">
-                <Link className="text-white text-decoration-none" href="/tourney4standings">Standings</Link>
-              </Button>
-              <Button variant="dark" className="mx-1">
-                <Link className="text-white text-decoration-none" href="/tourney4stats">Stats</Link>
-              </Button>
-              <Button variant="dark" className="mx-1">
-                <Link className="text-white text-decoration-none" href="/tourney4">Bracket</Link>
-              </Button>
-            </Accordion.Body>
-          </Accordion.Item>
-        </Accordion>
-      </Container>
-    </>
+    <Container className="py-4">
+      <h1 className="fw-bold mb-4">The Lair of Evil</h1>
+      {loading && <Spinner animation="border" />}
+      {pinned.length>0 && <section className="mb-5"><h3 className="h5 mb-3">Featured</h3><Row className="g-4">{pinned.map(p=> <PostCard key={p.id} post={p} />)}</Row></section>}
+      <section><h3 className="h5 mb-3">Latest</h3><Row className="g-4">{rest.map(p=> <PostCard key={p.id} post={p} />)}{!loading && posts.length===0 && <Col><div className="text-muted small fst-italic">No posts yet.</div></Col>}</Row></section>
+    </Container>
   );
 }
+
+function PostCard({ post }: { post: any }){
+  return (
+    <Col md={4} sm={6} xs={12}>
+      <Card className="h-100">
+        {post.bannerUrl && <div style={{height:160, overflow:'hidden'}}><Card.Img src={post.bannerUrl} alt={post.title} style={{objectFit:'cover', height:'100%', width:'100%'}} /></div>}
+        <Card.Body className="d-flex flex-column">
+          <Card.Title className="fs-6 d-flex gap-2 align-items-start">{post.title}{post.pinned && <Badge bg="warning" text="dark" className="ms-auto">Pinned</Badge>}</Card.Title>
+          <div className="mb-2 small text-muted">{new Date(post.createdAt).toLocaleDateString()}</div>
+          <div className="mb-3" style={{minHeight:40}}>{post.tags?.slice(0,3).map((t:string)=><Badge key={t} bg="info" className="me-1">{t}</Badge>)}</div>
+          <Link href={`/posts/${post.slug}`} passHref legacyBehavior><Button as="a" size="sm" variant="outline-primary" className="mt-auto">Read</Button></Link>
+        </Card.Body>
+      </Card>
+    </Col>
+  );
+}
+
