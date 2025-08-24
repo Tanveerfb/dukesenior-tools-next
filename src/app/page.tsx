@@ -1,95 +1,97 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+"use client";
+import Link from "next/link";
+import { Alert, Accordion, Button, ButtonGroup, Container, Tab, Tabs } from "react-bootstrap";
 
-export default function Home() {
+export default function HomePage() {
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>src/app/page.tsx</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+    <>
+      <Container fluid className="p-3">
+        <Container>
+      <Tabs defaultActiveKey="current" className="mb-3" fill>
+            <Tab eventKey="current" title="Current Events">
+              <ButtonGroup className="flex-wrap flex-row p-2 align-items-center">
+        <Button variant="primary" className="m-1"><Link className="text-light text-decoration-none" href="/tourney4">Phasmo Tourney 4</Link></Button>
+        <Button variant="primary" className="m-1"><Link className="text-light text-decoration-none" href="/phasmoTourney3">Phasmo Tourney 3</Link></Button>
+              </ButtonGroup>
+            </Tab>
+            <Tab eventKey="tools" title="Tools">
+              <ButtonGroup className="flex-wrap flex-row p-2 align-items-center">
+                <Button variant="primary" className="m-1"><Link className="text-light text-decoration-none" href="/todolist">To Do List</Link></Button>
+                <Button variant="success" className="m-1"><Link className="text-light text-decoration-none" href="/GeminiAI">Gemini AI</Link></Button>
+              </ButtonGroup>
+            </Tab>
+            <Tab eventKey="wiki" title="Wiki">
+              <ButtonGroup className="flex-wrap flex-row p-2 align-items-center">
+                <Button variant="primary" className="m-1"><Link className="text-light text-decoration-none" href="/genshin">Genshin Impact</Link></Button>
+                <Button variant="tertiary" className="m-1"><Link className="text-light text-decoration-none" href="/phasmowiki">Phasmophobia</Link></Button>
+              </ButtonGroup>
+            </Tab>
+            <Tab eventKey="contact" title="Feedback">
+              <ButtonGroup className="d-flex flex-wrap flex-row p-1">
+                <Button variant="info" className="m-1"><Link className="text-light text-decoration-none" href="/suggestionsform">Suggestions form</Link></Button>
+              </ButtonGroup>
+            </Tab>
+          </Tabs>
+        </Container>
+      </Container>
+      <Container fluid className="p-3">
+        <Alert variant="info">Past Events</Alert>
+        <Accordion defaultActiveKey="99" alwaysOpen>
+          <Accordion.Item eventKey="1">
+            <Accordion.Header>[Past] [Closed] Dukesenior's Phasmo Tourney #1</Accordion.Header>
+            <Accordion.Body>
+              <Button variant="dark" className="mx-1">
+                <Link className="text-white text-decoration-none" href="/phasmotourneyData">Phasmo Tourney #1 Recorded runs</Link>
+              </Button>
+            </Accordion.Body>
+          </Accordion.Item>
+          <Accordion.Item eventKey="2">
+            <Accordion.Header>[Past] [Closed] Dukesenior's Phasmo Tourney #2</Accordion.Header>
+            <Accordion.Body>
+              <Button variant="dark" className="mx-1">
+                <Link className="text-white text-decoration-none" href="/phasmotourney2records">Recorded runs</Link>
+              </Button>
+              <Button variant="dark" className="mx-1">
+                <Link className="text-white text-decoration-none" href="/phasmotourney2standings">Standings</Link>
+              </Button>
+              <Button variant="dark" className="mx-1">
+                <Link className="text-white text-decoration-none" href="/phasmotourney2bracket">Bracket</Link>
+              </Button>
+            </Accordion.Body>
+          </Accordion.Item>
+          <Accordion.Item eventKey="3">
+            <Accordion.Header>[Past] [Closed] Dukesenior's Phasmo Tourney #3</Accordion.Header>
+            <Accordion.Body>
+              <Button variant="dark" className="mx-1">
+                <Link className="text-white text-decoration-none" href="/tourney3recordedruns">Recorded runs</Link>
+              </Button>
+              <Button variant="dark" className="mx-1">
+                <Link className="text-white text-decoration-none" href="/tourney3standings">Standings</Link>
+              </Button>
+              <Button variant="dark" className="mx-1">
+                <Link className="text-white text-decoration-none" href="/phasmoTourney3">Bracket</Link>
+              </Button>
+            </Accordion.Body>
+          </Accordion.Item>
+          <Accordion.Item eventKey="4">
+            <Accordion.Header>[Past] [Closed] Dukesenior's Phasmo Tourney #4</Accordion.Header>
+            <Accordion.Body>
+              <Button variant="dark" className="mx-1">
+                <Link className="text-white text-decoration-none" href="/tourney4recordedruns">Recorded runs</Link>
+              </Button>
+              <Button variant="dark" className="mx-1">
+                <Link className="text-white text-decoration-none" href="/tourney4standings">Standings</Link>
+              </Button>
+              <Button variant="dark" className="mx-1">
+                <Link className="text-white text-decoration-none" href="/tourney4stats">Stats</Link>
+              </Button>
+              <Button variant="dark" className="mx-1">
+                <Link className="text-white text-decoration-none" href="/tourney4">Bracket</Link>
+              </Button>
+            </Accordion.Body>
+          </Accordion.Item>
+        </Accordion>
+      </Container>
+    </>
   );
 }
