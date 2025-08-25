@@ -65,11 +65,12 @@
 - Sass still emits deprecation warnings (`@import`) – migration to `@use` pending.
 
 ---
+
 Generated automatically based on recent commits and build changes on 2025-08-25.
 
 ## Version 1.1.1 – Route cleanup, image & lint fixes, Discord patch publishing (2025-08-25)
 
-### Highlights
+### Changes & Improvements
 
 - Consolidated Phasmo tournament routes under `src/app/phasmotourney-series/*` and removed duplicate legacy stubs after verification.
 - Restored and stabilized Phasmo Tourney 2 bracket page with explicit winners displayed (matches now render bold winners as in the original site).
@@ -83,3 +84,29 @@ Generated automatically based on recent commits and build changes on 2025-08-25.
 
 ---
 
+## Version 1.1.2 – Mentions & Notifications Inbox, comment anchors (2025-08-25)
+
+### Highlights 1.1.2
+
+- Implemented client-side @-mention autocomplete inside post and comment composers with scoped suggestion dropdowns and keyboard navigation (works for main composer and nested replies).
+- Server-side mention notifications: secure API endpoint verifies ID tokens and writes per-user notification documents. Notifications now persist a friendly `postSlug` (when available) so links point to human-readable post URLs.
+- Added a Notifications inbox page (`/notifications`) that lists a user's notifications with quick mark-as-read actions and links to the related post and comment anchor.
+- Added comment DOM anchors (`id="comment-<id>"`) and a robust scroll-to-hash effect (retry interval + hashchange listener) so SPA navigation reliably scrolls to the target comment after async loading.
+- Navbar notification dropdown updated to prefer slug-based links and includes a "View all notifications" link to the inbox.
+
+## Version 1.1.3 – Navbar & Mobile UX: Offcanvas mobile menu, Accordion nav (2025-08-26)
+
+### Mobile & Navbar Highlights
+
+- Reworked the main navigation mobile experience to use a right-side Offcanvas menu opened via the hamburger toggle. The Offcanvas mirrors desktop sections (Admin, Community, Events, Tools) but uses Accordion items for reliable mobile interaction.
+- Desktop navigation remains centered with dropdown mega-panels; Offcanvas no longer renders inline on large screens to avoid duplication.
+- Accessibility controls, search button, and profile/login actions are available inside the Offcanvas and close the menu after selection.
+- Fixed mobile-specific dropdown issues (Admin/Community/Events/Tools) by replacing nested dropdowns with Accordion items for predictable touch behavior.
+- Minor TypeScript + lint cleanups related to unused refs/state during the refactor.
+
+Build: production build completed successfully (warnings present; none blocking).
+
+### Notes & Follow-ups
+
+- Legacy notifications created before `postSlug` was recorded will need a backfill to provide slug-based links — a safe server-side backfill script is recommended (not executed automatically).
+- UX polish ideas: mark-as-read-on-click (atomic), inbox pagination/grouping, avatars & timestamps formatting improvements.

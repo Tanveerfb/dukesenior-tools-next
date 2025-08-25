@@ -6,9 +6,10 @@ import { db, storage } from "@/lib/firebase/client";
 import { collection, doc, getDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { useRouter } from "next/navigation";
+import { getUserByUID } from '@/lib/services/users';
 
 export default function ProfilePage() {
-  const { user, resetPassword, updateDisplayName, logout } = useAuth();
+  const { user, resetPassword, updateDisplayName, logout, loading: authLoading } = useAuth();
   const [data, setData] = useState<any>(null);
   const [mainAlert, setMainAlert] = useState<string | null>(null);
   const [passwordAlert, setPasswordAlert] = useState<string | null>(null);
@@ -16,6 +17,28 @@ export default function ProfilePage() {
   const displayNameRef = useRef<HTMLInputElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+
+  // If the signed-in user has a public username, redirect to their public profile.
+  useEffect(() => {
+    let mounted = true;
+    async function maybeRedirect() {
+      if (!user || authLoading) return;
+      try {
+        const udoc = await getUserByUID(user.uid);
+        if (!mounted) return;
+        setData(udoc);
+        const uname = udoc?.username;
+        if (uname) {
+          router.push(`/profile/${uname}`);
+        }
+      } catch (_e) {
+        // ignore and show fallback account UI
+        console.error('profile redirect check failed', _e);
+      }
+    }
+    maybeRedirect();
+    return () => { mounted = false; };
+  }, [user, authLoading, router]);
 
   async function fetchdata() {
     if (!user) return;

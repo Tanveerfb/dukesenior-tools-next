@@ -9,3 +9,4 @@ export * from './tagRegistry';
 export * from './tags';
 export * from './todo';
 export * from './cms';
+export * from './users';

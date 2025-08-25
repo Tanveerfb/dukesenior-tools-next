@@ -48,7 +48,8 @@ export async function addComment(uid: string, authorName: string, input: NewComm
     const parentData = parent.data() as CMSComment | undefined;
     path = parentData ? parentData.path + '/' + id : id;
   }
-  const comment: CMSComment = { id, postId: input.postId, parentId: input.parentId ?? null, authorUID: uid, authorName, content: input.content, createdAt: now, updatedAt: now, likeCount:0, dislikeCount:0, path };
+  // allow optional mentions array on the input (list of usernames)
+  const comment: CMSComment = { id, postId: input.postId, parentId: input.parentId ?? null, authorUID: uid, authorName, content: input.content, createdAt: now, updatedAt: now, likeCount:0, dislikeCount:0, path, mentions: input.mentions || [] } as any;
   await setDoc(doc(db, COMMENTS_COL, id), comment);
   await updateDoc(doc(db, POSTS_COL, input.postId), { commentCount: increment(1) });
   return id;

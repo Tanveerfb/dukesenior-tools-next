@@ -27,6 +27,7 @@ export interface CMSComment {
   likeCount: number;
   dislikeCount: number;
   path: string; // materialized ancestry path for efficient queries e.g. root/child/child
+  mentions?: string[]; // optional list of mentioned usernames (lowercase)
 }
 
 export interface NewPostInput {
@@ -34,4 +35,4 @@ export interface NewPostInput {
 }
 export interface UpdatePostInput extends Partial<NewPostInput> { id: string; }
 
-export interface NewCommentInput { postId: string; parentId?: string; content: string; }
+export interface NewCommentInput { postId: string; parentId?: string; content: string; mentions?: string[]; }

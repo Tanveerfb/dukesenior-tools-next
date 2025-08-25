@@ -53,13 +53,14 @@ async function postToDiscord(webhookUrl, title, body) {
 }
 
 function extractTopSection(markdown) {
-  // Find first "## " heading and extract until next "## " or EOF
+  // Find the most recent (last) "## " heading block and extract until next "## " or EOF
   const lines = markdown.split(/\r?\n/);
-  let start = -1;
+  const starts = [];
   for (let i = 0; i < lines.length; i++) {
-    if (lines[i].startsWith('## ')) { start = i; break; }
+    if (lines[i].startsWith('## ')) starts.push(i);
   }
-  if (start === -1) return { title: 'Patch Notes', body: markdown };
+  if (starts.length === 0) return { title: 'Patch Notes', body: markdown };
+  const start = starts[starts.length - 1];
   let end = lines.length;
   for (let i = start + 1; i < lines.length; i++) {
     if (lines[i].startsWith('## ')) { end = i; break; }

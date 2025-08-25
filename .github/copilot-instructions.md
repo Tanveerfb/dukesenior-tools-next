@@ -128,7 +128,7 @@ Concise, project-specific knowledge so an AI agent can work productively right a
    - 'The Lair of Evil' is the website brand name. It is also the user's discord server name and hence, the use of the website is for the user and his community.
    - 'Phasmo Tourney' is also a brand name.
    * User's twitch username is 'DukeSenior'
-
+10. Don't run 'npm run build' or commit git changes unless user specifies. 
 ---
 
 (End of instructions – keep updates concise and specific to actual code.)

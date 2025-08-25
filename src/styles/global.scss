@@ -51,3 +51,14 @@ body {
 h1,h2,h3,h4,h5,h6 {
 	line-height: 1.15;
 }
+
+/* Fixes for small-screen badge wrapping in post cards */
+.card .badge {
+	white-space: normal; // allow wrapping when necessary
+}
+.card .d-flex.flex-wrap .badge {
+	white-space: normal;
+}
+.navbar .navbar-toggler.ms-auto {
+	margin-left: auto !important;
+}

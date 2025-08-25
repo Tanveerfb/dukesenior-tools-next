@@ -64,9 +64,14 @@ export default function PostsIndex(){
                   </div>
                 )}
                 <Card.Body className="d-flex flex-column">
-                  <div className="d-flex align-items-start mb-2">
-                    <Card.Title className="mb-0">{p.title}</Card.Title>
-                    {p.pinned && <Badge bg="warning" text="dark" className="ms-auto">Pinned</Badge>}
+                  <div className="d-flex align-items-start mb-2 justify-content-between">
+                    <div style={{flex: '1 1 auto', minWidth: 0}}>
+                      <Card.Title className="mb-0 text-truncate" style={{marginBottom:0, whiteSpace: 'nowrap', overflow:'hidden', textOverflow:'ellipsis'}}>{p.title}</Card.Title>
+                    </div>
+                    <div className="d-flex align-items-center gap-2 flex-shrink-0 flex-wrap">
+                      {p.pinned && <Badge bg="warning" text="dark" className="d-none d-sm-inline">Pinned</Badge>}
+                      {p.id?.startsWith?.('sample-') && <Badge bg="secondary" className="d-none d-sm-inline">Sample</Badge>}
+                    </div>
                   </div>
                   <div className="text-muted small mb-2">{new Date(p.createdAt).toLocaleDateString()} • {p.author || 'DukeSenior'}</div>
                   <Card.Text className="mb-3 text-truncate">{excerpt(p.excerpt || p.content || '', 160)}</Card.Text>
@@ -101,7 +106,7 @@ export default function PostsIndex(){
                   <Card.Body className="d-flex flex-column h-100">
                     <div className="d-flex align-items-start mb-1">
                       <Card.Title className="fs-6 mb-0">{p.title}</Card.Title>
-                      {p.pinned && <Badge bg="warning" text="dark" className="ms-auto">Pinned</Badge>}
+                      {p.pinned && <Badge bg="warning" text="dark" className="ms-auto d-none d-sm-inline">Pinned</Badge>}
                     </div>
                     <div className="text-muted small mb-2">{new Date(p.createdAt).toLocaleDateString()}</div>
                     <Card.Text className="mb-3 small text-muted" style={{minHeight:40}}>{excerpt(p.excerpt || p.content || '', 120)}</Card.Text>

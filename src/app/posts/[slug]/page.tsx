@@ -1,5 +1,24 @@
 "use client";
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
+import Link from 'next/link';
+
+// Helper: render comment content and turn @username into profile links
+function renderCommentWithLinks(content: string){
+  if(!content) return <>{''}</>;
+  const parts: Array<string|React.ReactNode> = [];
+  const re = /@([A-Za-z0-9_]{3,32})/g;
+  let lastIndex = 0;
+  let m: RegExpExecArray | null;
+  while((m = re.exec(content))){
+    const idx = m.index;
+    if(idx > lastIndex) parts.push(content.slice(lastIndex, idx));
+    const uname = m[1];
+    parts.push(<Link key={idx} href={`/profile/${encodeURIComponent(uname)}`} className="text-decoration-none">@{uname}</Link>);
+    lastIndex = idx + m[0].length;
+  }
+  if(lastIndex < content.length) parts.push(content.slice(lastIndex));
+  return <span style={{whiteSpace:'pre-wrap'}}>{parts.map((p, i) => typeof p === 'string' ? <span key={i}>{p}</span> : p)}</span>;
+}
 import { useParams } from 'next/navigation';
 import { getPostBySlug, addComment, reactToPostForUser, reactToCommentForUser, listenPost, listenComments, getUserPostReaction, getUserCommentReaction } from '@/lib/services/cms';
 import { getSamplePostBySlug } from '@/lib/content/samplePosts';
@@ -12,6 +31,7 @@ import rehypeRaw from 'rehype-raw';
 import rehypeSanitize from 'rehype-sanitize';
 import rehypeSlug from 'rehype-slug';
 import { useAuth } from '@/hooks/useAuth';
+import { getAuth } from 'firebase/auth';
 import styles from './post.module.css';
 
 async function copyToClipboard(text: string){
@@ -60,12 +80,37 @@ function extractHeadings(markdown = ''){
   return items;
 }
 
+// Extract @username tokens and call server API to create notifications
+async function notifyMentions(text: string, postId: string, commentId?: string, postSlug?: string){
+  try {
+    const re = /@([A-Za-z0-9_]{3,32})/g;
+    const set = new Set<string>();
+    let m: RegExpExecArray | null;
+    while((m = re.exec(text))){ set.add(m[1].toLowerCase()); }
+    if(set.size === 0) return;
+    const list = Array.from(set);
+    let idToken = '';
+    try { const auth = getAuth(); idToken = await auth.currentUser?.getIdToken() || ''; } catch(e) { /* ignore */ }
+  await fetch('/api/notifications/mention', { method: 'POST', headers: { 'Content-Type':'application/json', 'Authorization': idToken? `Bearer ${idToken}` : '' }, body: JSON.stringify({ usernames: list, postId, postSlug: postSlug || '', commentId, context: '' }) });
+  } catch (e){ console.warn('notifyMentions error', e); }
+}
+
 export default function PostView(){
   const { slug } = useParams<{ slug: string }>();
   const [loading,setLoading] = useState(true);
   const [post,setPost] = useState<any>();
   const [comments,setComments] = useState<CommentNode[]>([]);
+  const scrolledToHashRef = useRef(false);
   const [newComment,setNewComment] = useState('');
+  const newCommentRef = useRef<HTMLTextAreaElement | null>(null);
+  const [suggestions, setSuggestions] = useState<{username:string; uid:string}[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [suggestionOwner, setSuggestionOwner] = useState<string | null>(null); // 'main' or commentId
+  const [activeSuggestion, setActiveSuggestion] = useState(0);
+  const [mentionStart, setMentionStart] = useState<number | null>(null);
+  const [mentionPartial, setMentionPartial] = useState<string>('');
+  const suggestionTimerRef = useRef<number | null>(null);
+  const activeTextareaRef = useRef<HTMLTextAreaElement | null>(null);
   const [posting,setPosting] = useState(false);
   const [userPostReaction,setUserPostReaction] = useState<'like'|'dislike'|undefined>();
   const { user } = useAuth();
@@ -171,8 +216,44 @@ export default function PostView(){
     return ()=> { unsubPost && unsubPost(); unsubComments && unsubComments(); };
   },[slug, user]);
 
-  // keyboard navigation for lightbox
+  // If navigated with a hash (e.g., /posts/:slug#comment-<id>) the comment element
+  // may not exist when the route first renders because comments load async.
+  // Keep trying to find and scroll to the element every 200ms for up to ~5s.
   useEffect(()=>{
+    if(typeof window === 'undefined') return;
+    const hash = window.location.hash;
+    if(!hash) return;
+    if(scrolledToHashRef.current) return;
+    const id = decodeURIComponent(hash.replace('#',''));
+    function tryScroll(){
+      const el = document.getElementById(id);
+      if(el){
+        try{ el.scrollIntoView({ behavior: 'smooth', block: 'center' }); (el as HTMLElement).focus?.(); }catch(e){}
+        scrolledToHashRef.current = true;
+        return true;
+      }
+      return false;
+    }
+    // immediate attempt
+    if(tryScroll()) return;
+    let attempts = 0;
+    const maxAttempts = 25; // ~5s at 200ms per attempt
+    const iv = window.setInterval(()=>{
+      attempts++;
+      if(tryScroll() || attempts >= maxAttempts){
+        window.clearInterval(iv);
+      }
+    }, 200);
+    // also respond to future hash changes while on the page
+    function onHash(){ if(!scrolledToHashRef.current) tryScroll(); }
+    window.addEventListener('hashchange', onHash);
+    return ()=>{ window.clearInterval(iv); window.removeEventListener('hashchange', onHash); };
+  }, [slug, comments, post]);
+
+  
+
+  // keyboard navigation for lightbox
+  useEffect(()=> {
     if(!lightboxOpen) return;
     function onKey(e: KeyboardEvent){
       if(e.key === 'Escape') { setLightboxOpen(false); }
@@ -181,7 +262,7 @@ export default function PostView(){
     }
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [lightboxOpen, currentIndex, gallery]);
+  }, [lightboxOpen, currentIndex, gallery, gotoPrev, gotoNext]);
 
   const readTime = estimateReadTime(post?.content || '');
   const headings = extractHeadings(post?.content || '');
@@ -192,12 +273,105 @@ export default function PostView(){
     setPosting(true);
     setCommentError(undefined);
     try {
-      await addComment(user.uid, user.email||'unknown', { postId: post.id, parentId, content: newComment.trim() });
-      setNewComment('');
+  const content = newComment.trim();
+  // extract mentions to persist on the comment
+  const re = /@([A-Za-z0-9_]{3,32})/g; const set = new Set<string>(); let mm: RegExpExecArray | null; while((mm = re.exec(content))){ set.add(mm[1].toLowerCase()); }
+  const mentions = Array.from(set);
+  const commentId = await addComment(user.uid, user.email||'unknown', { postId: post.id, parentId, content, mentions });
+  setNewComment('');
+  setShowSuggestions(false);
+  try { await notifyMentions(content, post.id, commentId, post.slug); } catch(e){ console.warn('mention notify failed', e); }
     } catch(err:any){
       console.error('Add comment failed', err);
       setCommentError('Failed to post comment: ' + (err?.message||'unknown'));
     } finally { setPosting(false); }
+  }
+
+  // --- mention autocomplete for main textarea ---
+  const fetchSuggestions = useCallback(async (q: string, owner?: string)=>{
+    // prefer server API (Admin-backed) when available
+    try{
+      const res = await fetch(`/api/users/search?q=${encodeURIComponent(q)}`);
+  if(res.ok){ const json = await res.json(); if(json?.results && Array.isArray(json.results) && json.results.length){ setSuggestions(json.results.slice(0,8)); setActiveSuggestion(0); setSuggestionOwner(owner || null); setShowSuggestions(true); return; } }
+    }catch(e){ /* ignore */ }
+
+    // fallback to client Firestore query
+    try{
+      const { db } = await import('@/lib/firebase/client');
+      const { collection, query, where, orderBy, limit, getDocs } = await import('firebase/firestore');
+      const start = q;
+      const end = q + '\uf8ff';
+      const col = collection(db, 'usernames');
+      const qref = query(col, where('username','>=', start), where('username','<=', end), orderBy('username'), limit(8));
+      const snap = await getDocs(qref as any);
+      const out: {username:string; uid:string}[] = [];
+      snap.forEach(d=> { const data = d.data() as any; if(data?.username && data?.uid) out.push({ username: data.username, uid: data.uid }); });
+  if(out.length){ setSuggestions(out); setActiveSuggestion(0); setSuggestionOwner(owner || null); setShowSuggestions(true); return; }
+    }catch(e){ /* ignore */ }
+
+  // no results: clear owner
+  setSuggestionOwner(null);
+  setSuggestions([]); setShowSuggestions(false);
+  }, []);
+
+  function handleNewCommentChange(e: React.ChangeEvent<HTMLTextAreaElement>){
+    const val = e.target.value;
+    setNewComment(val);
+    // detect mention token at caret
+    const caret = e.target.selectionStart || val.length;
+    const before = val.slice(0, caret);
+    const at = before.lastIndexOf('@');
+    if(at >= 0 && (at === 0 || /\s/.test(before[at-1]))){
+      const partial = before.slice(at+1);
+      setMentionPartial(partial);
+      if(/^[A-Za-z0-9_]{1,32}$/.test(partial)){
+        setMentionStart(at);
+        if(suggestionTimerRef.current) window.clearTimeout(suggestionTimerRef.current);
+  // mark owner as main textarea so only it shows suggestions
+  suggestionTimerRef.current = window.setTimeout(()=> fetchSuggestions(partial.toLowerCase(), 'main'), 200) as unknown as number;
+        return;
+      }
+    }
+    // else hide
+    setShowSuggestions(false);
+    setSuggestions([]);
+    setMentionStart(null);
+    setMentionPartial('');
+  }
+
+  function applySuggestionToTextarea(username: string){
+  const ta = activeTextareaRef.current || newCommentRef.current;
+    if(!ta) return;
+    const val = newComment;
+    const caret = ta.selectionStart || val.length;
+    const start = mentionStart ?? val.lastIndexOf('@', caret-1);
+    if(start < 0) return;
+    const before = val.slice(0, start);
+    const after = val.slice(caret);
+    const insert = `@${username} `;
+    const newVal = before + insert + after;
+    setNewComment(newVal);
+    setShowSuggestions(false);
+  setSuggestionOwner(null);
+    setSuggestions([]);
+    setMentionStart(null);
+    // position caret after inserted username
+    requestAnimationFrame(()=>{ const pos = before.length + insert.length; try{ ta.focus(); ta.setSelectionRange(pos,pos); }catch(e){} });
+  }
+
+  function handleNewKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>){
+    if(!showSuggestions || suggestions.length===0) return;
+    if(e.key === 'ArrowDown'){
+      e.preventDefault(); setActiveSuggestion(i => Math.min(suggestions.length-1, i+1));
+    } else if(e.key === 'ArrowUp'){
+      e.preventDefault(); setActiveSuggestion(i => Math.max(0, i-1));
+    } else if(e.key === 'Enter'){
+      // if suggestion open and caret at mention, accept
+      e.preventDefault(); const s = suggestions[activeSuggestion]; if(s) applySuggestionToTextarea(s.username);
+    } else if(e.key === 'Escape'){
+      setShowSuggestions(false);
+  setSuggestionOwner(null);
+    }
   }
 
   function renderContent(md: string){ return transformEmbeds(md); }
@@ -294,13 +468,25 @@ export default function PostView(){
         <h4 className="mb-3">Comments ({post.commentCount})</h4>
         {post.id.startsWith('sample-') ? <div className="text-muted small mb-3">Comments disabled for sample post.</div> : user ? (
           <Form onSubmit={e=> { e.preventDefault(); submit(); }} className="mb-4">
-            <Form.Group className="mb-2"><Form.Control as="textarea" rows={3} value={newComment} onChange={e=> setNewComment(e.target.value)} placeholder="Write a comment..." /></Form.Group>
+            <Form.Group className="mb-2" style={{ position: 'relative' }}>
+              <Form.Control as="textarea" rows={3} value={newComment} onChange={handleNewCommentChange} onKeyDown={handleNewKeyDown} placeholder="Write a comment..." ref={(el:any) => newCommentRef.current = el} />
+              {showSuggestions && suggestions.length > 0 && suggestionOwner === 'main' && (
+                <div style={{ position: 'absolute', left: 8, right: 8, top: '100%', zIndex: 2000, background: 'var(--bs-body-bg)', border: '1px solid rgba(0,0,0,0.15)', borderRadius: 6, marginTop: 6, boxShadow: '0 6px 18px rgba(0,0,0,0.12)' }}>
+                  {suggestions.map((s, idx)=> (
+                    <div key={s.username} onMouseDown={(ev)=> { ev.preventDefault(); applySuggestionToTextarea(s.username); }} style={{ padding: '6px 10px', cursor: 'pointer', background: idx===activeSuggestion? 'rgba(0,0,0,0.06)': 'transparent' }}>
+                      @{s.username}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Form.Group>
+            <div className="small text-muted mb-2">Mention partial: <strong>{mentionPartial || '-'}</strong> • Suggestions: {suggestions.length}</div>
             <Button size="sm" disabled={!newComment.trim()||posting} type="submit">{posting? 'Posting...':'Post Comment'}</Button>
           </Form>
         ) : <div className="text-muted small mb-3">Login to comment.</div>}
         {!post.id.startsWith('sample-') && (
           <div className="comments-tree">
-            {comments.map(c => <CommentItem key={c.id} node={c} postId={post.id} />)}
+            {comments.map(c => <CommentItem key={c.id} node={c} postId={post.id} mentionProps={{ suggestions, showSuggestions, suggestionOwner, activeSuggestion, applySuggestionToTextarea, fetchSuggestions, setActiveSuggestion, setShowSuggestions, setSuggestionOwner, setSuggestions, activeTextareaRef, postSlug: post.slug }} />)}
             {comments.length===0 && <div className="text-muted small fst-italic">No comments yet.</div>}
           </div>
         )}
@@ -341,8 +527,9 @@ export default function PostView(){
   );
 }
 
-function CommentItem({ node, postId }: { node: CommentNode; postId: string; }){
+function CommentItem({ node, postId, mentionProps }: { node: CommentNode; postId: string; mentionProps?: any }){
   const { user } = useAuth();
+  const { suggestions = [], showSuggestions = false, suggestionOwner = null, activeSuggestion = 0, applySuggestionToTextarea = (u:string)=>{}, fetchSuggestions = async (q:string)=>{}, setActiveSuggestion = (v:any)=>{}, setShowSuggestions = (v:any)=>{}, setSuggestionOwner = (v:any)=>{}, setSuggestions = (v:any)=>{}, activeTextareaRef = { current: null } } = mentionProps || {};
   const [replyOpen,setReplyOpen] = useState(false);
   const [reply,setReply] = useState('');
   const [working,setWorking] = useState(false);
@@ -358,12 +545,44 @@ function CommentItem({ node, postId }: { node: CommentNode; postId: string; }){
     setDislikeCount(c=> c + (type==='dislike'?1:0) - (userReaction==='dislike'?1:0));
     setUserReaction(type);
   }
-  async function submit(){ if(!user || !reply.trim()) return; setWorking(true); try { await addComment(user.uid, user.email||'unknown', { postId, parentId: node.id, content: reply.trim() }); setReply(''); setReplyOpen(false); } finally { setWorking(false);} }
+  async function submit(){
+    if(!user || !reply.trim()) return;
+    setWorking(true);
+    try {
+  const c = reply.trim();
+  const re = /@([A-Za-z0-9_]{3,32})/g; const set = new Set<string>(); let mm: RegExpExecArray | null; while((mm = re.exec(c))){ set.add(mm[1].toLowerCase()); }
+  const mentions = Array.from(set);
+  const commentId = await addComment(user.uid, user.email||'unknown', { postId, parentId: node.id, content: c, mentions });
+  setReply('');
+  setReplyOpen(false);
+  try { await notifyMentions(c, postId, commentId, mentionProps?.postSlug); } catch(e){ console.warn('mention notify failed', e); }
+    } finally { setWorking(false);} 
+  }
+
+  // insert suggestion into this reply textarea (keeps local React state in sync)
+  function insertSuggestionLocal(username: string){
+    const ta = activeTextareaRef.current as HTMLTextAreaElement | null;
+    // fallback: try to find focused textarea in this component
+    const caret = ta ? (ta.selectionStart || ta.value.length) : reply.length;
+    const val = reply;
+    const start = (ta ? val.lastIndexOf('@', caret-1) : val.lastIndexOf('@', caret-1));
+    if(start < 0) return;
+    const before = val.slice(0, start);
+    const after = val.slice(caret);
+    const insert = `@${username} `;
+    const newVal = before + insert + after;
+    setReply(newVal);
+    setShowSuggestions(false);
+    setSuggestionOwner(null);
+    setSuggestions([]);
+    // restore focus and caret
+    requestAnimationFrame(()=>{ try{ if(ta){ ta.focus(); const pos = before.length + insert.length; ta.setSelectionRange(pos,pos); } }catch(e){} });
+  }
   return (
-    <div className="mb-3">
+    <div id={`comment-${node.id}`} className="mb-3">
       <div className="p-2 border rounded bg-body-tertiary">
         <div className="d-flex align-items-center gap-2 small text-muted mb-1"><strong className="text-body">{node.authorName}</strong><span>{new Date(node.createdAt).toLocaleString()}</span></div>
-        <div className="small mb-2" style={{whiteSpace:'pre-wrap'}}>{node.content}</div>
+  <div className="small mb-2">{renderCommentWithLinks(node.content)}</div>
         <div className="d-flex gap-2">
           <Button size="sm" variant={userReaction==='like'? 'success':'outline-success'} disabled={!user} onClick={()=> react('like')}>👍 {likeCount}</Button>
           <Button size="sm" variant={userReaction==='dislike'? 'danger':'outline-danger'} disabled={!user} onClick={()=> react('dislike')}>👎 {dislikeCount}</Button>
@@ -372,7 +591,27 @@ function CommentItem({ node, postId }: { node: CommentNode; postId: string; }){
         <Collapse in={replyOpen}>
           <div>
             <Form className="mt-2" onSubmit={e=> { e.preventDefault(); submit(); }}>
-              <Form.Control as="textarea" rows={2} value={reply} onChange={e=> setReply(e.target.value)} placeholder="Reply..." className="mb-2" />
+      <Form.Control as="textarea" rows={2} value={reply} onChange={e=> { setReply(e.target.value);
+        // reply mention handling: set active textarea and look for @
+        const ta = e.target as HTMLTextAreaElement; activeTextareaRef.current = ta; const caret = ta.selectionStart || ta.value.length; const before = ta.value.slice(0, caret); const at = before.lastIndexOf('@'); if(at >= 0 && (at===0 || /\s/.test(before[at-1]))){ const partial = before.slice(at+1); if(/^[A-Za-z0-9_]{1,32}$/.test(partial)){ // debounce: simple 200ms
+        // mark this comment as suggestion owner so only its dropdown shows
+        setSuggestionOwner(node.id);
+        setTimeout(()=> fetchSuggestions(partial.toLowerCase(), node.id), 200);
+          } }
+        }} placeholder="Reply..." className="mb-2" onFocus={(e)=> { activeTextareaRef.current = e.target as HTMLTextAreaElement; setSuggestionOwner(node.id); }} onBlur={(e)=> { /* keep suggestions visible briefly; they will be cleared on apply or escape */ }} onKeyDown={(e)=> { if(suggestionOwner === node.id && showSuggestions) { if(e.key === 'ArrowDown'){ e.preventDefault(); setActiveSuggestion((i:number)=> Math.min(suggestions.length-1, i+1)); } else if(e.key === 'ArrowUp'){ e.preventDefault(); setActiveSuggestion((i:number)=> Math.max(0, i-1)); } else if(e.key === 'Enter'){ e.preventDefault(); const s = suggestions[activeSuggestion]; if(s) insertSuggestionLocal(s.username); } else if(e.key === 'Escape'){ setShowSuggestions(false); setSuggestionOwner(null); } } }} />
+              {suggestionOwner === node.id && showSuggestions && suggestions.length>0 && (
+                <div style={{ position: 'relative' }}>
+                  <div style={{ position: 'absolute', left: 8, right: 8, top: '100%', zIndex: 2000, background: 'var(--bs-body-bg)', border: '1px solid rgba(0,0,0,0.15)', borderRadius: 6, marginTop: 6, boxShadow: '0 6px 18px rgba(0,0,0,0.12)' }}>
+                    {suggestions.map((s: {username:string; uid:string}, idx: number)=> (
+                        <div key={s.username} onMouseDown={(ev)=> { ev.preventDefault(); // ensure owner still this before applying
+                          if(suggestionOwner === node.id) insertSuggestionLocal(s.username);
+                        }} style={{ padding: '6px 10px', cursor: 'pointer', background: idx===activeSuggestion? 'rgba(0,0,0,0.06)': 'transparent' }}>
+                          @{s.username}
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              )}
               <div className="d-flex gap-2">
                 <Button size="sm" disabled={!reply.trim()||working} type="submit">{working? 'Posting...':'Submit'}</Button>
                 <Button size="sm" variant="outline-secondary" onClick={()=> { setReplyOpen(false); setReply(''); }}>Cancel</Button>
@@ -382,7 +621,7 @@ function CommentItem({ node, postId }: { node: CommentNode; postId: string; }){
         </Collapse>
       </div>
       <div className="ms-4 mt-2">
-  {node.replies?.map(r=> <CommentItem key={r.id} node={r} postId={postId} />)}
+  {node.replies?.map(r=> <CommentItem key={r.id} node={r} postId={postId} mentionProps={mentionProps} />)}
       </div>
     </div>
   );
