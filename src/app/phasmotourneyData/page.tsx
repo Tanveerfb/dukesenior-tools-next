@@ -41,7 +41,7 @@ export default function PhasmoTourney1DataListPage() {
                   </td>
                   <td>{r[0]?.Officer}</td>
                   <td>{r[0]?.Map}</td>
-                  <td>{r[1] && <Link href={`/phasmotourneyData/${r[1]}`}>Details</Link>}</td>
+                  <td>{r[1] && <Link href={`/phasmotourney-series/phasmotourney1/${r[1]}`}>Details</Link>}</td>
                 </tr>
               );
             })}

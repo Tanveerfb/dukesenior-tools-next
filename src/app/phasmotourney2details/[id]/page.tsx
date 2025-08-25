@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { Alert, Button, Container, Table } from 'react-bootstrap';
 import Link from 'next/link';
-import { getPhasmoTourney2Document } from '@/lib/services/phasmoTourney2';
+import { getPhasmoTourney2Document } from '../../../lib/services/phasmoTourney2';
 
 export default function PhasmoTourney2RunDetailsPage() {
   const params = useParams();
@@ -38,7 +38,7 @@ export default function PhasmoTourney2RunDetailsPage() {
   return (
     <Container fluid="lg">
       <Alert variant="primary" className="d-flex flex-column flex-md-row justify-content-around align-items-center">
-        <Button variant="tertiary" className="m-1 text-white"><Link className="text-white text-decoration-none" href="/phasmotourney2records">Go back</Link></Button>
+  <Button variant="tertiary" className="m-1 text-white"><Link className="text-white text-decoration-none" href="/phasmotourney-series/phasmotourney2/records">Go back</Link></Button>
         <Button className="m-1" disabled>Document - {id}</Button>
       </Alert>
       <Table hover responsive>

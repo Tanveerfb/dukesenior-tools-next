@@ -1,0 +1,48 @@
+.postWrap {
+  --content-max-width: 720px;
+}
+.contentColumn {
+  max-width: var(--content-max-width);
+}
+.sidebar {
+  position: relative;
+}
+.stickySidebar {
+  position: sticky;
+  top: 90px;
+}
+.bannerPreview {
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+.bannerPreview img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  object-position: center center;
+  display: block;
+}
+.markdown-body img, .markdown-body video, .markdown-body iframe {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+.markdown-body {
+  word-break: break-word;
+}
+.twitch-badge { display:inline-block; }
+.twitch-badge .twitch-link { display:inline-flex; gap:8px; align-items:center; background:#9146FF; color:#fff; padding:8px 10px; border-radius:8px; text-decoration:none; }
+.twitch-badge .twitch-link svg { opacity:0.95 }
+.twitch-badge .twitch-link:hover { transform:translateY(-1px); box-shadow:0 4px 10px rgba(0,0,0,0.12); }
+.tocList { list-style: none; padding: 0; margin: 0; }
+.tocList li { margin-bottom: 0.35rem; }
+.tocLink { font-size: 0.9rem; color: var(--bs-link-color, #0d6efd); }
+.headingAnchor {
+  margin-left: 0.5rem; opacity: 0; transition: opacity .12s ease-in-out; font-size:0.85rem;
+}
+.markdownBody h1:hover .headingAnchor, .markdownBody h2:hover .headingAnchor, .markdownBody h3:hover .headingAnchor, .markdownBody h4:hover .headingAnchor { opacity: 1; }
+.copyNotice { position: fixed; right: 16px; bottom: 16px; background: rgba(0,0,0,0.7); color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 0.9rem; display:none; }
+.cardHover { transition: box-shadow .15s ease-in-out; }
+.cardHover:hover { box-shadow: 0 6px 18px rgba(16,24,40,0.08); }

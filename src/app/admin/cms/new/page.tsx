@@ -51,6 +51,7 @@ export default function NewPostPage(){
   },[editId,admin]);
 
   if(!admin) return <Container className="py-5"><Alert variant="danger">Admin only</Alert></Container>;
+  if(loading) return <Container className="py-5 text-center"><Spinner animation="border" /></Container>;
 
   function addTag(tag:string){ const t = tag.trim(); if(!t) return; setSelectedTags(prev => prev.includes(t)? prev : [...prev, t]); setTagQuery(''); setShowTagDropdown(false); }
   function removeTag(tag:string){ setSelectedTags(prev => prev.filter(t=> t!==tag)); }

@@ -19,6 +19,19 @@ $light: #f2eefb; // Soft Lavender Tint
 $text-color: #212121; // Neutral dark for text
 $background-color: #eef4fa; // Subtle off-white for background
 
+// Map to Bootstrap SASS variables so components/utilities use these colors
+$theme-colors: (
+	"primary": $primary,
+	"secondary": $secondary,
+	"success": $success,
+	"info": $info,
+	"warning": $warning,
+	"danger": $danger,
+	"light": $light,
+	"dark": $dark,
+);
+
+
 // (All previous custom navbar/mobile styles removed intentionally)
 @import "~bootstrap/scss/bootstrap";
 

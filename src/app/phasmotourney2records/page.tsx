@@ -41,7 +41,7 @@ export default function PhasmoTourney2RecordsPage() {
                   </td>
                   <td>{r[0]?.Officer}</td>
                   <td>{r[0]?.Map}</td>
-                  <td>{r[1] && <Link href={`/phasmotourney2details/${r[1]}`}>Details</Link>}</td>
+                  <td>{r[1] && <Link href={`/phasmotourney-series/phasmotourney2/${r[1]}`}>Details</Link>}</td>
                 </tr>
               );
             })}

@@ -66,7 +66,7 @@ export default function MainNavbar(){
   // Collapse navbar & reset tournament group state on route change
   useEffect(()=> { setExpanded(false); resetGroups(); }, [pathname, resetGroups]);
   function labelFor(meta: EffectiveMeta){
-  // Unified runs list (e.g., /phasmoTourney3Group/t3/runs)
+  // Unified runs list (e.g., /phasmotourney-series/phasmotourney3/runs)
   if(/\/runs$/i.test(meta.path)) return 'Runs';
     if(/standings/i.test(meta.path)) return 'Standings';
     if(/recordedruns|records/i.test(meta.path)) return 'Recorded Runs';

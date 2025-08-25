@@ -18,7 +18,7 @@ export interface CMSPost {
 export interface CMSComment {
   id: string;
   postId: string;
-  parentId?: string; // for nesting
+  parentId?: string | null; // for nesting (null for root comments)
   authorUID: string;
   authorName: string;
   content: string; // markdown/plain

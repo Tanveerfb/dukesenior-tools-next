@@ -1,5 +1,5 @@
 "use client";
-// Unified route: /phasmoTourney3Group/t3/runs lists runs, /phasmoTourney3Group/t3/runs/[id] shows a run.
+// Unified route: /phasmotourney-series/phasmotourney3/runs lists runs, /phasmotourney-series/phasmotourney3/runs/[id] shows a run.
 // This page renders run details (extracted from previous /run/[id] implementation).
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState, useCallback } from 'react';
@@ -52,7 +52,7 @@ export default function T3RunDetailsUnifiedPage(){
   return (
     <Container fluid="lg">
       <Alert variant="primary" className="d-flex flex-row justify-content-between align-items-center flex-wrap gap-2">
-        <Button onClick={()=> router.push('/phasmoTourney3Group/t3/runs')} variant="secondary" className="text-white">Back to runs</Button>
+  <Button onClick={()=> router.push('/phasmotourney-series/phasmotourney3/runs')} variant="secondary" className="text-white">Back to runs</Button>
       </Alert>
       {loading && <div className="text-center my-5"><Spinner animation="border" /> Loading run…</div>}
       {!loading && data && (
@@ -84,7 +84,7 @@ export default function T3RunDetailsUnifiedPage(){
             <div className="mt-2">
               <div className="fw-semibold mb-1">Closest matches:</div>
               <div className="d-flex flex-wrap gap-2">
-                {suggestions.map(s => <Button key={s} size="sm" variant="outline-secondary" onClick={()=> router.replace(`/phasmoTourney3Group/t3/runs/${encodeURIComponent(s.replace(/\s+/g,'_'))}`)}>{s}</Button>)}
+                {suggestions.map(s => <Button key={s} size="sm" variant="outline-secondary" onClick={()=> router.replace(`/phasmotourney-series/phasmotourney3/runs/${encodeURIComponent(s.replace(/\s+/g,'_'))}`)}>{s}</Button>)}
               </div>
             </div>
           )}

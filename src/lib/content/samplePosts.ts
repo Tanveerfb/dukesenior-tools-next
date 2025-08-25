@@ -39,6 +39,70 @@ export const samplePosts: CMSPost[] = [
     commentCount: 0,
   },
   {
+    id: 'feature-demo-demon-slayer-infinity-castle',
+    title: 'Demon Slayer: Infinity Castle — Feature Demo',
+    slug: 'demon-slayer-infinity-castle-feature-demo',
+    content: `# Demon Slayer: Kimetsu no Yaiba – The Movie: Infinity Castle
+
+**A feature-demo post to exercise the CMS: embeds, images, headings, lists and more.**
+
+![Infinity Castle Poster](https://i.pinimg.com/736x/0b/79/21/0b792183ca120c71d38398e3a0a18a5a.jpg)
+
+Demon Slayer returns in a multi-film adaptation of the Infinity Castle arc. This demo post includes rich content to validate rendering and interactions in the post view.
+
+### Quick Facts
+
+- Release: July 18, 2025 (Japan)
+- Studio: Ufotable
+- Director: Haruo Sotozaki
+
+### Plot summary
+
+Muzan Kibutsuji retreats into his Infinity Castle and traps the Demon Slayer Corps. Battles split the heroes across the dimensional stronghold as they hunt for Muzan.
+
+<!-- YT: https://www.youtube.com/watch?v=wyiZWYMilgk -->
+
+*(Official trailer embedded above via marker.)*
+
+### Gallery
+
+![Tanjiro Falling](https://i.pinimg.com/736x/07/f1/58/07f15849d3a8d117e77d0ba75bbd0f2a.jpg)
+
+Some scenes are visually stunning — click images to open the viewer.
+
+<img src="https://i.pinimg.com/736x/1e/9e/75/1e9e75c66a0fbe0f89e77895d8990486.jpg" alt="Akaza vs Giyu" />
+
+### Notable moments
+
+1. Shinobu vs Doma (emotional stakes)
+2. Zenitsu's seventh Thunder Breathing form
+3. Tanjiro's Transparent World and final confrontation with Akaza
+
+<!-- TWITCH: dukesenior -->
+
+### Why this demo?
+
+This post contains:
+
+- A YouTube embed marker (<!-- YT: ... -->)
+- A Twitch marker (<!-- TWITCH: ... -->)
+- Multiple markdown images and an inline HTML <img>
+- Headings and lists to test TOC extraction
+
+Enjoy testing the CMS features — leave comments, reactions, and try the image gallery.
+`,
+    createdAt: now - 1000 * 60 * 60 * 24,
+    updatedAt: now - 1000 * 60 * 60 * 24,
+    authorUID: 'dukesenior',
+    authorName: 'DukeSenior',
+    bannerUrl: 'https://i.pinimg.com/736x/0b/79/21/0b792183ca120c71d38398e3a0a18a5a.jpg',
+    tags: ['Anime','Movie','DemonSlayer','Trailer','FeatureDemo'],
+    pinned: false,
+    likeCount: 5,
+    dislikeCount: 0,
+    commentCount: 0,
+  },
+  {
     id: 'sample-2',
     title: 'GRN SSJ2 Kefla in Dragon Ball Legends',
     slug: 'grn-ssj2-kefla-in-dragon-ball-legends',

@@ -2,7 +2,7 @@
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Alert, Button, Container, Table } from 'react-bootstrap';
-import { getPhasmoTourney4Document } from '@/lib/services/phasmoTourney4';
+import { getPhasmoTourney4Document } from '../../../../../lib/services/phasmoTourney4';
 
 export default function Tourney4RunDetailsPage(){
   const { id } = useParams<{id:string}>();
