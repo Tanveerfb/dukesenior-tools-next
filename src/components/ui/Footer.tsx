@@ -24,6 +24,7 @@ export default function Footer() {
               <h6 className="text-uppercase small text-muted mb-2">Developer</h6>
               <ListGroup variant="flush">
                 <ListGroup.Item className="px-0 border-0 bg-transparent"><Link href="/style-check" className="text-decoration-none">Style check</Link></ListGroup.Item>
+                <ListGroup.Item className="px-0 border-0 bg-transparent"><Link href="/suggestions" className="text-decoration-none">Suggestions</Link></ListGroup.Item>
               </ListGroup>
             </Col>
 
@@ -59,7 +60,9 @@ export default function Footer() {
               <Accordion.Item eventKey="0">
                 <Accordion.Header>Developer</Accordion.Header>
                 <Accordion.Body>
-                  <Link href="/style-check">Style check</Link>
+                  <div><Link href="/style-check">Style check</Link></div>
+                  <div><Link href="/suggestions">Suggestions</Link></div>
+                  <div><Link href="/admin/suggestions">Suggestions (admin)</Link></div>
                 </Accordion.Body>
               </Accordion.Item>
               <Accordion.Item eventKey="1">

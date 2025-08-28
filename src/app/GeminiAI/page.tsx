@@ -1,6 +1,6 @@
 "use client";
 import { useRef, useState } from "react";
-import { Button, ButtonGroup, Container, Form } from "react-bootstrap";
+import { Button, ButtonGroup, Container, Form, Card } from "react-bootstrap";
 import { getAIResponse } from "@/lib/ai/gemini";
 import ReactMarkdown from "react-markdown";
 import { FaCopy } from "react-icons/fa";
@@ -43,4 +43,6 @@ export default function GeminiAIPage() {
     </Container>
   );
 }
+
+// NOTE: mini component moved to src/components/home/GeminiMini.tsx to avoid named exports on page files.
 

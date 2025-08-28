@@ -170,6 +170,7 @@ export default function MainNavbar(){
                     </Dropdown.Toggle>
                     <Dropdown.Menu className="p-2" style={{minWidth:'14rem'}}>
                       <Dropdown.Item as={InlineLink} href="/admin/cms" className="fw-semibold" onClick={()=>{ setAdminShow(false); setExpanded(false); }}>CMS Admin</Dropdown.Item>
+                      <Dropdown.Item as={InlineLink} href="/admin/suggestions" className="fw-semibold" onClick={()=>{ setAdminShow(false); setExpanded(false); }}>Suggestions</Dropdown.Item>
                     </Dropdown.Menu>
                   </Dropdown>
                 )}
@@ -239,6 +240,7 @@ export default function MainNavbar(){
                     <FaTools /> <span className="d-none d-lg-inline fw-medium">Tools</span>
                   </Dropdown.Toggle>
                   <Dropdown.Menu className="p-2" style={{minWidth:'18rem'}}>
+                    <Dropdown.Item as={InlineLink} href="/todolist" className="d-flex justify-content-between align-items-center rounded-2" onClick={()=>{ setToolsShow(false); setExpanded(false); }}>To‑Do</Dropdown.Item>
                     {tools.length === 0 && <div className="px-2 py-1 text-muted small">No tools</div>}
                     {tools.map(m=> (
                       <Dropdown.Item key={m.path} as={InlineLink} href={mapHref(m.path)} className="d-flex justify-content-between align-items-center rounded-2" onClick={()=>{ setToolsShow(false); setExpanded(false); }}>
@@ -382,6 +384,7 @@ export default function MainNavbar(){
                     <Accordion.Header className="d-flex align-items-center gap-2"><FaTools /> <span className="fw-medium">Tools</span></Accordion.Header>
                     <Accordion.Body className="p-0">
                       <div className="list-group list-group-flush">
+                        <InlineLink href="/todolist" className="list-group-item list-group-item-action" onClick={()=> setShowOffcanvas(false)}>To‑Do</InlineLink>
                         {tools.map(m => (
                           <InlineLink key={m.path} href={mapHref(m.path)} className="list-group-item list-group-item-action" onClick={()=> setShowOffcanvas(false)}>{m.title || m.path}</InlineLink>
                         ))}

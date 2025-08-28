@@ -110,3 +110,22 @@ Build: production build completed successfully (warnings present; none blocking)
 
 - Legacy notifications created before `postSlug` was recorded will need a backfill to provide slug-based links — a safe server-side backfill script is recommended (not executed automatically).
 - UX polish ideas: mark-as-read-on-click (atomic), inbox pagination/grouping, avatars & timestamps formatting improvements.
+
+## Version 1.1.4 – UI polish, admin CMS refactor & link standardization (2025-08-29)
+
+### Highlights 1.1.4
+
+- Reworked internal link handling across the UI: introduced a shared `InlineLink` usage pattern and replaced several raw `Link` elements that used bootstrap `btn` classes with `React-Bootstrap` `Button` using `InlineLink` as the `as` prop for consistent behavior and better accessibility.
+- Admin CMS list UI refactor: the posts table was replaced with a card-based listing and an actions `DropdownButton` for Edit / Pin / Delete flows to improve mobile layout and match the rest of the site's card-driven listing styles.
+- Navbar improvements: replaced several `next/link` usages in the Navbar with the shared `InlineLink`, and the Profile menu now resolves a public `/profile/[username]` route (falls back to `/profile`) by reading the current user's public username when available.
+- Post list and home feed tweaks: `PostsFeed` and posts index updated to use `Button as={InlineLink}` for the Read actions; featured/list layout spacing and Read button behavior improved.
+- Removed several legacy/empty route stubs and small unused pages to reduce surface area (legacy tourney redirect stubs removed).
+- Developer tooling: minor changes to `page` bootstrapping and the `style-check` page received content and component additions for more comprehensive UI testing (components like Breadcrumb, Modal, Toast, Tabs were added in the style-check playground).
+
+### Developer notes & migration
+
+- The shared `InlineLink` is a client component and is used with a narrow `as={InlineLink as any}` cast in places to avoid brittle typing with React-Bootstrap's `as` prop; we can remove the `as any` cast later by tightening types or adding a small type shim.
+- Admin API/behavior unchanged — the CMS list refactor is purely presentational and keeps the same CRUD calls under `src/lib/services/cms`.
+- A few ESLint/TS warnings remain after the refactor (unused imports, missing hook deps). They are non-blocking but recommended for a follow-up cleanup pass.
+
+---
