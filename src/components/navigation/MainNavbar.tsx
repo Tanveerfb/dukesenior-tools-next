@@ -1,11 +1,28 @@
 "use client";
 import Link from 'next/link';
+import InlineLink from '@/components/ui/InlineLink';
 import { Navbar, Nav, Container, Dropdown, Button, Badge, InputGroup, Spinner, Accordion, OverlayTrigger, Popover } from 'react-bootstrap';
 import { Offcanvas } from 'react-bootstrap';
 import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/components/ThemeProvider';
-import { FaCalendarAlt, FaSearch, FaSun, FaMoon, FaUserCircle, FaTools, FaChevronRight, FaChevronDown, FaSitemap, FaListOl, FaChartBar, FaPlayCircle, FaFont, FaPlus, FaMinus, FaUndo } from 'react-icons/fa';
-import { useEffect, useState, useCallback, useRef } from 'react';
+import {
+  FaCalendarAlt,
+  FaSearch,
+  FaSun,
+  FaMoon,
+  FaUserCircle,
+  FaTools,
+  FaSitemap,
+  FaListOl,
+  FaChartBar,
+  FaPlayCircle,
+  FaFont,
+  FaPlus,
+  FaMinus,
+  FaUndo,
+} from 'react-icons/fa';
+import { useEffect, useState, useCallback } from 'react';
+import { getUserByUID } from '@/lib/services/users';
 import { usePathname, useRouter } from 'next/navigation';
 import SearchModal from '@/components/navigation/SearchModal';
 // taggedManifest import removed (unused)
@@ -17,6 +34,7 @@ function mapHref(path:string){ return path.replace(/\[id\]/,'example-id'); }
 
 export default function MainNavbar(){
   const { user, logout, admin } = useAuth();
+  const [profileHref, setProfileHref] = useState('/profile');
   const { theme, toggleTheme, fontScale, increaseFont, decreaseFont, resetFont } = useTheme();
   const [showSearch,setShowSearch] = useState(false);
   const [effective,setEffective] = useState<EffectiveMeta[]>([]);
@@ -31,6 +49,21 @@ export default function MainNavbar(){
   const pathname = usePathname();
   const router = useRouter();
   useEffect(()=>{ (async()=>{ try { const res = await fetch('/api/tags/effective'); if(res.ok){ setEffective(await res.json()); } const reg = await fetch('/api/tags/registry'); if(reg.ok){ setRegistry(await reg.json()); } } finally { setLoading(false); } })(); },[]);
+
+  // Resolve user -> public username if available so navbar links to /profile/[username]
+  useEffect(()=>{
+    let mounted = true;
+    (async ()=>{
+      try{
+        if(!user?.uid){ if(mounted) setProfileHref('/profile'); return; }
+        const doc = await getUserByUID(user.uid);
+        if(!mounted) return;
+        if(doc?.username) setProfileHref(`/profile/${doc.username}`);
+        else setProfileHref('/profile');
+      }catch(_){ if(mounted) setProfileHref('/profile'); }
+    })();
+    return ()=>{ mounted = false; };
+  }, [user?.uid]);
   // tagColor unused after design simplification; remove to satisfy linter.
 
   // Group tournament pages (exclude run/detail pages needing an id)
@@ -122,7 +155,7 @@ export default function MainNavbar(){
           <div className="d-flex align-items-center w-100">
             {/* Left: Brand (no Beta) */}
             <div className="left-brand d-flex align-items-center mx-2">
-              <Navbar.Brand as={Link} href="/" className="fw-semibold d-flex align-items-center gap-2 mx-2" style={theme==='dark'?{color:'#fff'}:{color:'#3b2a47'}}>
+              <Navbar.Brand as={InlineLink} href="/" className="fw-semibold d-flex align-items-center gap-2 mx-2" style={theme==='dark'?{color:'#fff'}:{color:'#3b2a47'}}>
                 <span style={{fontSize:'1.15rem'}}>The Lair of Evil Tools</span>
               </Navbar.Brand>
             </div>
@@ -136,7 +169,7 @@ export default function MainNavbar(){
                       <FaUserCircle /> <span className="d-none d-lg-inline fw-medium">Admin</span>
                     </Dropdown.Toggle>
                     <Dropdown.Menu className="p-2" style={{minWidth:'14rem'}}>
-                      <Dropdown.Item as={Link} href="/admin/cms" className="fw-semibold" onClick={()=>{ setAdminShow(false); setExpanded(false); }}>CMS Admin</Dropdown.Item>
+                      <Dropdown.Item as={InlineLink} href="/admin/cms" className="fw-semibold" onClick={()=>{ setAdminShow(false); setExpanded(false); }}>CMS Admin</Dropdown.Item>
                     </Dropdown.Menu>
                   </Dropdown>
                 )}
@@ -146,7 +179,7 @@ export default function MainNavbar(){
                     <FaSitemap /> <span className="d-none d-lg-inline fw-medium">Community</span>
                   </Dropdown.Toggle>
                   <Dropdown.Menu className="p-2" style={{minWidth:'12rem'}}>
-                    <Dropdown.Item as={Link} href="/posts" onClick={()=>{ setCommunityShow(false); setExpanded(false); }}>Posts</Dropdown.Item>
+                    <Dropdown.Item as={InlineLink} href="/posts" onClick={()=>{ setCommunityShow(false); setExpanded(false); }}>Posts</Dropdown.Item>
                   </Dropdown.Menu>
                 </Dropdown>
 
@@ -208,7 +241,7 @@ export default function MainNavbar(){
                   <Dropdown.Menu className="p-2" style={{minWidth:'18rem'}}>
                     {tools.length === 0 && <div className="px-2 py-1 text-muted small">No tools</div>}
                     {tools.map(m=> (
-                      <Dropdown.Item key={m.path} as={Link} href={mapHref(m.path)} className="d-flex justify-content-between align-items-center rounded-2" onClick={()=>{ setToolsShow(false); setExpanded(false); }}>
+                      <Dropdown.Item key={m.path} as={InlineLink} href={mapHref(m.path)} className="d-flex justify-content-between align-items-center rounded-2" onClick={()=>{ setToolsShow(false); setExpanded(false); }}>
                         <span className="small">{m.title || m.path}</span>
                         <span className="d-flex gap-1">{m.effective.filter(t=> ['AI','ToDo'].includes(t)).slice(0,2).map(t=> <Badge key={t} bg="secondary" className="text-uppercase small" style={{fontSize:'0.55rem'}}>{t}</Badge>)}</span>
                       </Dropdown.Item>
@@ -263,7 +296,7 @@ export default function MainNavbar(){
                       <FaUserCircle />
                     </Dropdown.Toggle>
                     <Dropdown.Menu className="small">
-                      <Dropdown.Item as={Link} href="/profile">Profile</Dropdown.Item>
+                      <Dropdown.Item as={InlineLink} href={profileHref}>Profile</Dropdown.Item>
                       <Dropdown.Divider />
                       <Dropdown.Item onClick={logout}>Logout</Dropdown.Item>
                     </Dropdown.Menu>
@@ -289,9 +322,9 @@ export default function MainNavbar(){
                       <Accordion.Header className="d-flex align-items-center gap-2"><FaUserCircle /> <span className="fw-medium">Admin</span></Accordion.Header>
                       <Accordion.Body className="p-0">
                         <div className="list-group list-group-flush">
-                          <Link href="/admin/cms" className="list-group-item list-group-item-action" onClick={()=>{ setShowOffcanvas(false); }}>
+                          <InlineLink href="/admin/cms" className="list-group-item list-group-item-action" onClick={()=>{ setShowOffcanvas(false); }}>
                             CMS Admin
-                          </Link>
+                          </InlineLink>
                         </div>
                       </Accordion.Body>
                     </Accordion.Item>
@@ -302,7 +335,7 @@ export default function MainNavbar(){
                     <Accordion.Header className="d-flex align-items-center gap-2"><FaSitemap /> <span className="fw-medium">Community</span></Accordion.Header>
                     <Accordion.Body className="p-0">
                       <div className="list-group list-group-flush">
-                        <Link href="/posts" className="list-group-item list-group-item-action" onClick={()=> setShowOffcanvas(false)}>Posts</Link>
+                        <InlineLink href="/posts" className="list-group-item list-group-item-action" onClick={()=> setShowOffcanvas(false)}>Posts</InlineLink>
                       </div>
                     </Accordion.Body>
                   </Accordion.Item>
@@ -321,7 +354,7 @@ export default function MainNavbar(){
                               <Accordion.Header className="fw-semibold">{k}</Accordion.Header>
                               <Accordion.Body className="p-0">
                                 {list.map(m => (
-                                  <Link key={m.path} href={mapHref(m.path)} className="list-group-item list-group-item-action small ps-3" onClick={()=>{ setShowOffcanvas(false); }}>{labelFor(m)}</Link>
+                                  <InlineLink key={m.path} href={mapHref(m.path)} className="list-group-item list-group-item-action small ps-3" onClick={()=>{ setShowOffcanvas(false); }}>{labelFor(m)}</InlineLink>
                                 ))}
                               </Accordion.Body>
                             </Accordion.Item>
@@ -334,7 +367,7 @@ export default function MainNavbar(){
                               <div key={k} className="px-0">
                                 <div className="small text-muted px-3 py-2 fw-medium">{k}</div>
                                 {pastGroups[k].map(m => (
-                                  <Link key={m.path} href={mapHref(m.path)} className="list-group-item list-group-item-action small ps-3" onClick={()=>{ setShowOffcanvas(false); }}>{labelFor(m)}</Link>
+                                  <InlineLink key={m.path} href={mapHref(m.path)} className="list-group-item list-group-item-action small ps-3" onClick={()=>{ setShowOffcanvas(false); }}>{labelFor(m)}</InlineLink>
                                 ))}
                               </div>
                             ))}
@@ -350,7 +383,7 @@ export default function MainNavbar(){
                     <Accordion.Body className="p-0">
                       <div className="list-group list-group-flush">
                         {tools.map(m => (
-                          <Link key={m.path} href={mapHref(m.path)} className="list-group-item list-group-item-action" onClick={()=> setShowOffcanvas(false)}>{m.title || m.path}</Link>
+                          <InlineLink key={m.path} href={mapHref(m.path)} className="list-group-item list-group-item-action" onClick={()=> setShowOffcanvas(false)}>{m.title || m.path}</InlineLink>
                         ))}
                       </div>
                     </Accordion.Body>
@@ -403,7 +436,7 @@ export default function MainNavbar(){
                       <FaUserCircle /> <span className="d-none d-md-inline">{user.displayName || user.email || 'Profile'}</span>
                     </Dropdown.Toggle>
                     <Dropdown.Menu className="small">
-                      <Dropdown.Item as={Link} href="/profile">Profile</Dropdown.Item>
+                      <Dropdown.Item as={InlineLink} href={profileHref}>Profile</Dropdown.Item>
                       <Dropdown.Divider />
                       <Dropdown.Item onClick={()=>{ logout(); setShowOffcanvas(false); }}>Logout</Dropdown.Item>
                     </Dropdown.Menu>

@@ -1,5 +1,5 @@
-import Link from 'next/link';
-import { Container, Row, Col, Card } from 'react-bootstrap';
+import InlineLink from '@/components/ui/InlineLink';
+import { Container, Row, Col, Card, Button } from 'react-bootstrap';
 
 export default function SeriesIndex(){
   const items = [
@@ -17,7 +17,7 @@ export default function SeriesIndex(){
             <Card className="h-100">
               <Card.Body>
                 <Card.Title>{i.title}</Card.Title>
-                <Link href={i.href} className="btn btn-outline-primary mt-2">Open</Link>
+                <Button as={InlineLink as any} href={i.href} variant="outline-primary" className="mt-2">Open</Button>
               </Card.Body>
             </Card>
           </Col>

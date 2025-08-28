@@ -1,4 +1,4 @@
-"use client";
+"use client";;
 import {
   Modal,
   Form,
@@ -8,7 +8,7 @@ import {
   InputGroup,
 } from "react-bootstrap";
 import { useState, useEffect, useCallback, useRef } from "react";
-import Link from "next/link";
+import InlineLink from '@/components/ui/InlineLink';
 import {
   FaSearch,
   FaTimes,
@@ -210,7 +210,7 @@ export default function SearchModal({
               <ListGroup.Item
                 key={r.path}
                 action
-                as={Link}
+                as={InlineLink}
                 href={href}
                 onClick={onHide}
                 className={`d-flex justify-content-between align-items-start rounded ${

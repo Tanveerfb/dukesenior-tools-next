@@ -1,8 +1,23 @@
-'use client';
-import { onAuthStateChanged, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword, updateProfile, sendPasswordResetEmail, browserLocalPersistence, setPersistence } from 'firebase/auth';
-import { auth, db } from '@/lib/firebase/client';
-import { doc, setDoc, getDoc, serverTimestamp, increment } from 'firebase/firestore';
-import { createContext, useContext, useEffect, useState } from 'react';
+"use client";
+import {
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut,
+  createUserWithEmailAndPassword,
+  updateProfile,
+  sendPasswordResetEmail,
+  browserLocalPersistence,
+  setPersistence,
+} from "firebase/auth";
+import { auth, db } from "@/lib/firebase/client";
+import {
+  doc,
+  setDoc,
+  getDoc,
+  serverTimestamp,
+  increment,
+} from "firebase/firestore";
+import { createContext, useContext, useEffect, useState } from "react";
 
 interface AuthContextValue {
   user: any;
@@ -17,13 +32,8 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-const ADMIN_EMAILS = new Set([
-  'dukesenior22@proton.me',
-  'flareon@abv.bg'
-]);
-const ADMIN_UIDS = new Set([
-  'GeLWvzA1PxfvGBmvN1niZ2GjHKe2'
-]);
+const ADMIN_EMAILS = new Set(["dukesenior22@proton.me", "flareon@abv.bg"]);
+const ADMIN_UIDS = new Set(["GeLWvzA1PxfvGBmvN1niZ2GjHKe2"]);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<any>(null);
@@ -32,40 +42,49 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     setPersistence(auth, browserLocalPersistence);
-    const unsub = onAuthStateChanged(auth, u => {
+    const unsub = onAuthStateChanged(auth, (u) => {
       setUser(u);
       if (u) {
-        setAdmin(ADMIN_EMAILS.has(u.email || '') || ADMIN_UIDS.has(u.uid));
+        setAdmin(ADMIN_EMAILS.has(u.email || "") || ADMIN_UIDS.has(u.uid));
         // update a detailed summary record in Firestore each time the user signs in
         // non-blocking fire-and-forget; failures are logged to console
-        (async function updateUserRecord(signedInUser){
-          try{
-            if(!signedInUser?.uid) return;
-            const ref = doc(db, 'users', signedInUser.uid);
+        (async function updateUserRecord(signedInUser) {
+          try {
+            if (!signedInUser?.uid) return;
+            const ref = doc(db, "users", signedInUser.uid);
             const snap = await getDoc(ref);
 
             // derive provider (auth method)
-            const provider = (signedInUser.providerData && signedInUser.providerData[0] && signedInUser.providerData[0].providerId) || (signedInUser.providerId || 'unknown');
+            const provider =
+              (signedInUser.providerData &&
+                signedInUser.providerData[0] &&
+                signedInUser.providerData[0].providerId) ||
+              signedInUser.providerId ||
+              "unknown";
 
             // device info (client-side)
-            const userAgent = typeof navigator !== 'undefined' ? navigator.userAgent : '';
-            const platform = typeof navigator !== 'undefined' ? navigator.platform : '';
+            const userAgent =
+              typeof navigator !== "undefined" ? navigator.userAgent : "";
+            const platform =
+              typeof navigator !== "undefined" ? navigator.platform : "";
 
             // try to fetch public IP (best-effort, non-blocking)
             let ip = null;
-            try{
-              const resp = await fetch('https://api.ipify.org?format=json');
-              if (resp.ok){
+            try {
+              const resp = await fetch("https://api.ipify.org?format=json");
+              if (resp.ok) {
                 const j = await resp.json();
                 ip = j?.ip || null;
               }
-            }catch(err){ /* ignore IP fetch errors */ }
+            } catch (err) {
+              console.log(err);
+            }
 
             const payload: any = {
               uid: signedInUser.uid,
-              email: signedInUser.email || '',
-              displayName: signedInUser.displayName || '',
-              photoURL: signedInUser.photoURL || '',
+              email: signedInUser.email || "",
+              displayName: signedInUser.displayName || "",
+              photoURL: signedInUser.photoURL || "",
               lastSeen: serverTimestamp(),
               lastSignInAt: serverTimestamp(),
               lastSignInMethod: provider,
@@ -77,7 +96,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             };
             if (!snap.exists()) payload.createdAt = serverTimestamp();
             await setDoc(ref, payload, { merge: true });
-          }catch(e){ console.error('updateUserRecord error', e); }
+          } catch (e) {
+            console.error("updateUserRecord error", e);
+          }
         })(u);
       } else {
         setAdmin(false);
@@ -94,15 +115,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     login: (e, p) => signInWithEmailAndPassword(auth, e, p),
     signup: (e, p) => createUserWithEmailAndPassword(auth, e, p),
     logout: () => signOut(auth),
-    updateDisplayName: (name) => updateProfile(auth.currentUser!, { displayName: name }),
-    resetPassword: (email) => sendPasswordResetEmail(auth, email, { url: 'https://your-hosted-domain/' })
+    updateDisplayName: (name) =>
+      updateProfile(auth.currentUser!, { displayName: name }),
+    resetPassword: (email) =>
+      sendPasswordResetEmail(auth, email, {
+        url: "https://your-hosted-domain/",
+      }),
   };
 
-  return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {!loading && children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
+  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
   return ctx;
 }

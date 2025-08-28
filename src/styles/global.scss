@@ -4,61 +4,66 @@
 // Theme variable definitions (must precede bootstrap for customization)
 
 // Phasmo Tourney 4 Theme Colors
-$primary: #6c1e70; // Dark Purple
-$secondary: #2e9262; // Teal Green
-$tertiary: #e763ff; // Neon Pink-Purple
+$primary: #ab2fb1;
+$secondary: #36453b;
+$tertiary: #515751;
 
 // Updated colors for better contrast
-$success: #0e6655; // Dark Green for buttons
-$warning: #f7c600; // Bright Yellow-Green for warnings
-$danger: #c03a2b; // Darker Red for better contrast
+$success: #0f8029;
+$warning: #ffca3a;
+$danger: #a63a50;
 
-$info: #5c6bc0; // Starry Sky Blue
-$dark: #101c2c; // Deep Space Blue
-$light: #f2eefb; // Soft Lavender Tint
-$text-color: #212121; // Neutral dark for text
-$background-color: #eef4fa; // Subtle off-white for background
+$info: #89608e; // Starry Sky Blue
+$dark: #12130f; // Night
+$light: #dcfffd; // Soft Lavender Tint
+$text-color: #0c0909; // Neutral dark for text
+$background-color: #f7f7ff; // Subtle off-white for background
 
 // Map to Bootstrap SASS variables so components/utilities use these colors
 $theme-colors: (
-	"primary": $primary,
-	"secondary": $secondary,
-	"success": $success,
-	"info": $info,
-	"warning": $warning,
-	"danger": $danger,
-	"light": $light,
-	"dark": $dark,
+  "primary": $primary,
+  "secondary": $secondary,
+  "tertiary": $tertiary,
+  "success": $success,
+  "info": $info,
+  "warning": $warning,
+  "danger": $danger,
+  "light": $light,
+  "dark": $dark,
 );
-
 
 // (All previous custom navbar/mobile styles removed intentionally)
 @import "~bootstrap/scss/bootstrap";
 
 // Runtime accessibility scaling (controlled via ThemeProvider)
 :root {
-	--font-scale: 1; // default; ThemeProvider updates at runtime
+  --font-scale: 1; // default; ThemeProvider updates at runtime
 }
 html {
-	font-size: calc(16px * var(--font-scale, 1));
-	transition: font-size 0.15s ease-in-out;
+  font-size: calc(16px * var(--font-scale, 1));
+  transition: font-size 0.15s ease-in-out;
 }
 body {
-	font-size: 1rem; // keep base context; rem units scale via html font-size
+  font-size: 1rem; // keep base context; rem units scale via html font-size
 }
 
 // Optionally scale headings slightly less aggressively (clamp effect)
-h1,h2,h3,h4,h5,h6 {
-	line-height: 1.15;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  line-height: 1.15;
 }
 
 /* Fixes for small-screen badge wrapping in post cards */
 .card .badge {
-	white-space: normal; // allow wrapping when necessary
+  white-space: normal; // allow wrapping when necessary
 }
 .card .d-flex.flex-wrap .badge {
-	white-space: normal;
+  white-space: normal;
 }
 .navbar .navbar-toggler.ms-auto {
-	margin-left: auto !important;
+  margin-left: auto !important;
 }

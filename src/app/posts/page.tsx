@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Container, Row, Col, Card, Badge, Spinner, Button, Form, InputGroup } from 'react-bootstrap';
 import Image from 'next/image';
 import Link from 'next/link';
+import InlineLink from '@/components/ui/InlineLink';
 import { listPosts } from '@/lib/services/cms';
 import { samplePosts } from '@/lib/content/samplePosts';
 
@@ -76,9 +77,9 @@ export default function PostsIndex(){
                   <div className="text-muted small mb-2">{new Date(p.createdAt).toLocaleDateString()} • {p.author || 'DukeSenior'}</div>
                   <Card.Text className="mb-3 text-truncate">{excerpt(p.excerpt || p.content || '', 160)}</Card.Text>
                   <div className="mt-auto">
-                    <Link href={`/posts/${p.slug}`} className="btn btn-primary w-100" aria-label={`Read ${p.title}`}>
+                    <Button as={InlineLink as any} href={`/posts/${p.slug}`} aria-label={`Read ${p.title}`} className="w-100">
                       Read
-                    </Link>
+                    </Button>
                     <div className="mt-2 small text-muted text-end">{p.readTime || ''}</div>
                   </div>
                 </Card.Body>
@@ -112,9 +113,9 @@ export default function PostsIndex(){
                     <Card.Text className="mb-3 small text-muted" style={{minHeight:40}}>{excerpt(p.excerpt || p.content || '', 120)}</Card.Text>
                     <div className="mt-auto">
                       <div className="d-flex flex-wrap mb-2">{p.tags?.slice(0,3).map((t:string)=><Badge key={t} bg="info" className="me-2 mb-2">{t}</Badge>)}</div>
-                      <Link href={`/posts/${p.slug}`} className="btn btn-outline-primary btn-sm w-100" aria-label={`Read ${p.title}`}>
+                      <Button as={InlineLink as any} href={`/posts/${p.slug}`} variant="outline-primary" size="sm" className="w-100" aria-label={`Read ${p.title}`}>
                         Read
-                      </Link>
+                      </Button>
                     </div>
                   </Card.Body>
                 </Col>
