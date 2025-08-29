@@ -129,3 +129,23 @@ Build: production build completed successfully (warnings present; none blocking)
 - A few ESLint/TS warnings remain after the refactor (unused imports, missing hook deps). They are non-blocking but recommended for a follow-up cleanup pass.
 
 ---
+
+## Version 1.1.5 – Admin CMS: upload progress, toasts & banner validation (2025-08-29)
+
+### Highlights 1.1.5
+
+- Resumable image uploads with per-file progress reporting and cancellation.
+- Centralized upload logic moved to `src/hooks/useCmsUploads.ts` (optimize + upload + progress callbacks).
+- Admin new-post page (`/admin/cms/new`) updated with:
+  - per-file progress bars and overall upload state,
+  - toasts for upload success/failure,
+  - keyboard-accessible tag dropdown with highlighted matches and arrow-key navigation,
+  - banner upload progress and live preview.
+- Server-side banner validation endpoint `POST /api/admin/validate-banner` added: performs a HEAD probe to check MIME type and size (max 10MB) and requires a verified Firebase ID token (admin) to run.
+- Improved error handling and reporting for uploads; added cancel/retry controls and optimistic UI behavior for image inserts.
+
+### Notes
+
+- The validate-banner endpoint requires an ID token in `Authorization: Bearer <token>`; client-side calls should include the current user's Firebase token (the admin page can be updated to attach it automatically).
+- Some remote hosts may not respond to HEAD requests; a GET fallback can be added if needed.
+- Build completed successfully during development with non-blocking lint warnings.
