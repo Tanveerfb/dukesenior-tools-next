@@ -55,7 +55,7 @@ export default function ProfileHeader({ uid, username, displayName, photoURL, bi
             <div className="d-flex gap-2">
               {isOwner ? (
                 <>
-                  <Button variant="outline-secondary" size="sm" onClick={() => router.push('/account')}>Edit Profile</Button>
+                  <Button variant="outline-primary" size="sm" onClick={() => router.push('/account')}>Edit Profile</Button>
                   <Button variant="primary" size="sm" onClick={() => router.push('/account')}>Change Username</Button>
                 </>
               ) : (

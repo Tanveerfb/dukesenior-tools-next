@@ -143,7 +143,7 @@ export default function PostsFeed({
 
       <section>
         {!loading && posts.length === 0 ? (
-          <Card className="border-0 bg-light text-center p-4">
+          <Card className="border-0 text-center p-4">
             <Card.Body>
               <Card.Text className="h6 text-muted mb-0">
                 No posts available.

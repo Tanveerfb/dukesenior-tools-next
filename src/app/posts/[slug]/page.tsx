@@ -19,7 +19,7 @@ function renderCommentWithLinks(content: string){
   if(lastIndex < content.length) parts.push(content.slice(lastIndex));
   return <span style={{whiteSpace:'pre-wrap'}}>{parts.map((p, i) => typeof p === 'string' ? <span key={i}>{p}</span> : p)}</span>;
 }
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { getPostBySlug, addComment, reactToPostForUser, reactToCommentForUser, listenPost, listenComments, getUserPostReaction, getUserCommentReaction } from '@/lib/services/cms';
 import { getSamplePostBySlug } from '@/lib/content/samplePosts';
 import { Container, Badge, Spinner, Button, Form, Collapse, Row, Col, Card, Modal } from 'react-bootstrap';
@@ -30,6 +30,7 @@ import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import rehypeSanitize from 'rehype-sanitize';
 import rehypeSlug from 'rehype-slug';
+import { useMemo } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { getAuth } from 'firebase/auth';
 import styles from './post.module.css';
@@ -97,6 +98,8 @@ async function notifyMentions(text: string, postId: string, commentId?: string, 
 
 export default function PostView(){
   const { slug } = useParams<{ slug: string }>();
+  const searchParams = useSearchParams?.();
+  const debugRaw = !!(searchParams && searchParams.get('debugRaw') === '1');
   const [loading,setLoading] = useState(true);
   const [post,setPost] = useState<any>();
   const [comments,setComments] = useState<CommentNode[]>([]);
@@ -117,12 +120,18 @@ export default function PostView(){
   const [copied,setCopied] = useState(false);
   const [commentError, setCommentError] = useState<string|undefined>();
   // Sanitization schema to allow iframe elements for embeds
+  // Sanitization schema to allow iframe elements for embeds and also
+  // preserve standard markdown-generated tags (p, headings, lists, strong, em, img, code, blockquote).
   const sanitizeSchema = {
-    tagNames: ['iframe','div','a','svg','path','span'],
+    tagNames: [
+      'p','h1','h2','h3','h4','h5','h6','strong','em','b','i','ul','ol','li','pre','code','blockquote',
+      'iframe','div','a','img','figure','figcaption','span','svg','path'
+    ],
     attributes: {
       iframe: ['src','title','allow','frameborder','allowfullscreen','loading','scrolling'],
       div: ['class','className'],
       a: ['href','target','rel','class','className','aria-label'],
+      img: ['src','alt','title','width','height'],
       svg: ['xmlns','viewBox','width','height','fill','aria-hidden','class'],
       path: ['d','fill','stroke'],
       span: ['class','className'],
@@ -177,7 +186,10 @@ export default function PostView(){
       try {
         const base = await getPostBySlug(slug) || getSamplePostBySlug(slug);
         if(!base){ setPost(undefined); return; }
-        setPost(base);
+  setPost(base);
+  // Dev debug: print a short snippet of the raw content so we can verify whether
+  // the content contains escaped HTML entities or raw markdown/html.
+  try{ if(process.env.NODE_ENV !== 'production') console.debug('[PostView] content preview:', (base.content||'').slice(0,400)); }catch(e){}
         // Build image gallery from fetched post (banner + markdown/html images)
         try{
           const items: {src:string; alt:string}[] = [];
@@ -373,8 +385,27 @@ export default function PostView(){
   setSuggestionOwner(null);
     }
   }
+  // Some stored posts may have HTML entities escaped (e.g. &lt;iframe&gt;). Decode them
+  // on the client before passing to ReactMarkdown so rehype-raw can parse actual tags.
+  function decodeHtmlEntities(input: string){
+    try{
+      const t = document.createElement('textarea');
+      t.innerHTML = input;
+      return t.value;
+    }catch(e){ return input; }
+  }
 
-  function renderContent(md: string){ return transformEmbeds(md); }
+  // Only decode HTML entities when the content actually contains entity markers
+  // (e.g. &lt; or &gt;). Many posts are plain Markdown and decoding via a
+  // DOM textarea can mutate sequences like backslashes/newlines; prefer to
+  // leave plain Markdown untouched so remark-gfm parses as expected.
+  function renderContent(md: string){
+    if(!md) return '';
+    const hasEntities = md.includes('&lt;') || md.includes('&gt;') || md.includes('&amp;') || md.includes('&quot;');
+    const input = hasEntities ? decodeHtmlEntities(md) : md;
+    return transformEmbeds(input);
+  }
+  const memoizedMarkdown = useMemo(() => renderContent(post?.content || ''), [post?.content]);
 
   if(loading) return <Container className="py-5 text-center"><Spinner animation="border" /></Container>;
   if(!post) return <Container className="py-5"><div className="text-muted">Post not found.</div></Container>;
@@ -394,6 +425,22 @@ export default function PostView(){
           <div className="text-muted small mb-3">{post.author || 'DukeSenior'} • {readTime} min read</div>
 
           <div className="markdown-body mb-5" id="article-markdown">
+            {debugRaw && (
+              <div className="mb-3">
+                <strong>Debug: raw stored content preview</strong>
+                <pre style={{maxHeight:160, overflow:'auto', background:'#f8f9fa', padding:8}}>{String(post.content || '').slice(0,1000)}</pre>
+                <div className="mt-2">
+                  <strong>Debug (JSON.stringify)</strong>
+                  <pre style={{maxHeight:160, overflow:'auto', background:'#fff8db', padding:8}}>{JSON.stringify(post.content)}</pre>
+                </div>
+                <div className="mt-2">
+                  <strong>Minimal render (remark-gfm only)</strong>
+                  <div className="p-2 border rounded bg-body-tertiary" style={{maxHeight:220, overflow:'auto'}}>
+                    {String(post.content || '').trim() ? <ReactMarkdown remarkPlugins={[remarkGfm]}>{String(post.content || '')}</ReactMarkdown> : <div className="text-muted small">(empty)</div>}
+                  </div>
+                </div>
+              </div>
+            )}
             <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw, [rehypeSanitize, sanitizeSchema], rehypeSlug]}
               components={{
                 h2: ({node, ...props}) => (
@@ -426,7 +473,7 @@ export default function PostView(){
                         );
                       }
               }}
-            >{renderContent(post.content)}</ReactMarkdown>
+            >{memoizedMarkdown}</ReactMarkdown>
           </div>
         </Col>
 

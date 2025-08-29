@@ -8,7 +8,12 @@ export default function HomePage() {
     <Container className="py-4">
       <Row>
         <Col lg={8}>
-          <PostsFeed maxFeatured={3} maxLatest={3} fetchCount={12} showSampleFallback={false} />
+          <PostsFeed
+            maxFeatured={3}
+            maxLatest={3}
+            fetchCount={12}
+            showSampleFallback={false}
+          />
         </Col>
         <Col lg={4} className="d-none d-lg-block">
           <OpenToDoCard />
