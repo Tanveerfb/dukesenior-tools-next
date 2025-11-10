@@ -16,7 +16,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "The Lair of Evil Tools",
-  description: "A website developed by DukeSenior for the discord server members of 'The Lair of Evil",
+  description:
+    "A website developed by DukeSenior for the discord server members of 'The Lair of Evil",
 };
 
 export default function RootLayout({
@@ -26,7 +27,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+      <body
+        suppressHydrationWarning
+        className={`${geistSans.variable} ${geistMono.variable}`}
+      >
         <Providers>
           {children}
           <Analytics />

@@ -2,9 +2,11 @@
 // Redesigned Phasmo Tourney 3 bracket: responsive horizontal flow of rounds.
 // Uses a data schema to keep presentation lean & consistent.
 import React from "react";
-import { Container, Row, Col, Card, ListGroup, Badge } from "react-bootstrap";
+import { Row, Col, Card, ListGroup, Badge } from "react-bootstrap";
 import { FaTrophy } from "react-icons/fa";
 import BracketMatchInfo from "@/components/tourney3/BracketMatchInfo";
+import TourneyPage from "@/components/tourney/TourneyPage";
+import { buildTourneyBreadcrumbs } from "@/lib/navigation/tourneyBreadcrumbs";
 // Redesigned Phasmo Tourney 3 bracket: responsive horizontal flow of rounds.
 // Uses a data schema to keep presentation lean & consistent.
 interface MatchDef {
@@ -294,11 +296,21 @@ function RoundColumn({ r }: { r: RoundDef }) {
 }
 
 export default function T3BracketPage() {
+  const breadcrumbs = buildTourneyBreadcrumbs([
+    { label: "Phasmo Tourney 3", href: "/phasmotourney-series/phasmotourney3" },
+    { label: "Bracket" },
+  ]);
+
   return (
-    <Container fluid="lg" className="py-3">
+    <TourneyPage
+      title="Phasmo Tourney 3 Bracket"
+      subtitle="Journey from eight squads to the champion, including redemption paths."
+      breadcrumbs={breadcrumbs}
+      badges={[{ label: "Phasmo Tourney 3" }, { label: "Bracket" }]}
+      containerProps={{ fluid: "lg", className: "py-3" }}
+    >
       <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
         <div>
-          <h2 className="mb-1">Phasmo Tourney 3 Bracket</h2>
           <div className="small text-muted">
             Progression from 8 teams to final champion with live score
             highlighting.
@@ -329,7 +341,6 @@ export default function T3BracketPage() {
         BracketMatchInfo). Redemption cards list tie-break / second-chance
         paths.
       </div>
-    </Container>
+    </TourneyPage>
   );
 }
-

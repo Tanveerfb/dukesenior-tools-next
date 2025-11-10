@@ -1,4 +1,4 @@
-"use client";;
+"use client";
 import {
   Modal,
   Form,
@@ -8,7 +8,7 @@ import {
   InputGroup,
 } from "react-bootstrap";
 import { useState, useEffect, useCallback, useRef } from "react";
-import InlineLink from '@/components/ui/InlineLink';
+import InlineLink from "@/components/ui/InlineLink";
 import {
   FaSearch,
   FaTimes,
@@ -18,11 +18,7 @@ import {
 } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 
-interface EffectiveMeta {
-  path: string;
-  effective: string[];
-  title: string;
-}
+import type { EffectiveMeta } from "@/types/tags";
 
 export default function SearchModal({
   show,

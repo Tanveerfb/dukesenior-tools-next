@@ -2,14 +2,13 @@
 import { AuthProvider } from "@/hooks/useAuth";
 import { ThemeProvider } from "./ThemeProvider";
 import MainNavbar from "./navigation/MainNavbar";
-import "bootstrap/dist/css/bootstrap.min.css";
 import Footer from "./ui/Footer";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider>
       <AuthProvider>
-  <MainNavbar />
+        <MainNavbar />
         <div className="container-fluid p-2" style={{ minHeight: "70vh" }}>
           {children}
         </div>

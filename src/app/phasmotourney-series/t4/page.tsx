@@ -1,11 +1,35 @@
-import Link from 'next/link';
-import { Container, Card } from 'react-bootstrap';
+import InlineLink from "@/components/ui/InlineLink";
+import TourneyPage from "@/components/tourney/TourneyPage";
+import { buildTourneyBreadcrumbs } from "@/lib/navigation/tourneyBreadcrumbs";
+import { Card, Stack } from "react-bootstrap";
 
-export default function T4(){
+export default function T4() {
+  const breadcrumbs = buildTourneyBreadcrumbs([{ label: "Phasmo Tourney 4" }]);
+
   return (
-    <Container className="py-4">
-      <h1>Phasmo Tourney 4</h1>
-  <Card className="p-3 mt-3"><Link href="/phasmotourney-series/phasmotourney4">Open Tourney 4 pages</Link></Card>
-    </Container>
+    <TourneyPage
+      title="Phasmo Tourney 4"
+      subtitle="The season where playoffs went wild and legends were born."
+      breadcrumbs={breadcrumbs}
+      containerProps={{ className: "py-4" }}
+    >
+      <Card className="shadow-sm">
+        <Card.Body>
+          <Stack gap={2}>
+            <p className="mb-0 text-muted">
+              Jump into standings, match archives, and recorded runs for the
+              fourth tournament.
+            </p>
+            <Card.Link
+              as={InlineLink}
+              href="/phasmotourney-series/phasmotourney4"
+              className="fw-semibold"
+            >
+              Open tournament hub
+            </Card.Link>
+          </Stack>
+        </Card.Body>
+      </Card>
+    </TourneyPage>
   );
 }

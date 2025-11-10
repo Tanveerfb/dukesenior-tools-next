@@ -1,11 +1,35 @@
-import Link from 'next/link';
-import { Container, Card } from 'react-bootstrap';
+import InlineLink from "@/components/ui/InlineLink";
+import TourneyPage from "@/components/tourney/TourneyPage";
+import { buildTourneyBreadcrumbs } from "@/lib/navigation/tourneyBreadcrumbs";
+import { Card, Stack } from "react-bootstrap";
 
-export default function T3(){
+export default function T3() {
+  const breadcrumbs = buildTourneyBreadcrumbs([{ label: "Phasmo Tourney 3" }]);
+
   return (
-    <Container className="py-4">
-      <h1>Phasmo Tourney 3</h1>
-  <Card className="p-3 mt-3"><Link href="/phasmotourney-series/phasmotourney3">Open Tourney 3 pages</Link></Card>
-    </Container>
+    <TourneyPage
+      title="Phasmo Tourney 3"
+      subtitle="Trios, rivalries, and the first marathon broadcast. Dive back into the action."
+      breadcrumbs={breadcrumbs}
+      containerProps={{ className: "py-4" }}
+    >
+      <Card className="shadow-sm">
+        <Card.Body>
+          <Stack gap={2}>
+            <p className="mb-0 text-muted">
+              Browse the bracket breakdowns, player stats, and memorable runs
+              from tournament #3.
+            </p>
+            <Card.Link
+              as={InlineLink}
+              href="/phasmotourney-series/phasmotourney3"
+              className="fw-semibold"
+            >
+              Open tournament hub
+            </Card.Link>
+          </Stack>
+        </Card.Body>
+      </Card>
+    </TourneyPage>
   );
 }

@@ -1,9 +1,6 @@
 @use "sass:color";
-@use "sass:math";
 
 // Theme variable definitions (must precede bootstrap for customization)
-
-// Phasmo Tourney 4 Theme Colors
 $primary: #ab2fb1;
 $secondary: #36453b;
 $tertiary: #515751;
@@ -19,6 +16,31 @@ $light: #dcfffd; // Soft Lavender Tint
 $text-color: #0c0909; // Neutral dark for text
 $background-color: #f7f7ff; // Subtle off-white for background
 
+$body-bg: $background-color;
+$body-color: $text-color;
+$link-color: $primary;
+$link-hover-color: color.scale($primary, $lightness: -12%);
+
+$btn-primary-color: #ffffff;
+$btn-primary-bg: $primary;
+$btn-primary-border: $primary;
+$btn-primary-hover-bg: color.scale($primary, $lightness: -8%);
+$btn-primary-hover-border: color.scale($primary, $lightness: -12%);
+$btn-primary-active-bg: color.scale($primary, $lightness: -18%);
+$btn-primary-active-border: color.scale($primary, $lightness: -20%);
+
+$btn-secondary-color: #ffffff;
+$btn-secondary-bg: $secondary;
+$btn-secondary-border: $secondary;
+$btn-secondary-hover-bg: color.scale($secondary, $lightness: -6%);
+$btn-secondary-hover-border: color.scale($secondary, $lightness: -10%);
+$btn-secondary-active-bg: color.scale($secondary, $lightness: -12%);
+$btn-secondary-active-border: color.scale($secondary, $lightness: -15%);
+
+$input-focus-border-color: color.scale($primary, $lightness: -6%);
+$input-focus-box-shadow: 0 0 0 0.2rem
+  rgba(color.red($primary), color.green($primary), color.blue($primary), 0.25);
+
 // Map to Bootstrap SASS variables so components/utilities use these colors
 $theme-colors: (
   "primary": $primary,
@@ -33,16 +55,17 @@ $theme-colors: (
 );
 
 // (All previous custom navbar/mobile styles removed intentionally)
-@import "~bootstrap/scss/bootstrap";
+@import "../../node_modules/bootstrap/scss/bootstrap";
 
-// Runtime accessibility scaling (controlled via ThemeProvider)
 :root {
   --font-scale: 1; // default; ThemeProvider updates at runtime
 }
+
 html {
   font-size: calc(16px * var(--font-scale, 1));
   transition: font-size 0.15s ease-in-out;
 }
+
 body {
   font-size: 1rem; // keep base context; rem units scale via html font-size
 }
@@ -66,4 +89,130 @@ h6 {
 }
 .navbar .navbar-toggler.ms-auto {
   margin-left: auto !important;
+}
+
+.compact-navbar .navbar-brand,
+.compact-navbar .navbar-nav .nav-link,
+.compact-navbar .dropdown-toggle {
+  padding-top: 0.35rem;
+  padding-bottom: 0.35rem;
+}
+
+.compact-navbar .navbar-nav .nav-link,
+.compact-navbar .dropdown-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.compact-navbar .dropdown-toggle::after {
+  margin-left: 0.35rem;
+  vertical-align: middle;
+}
+
+.compact-navbar .dropdown-menu {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.compact-navbar .dropdown-section {
+  padding: 0.25rem 0;
+}
+
+.compact-navbar .dropdown-section-toggle {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  padding: 0.35rem 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.compact-navbar .dropdown-section-toggle:focus {
+  outline: none;
+}
+
+.compact-navbar .dropdown-section-toggle:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+[data-bs-theme="dark"] .compact-navbar .dropdown-section-toggle:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.compact-navbar .dropdown-section-toggle-icon {
+  transition: transform 0.15s ease-in-out;
+}
+
+.compact-navbar
+  .dropdown-section-toggle[aria-expanded="true"]
+  .dropdown-section-toggle-icon {
+  transform: rotate(180deg);
+}
+
+.compact-navbar .dropdown-section-items {
+  padding-left: 0.75rem;
+}
+
+.tourney-hero {
+  background: linear-gradient(
+    115deg,
+    rgba(171, 47, 177, 0.12),
+    rgba(54, 69, 59, 0.1)
+  );
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+[data-bs-theme="dark"] .tourney-hero {
+  background: linear-gradient(
+    115deg,
+    rgba(171, 47, 177, 0.22),
+    rgba(54, 69, 59, 0.25)
+  );
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.tourney-hero.tourney-hero-secondary {
+  background: linear-gradient(
+    115deg,
+    rgba(54, 69, 59, 0.12),
+    rgba(18, 19, 15, 0.08)
+  );
+}
+
+.tourney-hero.tourney-hero-success {
+  background: linear-gradient(
+    115deg,
+    rgba(15, 128, 41, 0.12),
+    rgba(54, 69, 59, 0.08)
+  );
+}
+
+.tourney-hero.tourney-hero-warning {
+  background: linear-gradient(
+    115deg,
+    rgba(255, 202, 58, 0.18),
+    rgba(171, 47, 177, 0.12)
+  );
+}
+
+.tourney-hero.tourney-hero-info {
+  background: linear-gradient(
+    115deg,
+    rgba(137, 96, 142, 0.18),
+    rgba(171, 47, 177, 0.12)
+  );
+}
+
+.tourney-hero .breadcrumb-item + .breadcrumb-item::before {
+  color: inherit;
+}
+
+.tourney-hero .btn {
+  backdrop-filter: blur(6px);
 }

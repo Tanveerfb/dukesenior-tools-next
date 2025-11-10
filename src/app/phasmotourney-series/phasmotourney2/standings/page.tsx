@@ -1,8 +1,21 @@
-import { Alert, Container, Table } from 'react-bootstrap';
+import { Alert, Table } from "react-bootstrap";
+import TourneyPage from "@/components/tourney/TourneyPage";
+import { buildTourneyBreadcrumbs } from "@/lib/navigation/tourneyBreadcrumbs";
 
 export default function PhasmoTourney2StandingsPage() {
+  const breadcrumbs = buildTourneyBreadcrumbs([
+    { label: "Phasmo Tourney 2", href: "/phasmotourney-series/phasmotourney2" },
+    { label: "Standings" },
+  ]);
+
   return (
-    <Container fluid className="p-3">
+    <TourneyPage
+      title="Standings"
+      subtitle="Final placements from the second Phasmo Tourney, including second chance bracket results."
+      breadcrumbs={breadcrumbs}
+      badges={[{ label: "Phasmo Tourney 2" }, { label: "Standings" }]}
+      containerProps={{ fluid: true, className: "py-3" }}
+    >
       <Alert>Current standings</Alert>
       <Table hover responsive>
         <thead>
@@ -46,7 +59,9 @@ export default function PhasmoTourney2StandingsPage() {
         </thead>
         <tbody>
           <tr>
-            <td><b>Winner</b></td>
+            <td>
+              <b>Winner</b>
+            </td>
             <td>bgflareon</td>
             <td>18[36]</td>
             <td>07:38</td>
@@ -71,6 +86,6 @@ export default function PhasmoTourney2StandingsPage() {
           </tr>
         </tbody>
       </Table>
-    </Container>
+    </TourneyPage>
   );
 }

@@ -1,8 +1,17 @@
 "use client";
-import { useRef, useState } from 'react';
-import { Alert, Button, ButtonGroup, Container, Form, FormGroup, Table } from 'react-bootstrap';
-import { tourney2DataExport } from '@/lib/services/phasmoTourney2';
-import { useAuth } from '@/hooks/useAuth';
+import { useRef, useState } from "react";
+import {
+  Alert,
+  Button,
+  ButtonGroup,
+  Form,
+  FormGroup,
+  Table,
+} from "react-bootstrap";
+import TourneyPage from "@/components/tourney/TourneyPage";
+import { buildTourneyBreadcrumbs } from "@/lib/navigation/tourneyBreadcrumbs";
+import { tourney2DataExport } from "@/lib/services/phasmoTourney2";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function PhasmoTourney2FormPage() {
   const { user } = useAuth();
@@ -23,9 +32,15 @@ export default function PhasmoTourney2FormPage() {
   const [resultScreen, setResultScreen] = useState(false);
   const [marks, setMarks] = useState(0);
 
-  function toggleSurvival() { setSurvived(s => !s); }
-  function toggleCorrectGhost() { setCorrectGhost(c => !c); }
-  function togglePerfectGame() { setPerfectGame(p => !p); }
+  function toggleSurvival() {
+    setSurvived((s) => !s);
+  }
+  function toggleCorrectGhost() {
+    setCorrectGhost((c) => !c);
+  }
+  function togglePerfectGame() {
+    setPerfectGame((p) => !p);
+  }
 
   async function calculate(e: React.FormEvent) {
     e.preventDefault();
@@ -41,9 +56,9 @@ export default function PhasmoTourney2FormPage() {
     setMarks(m);
 
     await tourney2DataExport(
-      officer.current?.value || '',
-      username.current?.value || '',
-      phasmomap.current?.value || '',
+      officer.current?.value || "",
+      username.current?.value || "",
+      phasmomap.current?.value || "",
       !!ghostpicture.current?.checked,
       !!bonepicture.current?.checked,
       !!objective1.current?.checked,
@@ -52,30 +67,60 @@ export default function PhasmoTourney2FormPage() {
       survived,
       correctGhost,
       perfectGame,
-      minutesRef.current?.value || '00',
-      secondsRef.current?.value || '00',
-      notes.current?.value || ''
+      minutesRef.current?.value || "00",
+      secondsRef.current?.value || "00",
+      notes.current?.value || ""
     );
 
     setResultScreen(true);
   }
-  function reset() { setMarks(0); setSurvived(true); setCorrectGhost(true); setPerfectGame(true); setResultScreen(false); }
+  function reset() {
+    setMarks(0);
+    setSurvived(true);
+    setCorrectGhost(true);
+    setPerfectGame(true);
+    setResultScreen(false);
+  }
+
+  const breadcrumbs = buildTourneyBreadcrumbs([
+    { label: "Phasmo Tourney 2", href: "/phasmotourney-series/phasmotourney2" },
+    { label: "Submission Form" },
+  ]);
 
   return (
-    <Container fluid="md" className="mb-3">
+    <TourneyPage
+      title="Phasmo Tourney 2 Submission"
+      subtitle="Officer-only intake form for recording official round results into the archive."
+      breadcrumbs={breadcrumbs}
+      badges={[{ label: "Phasmo Tourney 2" }, { label: "Admin Tool" }]}
+      containerProps={{ fluid: "md", className: "py-4" }}
+    >
       {resultScreen ? (
-        <Container className="p-2 d-flex flex-column">
-          <Alert variant="primary" className="text-center">Congratulations! You got {marks} marks.</Alert>
-          <Button variant="secondary" onClick={reset}>Another run?</Button>
-        </Container>
+        <div className="p-2 d-flex flex-column align-items-center">
+          <Alert variant="primary" className="text-center">
+            Congratulations! You got {marks} marks.
+          </Alert>
+          <Button variant="secondary" onClick={reset}>
+            Another run?
+          </Button>
+        </div>
       ) : (
         <Form className="p-3 m-auto" onSubmit={calculate}>
-          <Alert variant="primary" className="text-center">DukeSenior's Phasmo Tourney #2 (2024)</Alert>
+          <Alert variant="primary" className="text-center">
+            DukeSenior's Phasmo Tourney #2 (2024)
+          </Alert>
           <FormGroup className="mb-3">
             <Form.Label>Name of the person filling this form</Form.Label>
-            <Form.Control ref={officer} defaultValue={user?.displayName || ''} disabled={!user?.displayName} required />
+            <Form.Control
+              ref={officer}
+              defaultValue={user?.displayName || ""}
+              disabled={!user?.displayName}
+              required
+            />
           </FormGroup>
-          <Alert variant="danger" className="text-center">During the investigation :</Alert>
+          <Alert variant="danger" className="text-center">
+            During the investigation :
+          </Alert>
           <FormGroup className="mb-3">
             <Form.Label>Player name / Twitch username</Form.Label>
             <Form.Control type="text" maxLength={30} ref={username} required />
@@ -86,56 +131,156 @@ export default function PhasmoTourney2FormPage() {
               <option value="10 Ridgeview Court">10 Ridgeview Court</option>
               <option value="Grafton Farmhouse">Grafton Farmhouse</option>
               <option value="Willow Street">Willow Street</option>
-              <option value="Sunny Meadows Restricted">Sunny Meadows Restricted</option>
+              <option value="Sunny Meadows Restricted">
+                Sunny Meadows Restricted
+              </option>
               <option value="SCB Special">SCB Special</option>
             </Form.Select>
           </FormGroup>
           <Table hover size="sm" responsive="md">
             <tbody>
               <tr>
-                <td><Form.Check type="switch" label="Ghost picture" ref={ghostpicture} /></td>
-                <td><Form.Check type="switch" label="Bone picture" ref={bonepicture} /></td>
+                <td>
+                  <Form.Check
+                    type="switch"
+                    label="Ghost picture"
+                    ref={ghostpicture}
+                  />
+                </td>
+                <td>
+                  <Form.Check
+                    type="switch"
+                    label="Bone picture"
+                    ref={bonepicture}
+                  />
+                </td>
               </tr>
               <tr>
-                <td><Form.Check type="switch" label="Objective 1" ref={objective1} /></td>
-                <td><Form.Check type="switch" label="Objective 2" ref={objective2} /></td>
-                <td><Form.Check type="switch" label="Objective 3" ref={objective3} /></td>
+                <td>
+                  <Form.Check
+                    type="switch"
+                    label="Objective 1"
+                    ref={objective1}
+                  />
+                </td>
+                <td>
+                  <Form.Check
+                    type="switch"
+                    label="Objective 2"
+                    ref={objective2}
+                  />
+                </td>
+                <td>
+                  <Form.Check
+                    type="switch"
+                    label="Objective 3"
+                    ref={objective3}
+                  />
+                </td>
               </tr>
             </tbody>
           </Table>
-          <Alert variant="danger" className="text-center">Post investigation summary :</Alert>
+          <Alert variant="danger" className="text-center">
+            Post investigation summary :
+          </Alert>
           <FormGroup className="mb-1">
             <ButtonGroup className="d-flex">
-              <Button variant={survived ? 'primary' : 'outline-primary'} disabled={survived} onClick={toggleSurvival} className="m-1">Survived</Button>
-              <Button variant={!survived ? 'tertiary' : 'outline-tertiary'} disabled={!survived} onClick={toggleSurvival} className="m-1">Died</Button>
+              <Button
+                variant={survived ? "primary" : "outline-primary"}
+                disabled={survived}
+                onClick={toggleSurvival}
+                className="m-1"
+              >
+                Survived
+              </Button>
+              <Button
+                variant={!survived ? "tertiary" : "outline-tertiary"}
+                disabled={!survived}
+                onClick={toggleSurvival}
+                className="m-1"
+              >
+                Died
+              </Button>
             </ButtonGroup>
           </FormGroup>
           <FormGroup className="mb-1">
             <ButtonGroup className="d-flex">
-              <Button variant={correctGhost ? 'primary' : 'outline-primary'} disabled={correctGhost} onClick={toggleCorrectGhost} className="m-1">Correct ghost type</Button>
-              <Button variant={!correctGhost ? 'tertiary' : 'outline-tertiary'} disabled={!correctGhost} onClick={toggleCorrectGhost} className="m-1">Incorrect type</Button>
+              <Button
+                variant={correctGhost ? "primary" : "outline-primary"}
+                disabled={correctGhost}
+                onClick={toggleCorrectGhost}
+                className="m-1"
+              >
+                Correct ghost type
+              </Button>
+              <Button
+                variant={!correctGhost ? "tertiary" : "outline-tertiary"}
+                disabled={!correctGhost}
+                onClick={toggleCorrectGhost}
+                className="m-1"
+              >
+                Incorrect type
+              </Button>
             </ButtonGroup>
           </FormGroup>
           <FormGroup className="mb-1">
             <ButtonGroup className="d-flex">
-              <Button variant={perfectGame ? 'primary' : 'outline-primary'} disabled={perfectGame} onClick={togglePerfectGame} className="m-1">Perfect game</Button>
-              <Button variant={!perfectGame ? 'tertiary' : 'outline-tertiary'} disabled={!perfectGame} onClick={togglePerfectGame} className="m-1">Normal game</Button>
+              <Button
+                variant={perfectGame ? "primary" : "outline-primary"}
+                disabled={perfectGame}
+                onClick={togglePerfectGame}
+                className="m-1"
+              >
+                Perfect game
+              </Button>
+              <Button
+                variant={!perfectGame ? "tertiary" : "outline-tertiary"}
+                disabled={!perfectGame}
+                onClick={togglePerfectGame}
+                className="m-1"
+              >
+                Normal game
+              </Button>
             </ButtonGroup>
           </FormGroup>
           <FormGroup className="mb-1">
             <Form.Label>Total time investigating :</Form.Label>
             <div className="d-flex gap-2">
-              <Form.Control type="number" placeholder="Minutes" maxLength={2} min={0} max={99} ref={minutesRef} required />
-              <Form.Control type="number" placeholder="Seconds" maxLength={2} min={0} max={59} ref={secondsRef} required />
+              <Form.Control
+                type="number"
+                placeholder="Minutes"
+                maxLength={2}
+                min={0}
+                max={99}
+                ref={minutesRef}
+                required
+              />
+              <Form.Control
+                type="number"
+                placeholder="Seconds"
+                maxLength={2}
+                min={0}
+                max={59}
+                ref={secondsRef}
+                required
+              />
             </div>
           </FormGroup>
           <FormGroup className="d-flex flex-column mb-3">
             <Form.Label>Additional notes:</Form.Label>
-            <Form.Control as="textarea" className="mb-2" rows={4} placeholder="Type details of the run." ref={notes} />
-            <Button type="submit" variant="tertiary" className="m-1 text-white">Submit and check</Button>
+            <Form.Control
+              as="textarea"
+              className="mb-2"
+              rows={4}
+              placeholder="Type details of the run."
+              ref={notes}
+            />
+            <Button type="submit" variant="tertiary" className="m-1 text-white">
+              Submit and check
+            </Button>
           </FormGroup>
         </Form>
       )}
-    </Container>
+    </TourneyPage>
   );
 }

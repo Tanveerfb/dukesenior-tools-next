@@ -1,251 +1,160 @@
 import Link from "next/link";
-import {
-  Container,
-  Row,
-  Col,
-  Accordion,
-  ListGroup,
-  Button,
-} from "react-bootstrap";
+import { Col, Container, Row, Stack } from "react-bootstrap";
+import { FaDiscord, FaInstagram, FaTwitter } from "react-icons/fa";
+import { RiNextjsFill } from "react-icons/ri";
 import { BsFillBootstrapFill } from "react-icons/bs";
-import { FaDiscord } from "react-icons/fa";
-import { RiNextjsFill, RiReactjsFill } from "react-icons/ri";
 import { SiKofi } from "react-icons/si";
-// other icons intentionally omitted
+
+const navSections = [
+  {
+    title: "Explore",
+    links: [
+      { label: "Phasmo Tourney series", href: "/phasmotourney-series" },
+      { label: "Posts & updates", href: "/posts" },
+      { label: "Notifications", href: "/notifications" },
+    ],
+  },
+  {
+    title: "Tools",
+    links: [
+      { label: "To-Do board", href: "/todolist" },
+      { label: "Suggestions", href: "/suggestions" },
+      { label: "Style check", href: "/style-check" },
+    ],
+  },
+  {
+    title: "Community",
+    links: [
+      {
+        label: "The Lair of Evil Discord",
+        href: "https://discord.gg/xB9mpZfbq3",
+        external: true,
+      },
+      {
+        label: "Phasmo Tourney Discord",
+        href: "https://discord.gg/r9WT8RUPxn",
+        external: true,
+      },
+      { label: "Profile", href: "/profile" },
+    ],
+  },
+];
+
+const socialLinks = [
+  {
+    icon: <FaTwitter />,
+    label: "Twitter",
+    href: "https://twitter.com/dukesenior",
+  },
+  {
+    icon: <FaInstagram />,
+    label: "Instagram",
+    href: "https://www.instagram.com/dukesenior22",
+  },
+  {
+    icon: <FaDiscord />,
+    label: "Discord",
+    href: "https://discord.gg/xB9mpZfbq3",
+  },
+];
 
 export default function Footer() {
   return (
-    <footer className=" border-top">
-      <Container fluid className="py-5">
-        <Container>
-          <Row className="align-items-start gy-4">
-            <Col lg={4}>
-              <h4 className="mb-2">The Lair of Evil</h4>
-              <p className="text-muted mb-2">
-                Tools, events and community resources for streamers and the
-                Phasmo Tourney project.
-              </p>
-              <div className="d-flex gap-2 align-items-center">
-                <Button
-                  href="https://ko-fi.com/dukesenior"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  variant="warning"
-                >
-                  Support on Ko‑Fi 
-                </Button>
-                <div className="text-muted small">
-                  &copy; {new Date().getFullYear()} DukeSenior
-                </div>
-              </div>
-            </Col>
-
-            <Col lg={2} className="d-none d-lg-block">
-              <h6 className="text-uppercase small text-muted mb-2">
-                Developer
-              </h6>
-              <ListGroup variant="flush">
-                <ListGroup.Item className="px-0 border-0 bg-transparent">
-                  <Link href="/style-check" className="text-decoration-none">
-                    Style check
-                  </Link>
-                </ListGroup.Item>
-                <ListGroup.Item className="px-0 border-0 bg-transparent">
-                  <Link href="/suggestions" className="text-decoration-none">
-                    Suggestions
-                  </Link>
-                </ListGroup.Item>
-              </ListGroup>
-            </Col>
-
-            <Col lg={2} className="d-none d-lg-block">
-              <h6 className="text-uppercase small text-muted mb-2">About</h6>
-              <ListGroup variant="flush">
-                <ListGroup.Item className="px-0 border-0 bg-transparent text-muted">
-                  Manage events and tournaments
-                </ListGroup.Item>
-                <ListGroup.Item className="px-0 border-0 bg-transparent text-muted">
-                  Collaborate with others
-                </ListGroup.Item>
-              </ListGroup>
-            </Col>
-
-            <Col lg={2} className="d-none d-lg-block">
-              <h6 className="text-uppercase small text-muted mb-2">Tech</h6>
-              <ListGroup variant="flush">
-                <ListGroup.Item className="px-0 border-0 bg-transparent">
-                  <a
-                    className="text-warning fw-semibold"
-                    href="https://nextjs.org/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <RiNextjsFill />
-                    &nbsp;NextJS
-                  </a>
-                </ListGroup.Item>
-                <ListGroup.Item className="px-0 border-0 bg-transparent">
-                  <a
-                    className="text-warning fw-semibold"
-                    href="https://react-bootstrap.github.io/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <BsFillBootstrapFill />
-                    &nbsp;React-Bootstrap
-                  </a>
-                </ListGroup.Item>
-              </ListGroup>
-            </Col>
-
-            <Col lg={2} className="d-none d-lg-block">
-              <h6 className="text-uppercase small text-muted mb-2">
-                Community
-              </h6>
-              <ListGroup variant="flush">
-                <ListGroup.Item className="px-0 border-0 bg-transparent">
-                  <a
-                    href="https://discord.gg/xB9mpZfbq3"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-decoration-none"
-                  >
-                    The Lair of Evil (Discord)
-                  </a>
-                </ListGroup.Item>
-                <ListGroup.Item className="px-0 border-0 bg-transparent">
-                  <a
-                    href="https://discord.gg/r9WT8RUPxn"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-decoration-none"
-                  >
-                    Phasmo Tourney (Discord)
-                  </a>
-                </ListGroup.Item>
-                <ListGroup.Item className="px-0 border-0 bg-transparent">
-                  <span className="text-muted">
-                    <FaDiscord />
-                    &nbsp;dukesenior22
-                  </span>
-                </ListGroup.Item>
-              </ListGroup>
-            </Col>
-          </Row>
-
-          {/* Collapsible for md and smaller */}
-          <div className="d-lg-none mt-4">
-            <Accordion>
-              <Accordion.Item eventKey="0">
-                <Accordion.Header>Developer</Accordion.Header>
-                <Accordion.Body>
-                  <div>
-                    <Link href="/style-check">Style check</Link>
-                  </div>
-                  <div>
-                    <Link href="/suggestions">Suggestions</Link>
-                  </div>
-                  <div>
-                    <Link href="/admin/suggestions">Suggestions (admin)</Link>
-                  </div>
-                </Accordion.Body>
-              </Accordion.Item>
-              <Accordion.Item eventKey="1">
-                <Accordion.Header>About</Accordion.Header>
-                <Accordion.Body>
-                  <div>Manage events and tournaments</div>
-                  <div>Collaborate with others</div>
-                </Accordion.Body>
-              </Accordion.Item>
-              <Accordion.Item eventKey="2">
-                <Accordion.Header>Tech</Accordion.Header>
-                <Accordion.Body>
-                  <div>
-                    <a
-                      className="text-warning fw-semibold"
-                      href="https://react.dev/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <RiReactjsFill /> React
-                    </a>
-                  </div>
-                  <div>
-                    <a
-                      className="text-warning fw-semibold"
-                      href="https://react-bootstrap.github.io/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <BsFillBootstrapFill /> React-Bootstrap
-                    </a>
-                  </div>
-                </Accordion.Body>
-              </Accordion.Item>
-              <Accordion.Item eventKey="3">
-                <Accordion.Header>Community</Accordion.Header>
-                <Accordion.Body>
-                  <div>
-                    <a
-                      href="https://discord.gg/xB9mpZfbq3"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      The Lair of Evil (Discord)
-                    </a>
-                  </div>
-                  <div>
-                    <a
-                      href="https://discord.gg/r9WT8RUPxn"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Phasmo Tourney (Discord)
-                    </a>
-                  </div>
-                  <div className="d-flex align-items-center">
-                    <FaDiscord className="me-2" />
-                    dukesenior22
-                  </div>
-                </Accordion.Body>
-              </Accordion.Item>
-            </Accordion>
-          </div>
-        </Container>
-
-        <Container className="mt-4">
-          <Row className="align-items-center">
-            <Col md={6} className="text-muted small">
-              Built with ❤️ — The Lair of Evil
-            </Col>
-            <Col md={6} className="text-md-end">
-              <a
-                href="https://twitter.com/dukesenior"
-                target="_blank"
-                className="me-3 text-muted"
-                aria-label="Twitter"
-              >
-                Twitter
-              </a>
-              <a
-                href="https://www.instagram.com/dukesenior22"
-                target="_blank"
-                className="me-3 text-muted"
-                aria-label="Instagram"
-              >
-                Instagram
-              </a>
+    <footer className="border-top bg-body-tertiary mt-auto">
+      <Container className="py-5">
+        <Row className="gy-5">
+          <Col lg={4}>
+            <h2 className="h4 fw-semibold mb-3">The Lair of Evil</h2>
+            <p className="text-muted small mb-4">
+              Tools, event dashboards, and community resources powering the
+              Phasmo Tourney project and the DukeSenior community.
+            </p>
+            <Stack
+              direction="horizontal"
+              gap={3}
+              className="flex-wrap align-items-center"
+            >
               <a
                 href="https://ko-fi.com/dukesenior"
                 target="_blank"
-                className="text-muted"
-                aria-label="Ko-fi"
+                rel="noopener noreferrer"
+                className="btn btn-warning d-inline-flex align-items-center gap-2"
               >
-                Ko‑Fi
+                <SiKofi /> Support on Ko-Fi
               </a>
+              <span className="text-muted small">
+                &copy; {new Date().getFullYear()} DukeSenior
+              </span>
+            </Stack>
+            <div className="text-muted small mt-3 d-flex align-items-center gap-3">
+              <span className="d-inline-flex align-items-center gap-1">
+                <RiNextjsFill /> Next.js
+              </span>
+              <span className="d-inline-flex align-items-center gap-1">
+                <BsFillBootstrapFill /> React-Bootstrap
+              </span>
+            </div>
+          </Col>
+
+          {navSections.map((section) => (
+            <Col key={section.title} xs={6} md={4} lg={2}>
+              <h3 className="text-uppercase small text-muted fw-semibold mb-3">
+                {section.title}
+              </h3>
+              <ul className="list-unstyled small mb-0">
+                {section.links.map((link) => (
+                  <li key={link.href} className="mb-2">
+                    {link.external ? (
+                      <a
+                        href={link.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-decoration-none text-reset"
+                      >
+                        {link.label}
+                      </a>
+                    ) : (
+                      <Link
+                        href={link.href}
+                        className="text-decoration-none text-reset"
+                      >
+                        {link.label}
+                      </Link>
+                    )}
+                  </li>
+                ))}
+              </ul>
             </Col>
-          </Row>
-        </Container>
+          ))}
+        </Row>
+
+        <Row className="mt-5 pt-4 border-top">
+          <Col md={6} className="text-muted small">
+            Built with care for players, casters, and crew of the Phasmo
+            Tourney.
+          </Col>
+          <Col md={6} className="mt-3 mt-md-0">
+            <Stack
+              direction="horizontal"
+              gap={3}
+              className="justify-content-md-end flex-wrap"
+            >
+              {socialLinks.map((social) => (
+                <a
+                  key={social.label}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-muted d-inline-flex align-items-center gap-2"
+                  aria-label={social.label}
+                >
+                  {social.icon}
+                  <span className="small">{social.label}</span>
+                </a>
+              ))}
+            </Stack>
+          </Col>
+        </Row>
       </Container>
     </footer>
   );
