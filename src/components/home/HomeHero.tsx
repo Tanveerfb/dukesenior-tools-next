@@ -20,7 +20,7 @@ const HomeHero = () => {
             <Badge bg="primary" className="text-uppercase small fw-semibold">
               Now Live
             </Badge>
-            <h1 className="display-5 fw-bold mt-3 mb-3">Phasmo Tourney 5</h1>
+            {/* Phasmo Tourney 5 removed */}
             <p className="lead text-muted mb-4">
               Follow brackets, recorded runs, and stats for the latest Phasmo
               Tourney showdown. Catch DukeSenior live for match commentary and

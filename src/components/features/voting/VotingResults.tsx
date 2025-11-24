@@ -29,14 +29,14 @@ export default function VotingResults({ round }: { round: number }) {
     setError(null);
     try {
       const listRes = await fetch(
-        `/api/t5/voting-sessions/list?round=${round}`
+        // Removed Phasmo Tourney 5 endpoint
       );
       if (!listRes.ok) throw new Error(`List failed ${listRes.status}`);
       const raw = await listRes.json();
       const tallies: SessionTally[] = [];
       for (const s of raw) {
         const tRes = await fetch(
-          `/api/t5/voting-sessions/tally?sessionId=${s.id}`
+          // Removed Phasmo Tourney 5 endpoint
         );
         if (tRes.ok) {
           const t = await tRes.json();
@@ -58,7 +58,7 @@ export default function VotingResults({ round }: { round: number }) {
 
   async function persistReveal(sessionId: string) {
     try {
-      const res = await fetch("/api/t5/voting-sessions/reveal", {
+      // Removed Phasmo Tourney 5 endpoint
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sessionId, revealed: true }),

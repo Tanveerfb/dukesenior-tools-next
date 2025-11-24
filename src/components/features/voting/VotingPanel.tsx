@@ -37,7 +37,7 @@ export default function VotingPanel({
     }
     setSubmitting(true);
     try {
-      const res = await fetch("/api/t5/voting-sessions/vote", {
+      // Removed Phasmo Tourney 5 endpoint
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sessionId, uid: user.uid, candidateId: choice }),

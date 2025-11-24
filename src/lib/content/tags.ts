@@ -8,37 +8,6 @@ export type PageTag = string; // Backwards compatibility alias
 
 // Manual manifest seed (can be augmented programmatically later)
 export const taggedManifest: TaggedRouteMeta[] = [
-  // Tourney 5 (new - current)
-  {
-    path: "/phasmotourney-series/phasmotourney5",
-    title: "Tourney 5 Bracket",
-    tags: ["PhasmoTourney5", "Bracket", "Event", "Current"],
-  },
-  {
-    path: "/phasmotourney-series/phasmotourney5/runs",
-    title: "Tourney 5 Recorded Runs",
-    tags: ["PhasmoTourney5", "RecordedRuns", "Event", "Current"],
-  },
-  {
-    path: "/phasmotourney-series/phasmotourney5/runs/[id]",
-    title: "Tourney 5 Run Details",
-    tags: ["PhasmoTourney5", "RecordedRuns", "Details", "Event", "Current"],
-  },
-  {
-    path: "/phasmotourney-series/phasmotourney5/round2-leaderboard",
-    title: "Tourney 5 Round 2 Leaderboard",
-    tags: ["PhasmoTourney5", "Leaderboard", "Event", "Current"],
-  },
-  {
-    path: "/phasmotourney-series/phasmotourney5/stats",
-    title: "Tourney 5 Stats",
-    tags: ["PhasmoTourney5", "Stats", "Event", "Current"],
-  },
-  {
-    path: "/phasmotourney-series/phasmotourney5/players",
-    title: "Tourney 5 Players",
-    tags: ["PhasmoTourney5", "Players", "Event", "Current"],
-  },
   // Tourney 4 (now under series)
   {
     path: "/phasmotourney-series/phasmotourney4",

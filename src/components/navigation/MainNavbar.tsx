@@ -249,15 +249,6 @@ export default function MainNavbar() {
                   >
                     Suggestions
                   </NavDropdown.Item>
-                  <NavDropdown.Divider />
-                  <NavDropdown.Header>Tourney 5</NavDropdown.Header>
-                  <NavDropdown.Item
-                    as={InlineLink}
-                    href="/phasmotourney-series/phasmotourney5/players/add"
-                    onClick={handleNavItemClick}
-                  >
-                    Add Player
-                  </NavDropdown.Item>
                 </NavDropdown>
               )}
 
