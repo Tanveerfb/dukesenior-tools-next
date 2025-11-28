@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useEffect, useState } from "react";
 import { Alert, Card, Col, Row, Spinner, Button, Badge } from "react-bootstrap";
 import { useAuth } from "@/hooks/useAuth";
@@ -28,16 +28,12 @@ export default function VotingResults({ round }: { round: number }) {
     setLoading(true);
     setError(null);
     try {
-      const listRes = await fetch(
-        // Removed Phasmo Tourney 5 endpoint
-      );
+      const listRes = await fetch(`/api/votes/list?round=${round}`);
       if (!listRes.ok) throw new Error(`List failed ${listRes.status}`);
       const raw = await listRes.json();
       const tallies: SessionTally[] = [];
       for (const s of raw) {
-        const tRes = await fetch(
-          // Removed Phasmo Tourney 5 endpoint
-        );
+        const tRes = await fetch(`/api/votes/session/${s.id}`);
         if (tRes.ok) {
           const t = await tRes.json();
           tallies.push({ ...t, sessionId: s.id, revealed: s.revealed });
@@ -58,7 +54,7 @@ export default function VotingResults({ round }: { round: number }) {
 
   async function persistReveal(sessionId: string) {
     try {
-      // Removed Phasmo Tourney 5 endpoint
+      const res = await fetch(`/api/votes/reveal`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sessionId, revealed: true }),
@@ -85,7 +81,7 @@ export default function VotingResults({ round }: { round: number }) {
       )}
       {loading && (
         <div className="d-flex align-items-center gap-2">
-          <Spinner size="sm" /> Loading results…
+          <Spinner size="sm" /> Loading results
         </div>
       )}
       {!loading && sessions.length === 0 && (

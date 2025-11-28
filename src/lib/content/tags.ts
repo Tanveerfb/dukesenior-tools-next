@@ -87,6 +87,52 @@ export const taggedManifest: TaggedRouteMeta[] = [
     title: "Tourney 1 Records",
     tags: ["PhasmoTourney1", "RecordedRuns", "Event", "Past"],
   },
+  // Tourney 5 (new skeleton)
+  {
+    path: "/phasmotourney-series/phasmotourney5",
+    title: "Tourney 5",
+    tags: ["PhasmoTourney5", "Event", "Current"],
+  },
+  {
+    path: "/phasmotourney-series/phasmotourney5/players",
+    title: "Tourney 5 Players",
+    tags: ["PhasmoTourney5", "Players", "Event", "Current"],
+  },
+  {
+    path: "/phasmotourney-series/phasmotourney5/rounds",
+    title: "Tourney 5 Rounds",
+    tags: ["PhasmoTourney5", "Rounds", "Event", "Current"],
+  },
+  {
+    path: "/phasmotourney-series/phasmotourney5/rounds/[roundNumber]",
+    title: "Tourney 5 Round Detail",
+    tags: ["PhasmoTourney5", "Rounds", "Details", "Event", "Current"],
+  },
+  {
+    path: "/phasmotourney-series/phasmotourney5/leaderboard",
+    title: "Tourney 5 Leaderboard",
+    tags: ["PhasmoTourney5", "Leaderboard", "Event", "Current"],
+  },
+  {
+    path: "/phasmotourney-series/phasmotourney5/player",
+    title: "Tourney 5 Player",
+    tags: ["PhasmoTourney5", "Player", "Event", "Current"],
+  },
+  {
+    path: "/phasmotourney-series/phasmotourney5/vote/[voteSlug]",
+    title: "Tourney 5 Vote",
+    tags: ["PhasmoTourney5", "Vote", "Event", "Current"],
+  },
+  {
+    path: "/phasmotourney-series/phasmotourney5/overlay/now-next",
+    title: "Tourney 5 Overlay Now/Next",
+    tags: ["PhasmoTourney5", "Overlay", "Event", "Current"],
+  },
+  {
+    path: "/phasmotourney-series/phasmotourney5/cards/matchup/[matchId]",
+    title: "Tourney 5 Matchup Card",
+    tags: ["PhasmoTourney5", "Cards", "Event", "Current"],
+  },
 ];
 
 export function findByTag(tag: PageTag) {

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useState } from "react";
 import { Alert, Button, Form, Spinner } from "react-bootstrap";
 import { useAuth } from "@/hooks/useAuth";
@@ -37,7 +37,7 @@ export default function VotingPanel({
     }
     setSubmitting(true);
     try {
-      // Removed Phasmo Tourney 5 endpoint
+      const res = await fetch("/api/votes/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sessionId, uid: user.uid, candidateId: choice }),
@@ -95,7 +95,7 @@ export default function VotingPanel({
         >
           {submitting ? (
             <>
-              <Spinner size="sm" className="me-1" /> Submitting…
+              <Spinner size="sm" className="me-1" /> Submitting
             </>
           ) : (
             "Submit Vote"

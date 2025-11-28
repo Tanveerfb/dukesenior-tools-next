@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "@/styles/global.scss";
 import Providers from "../components/Providers";
+import AppChrome from "../components/layout/AppChrome";
 import { Analytics } from "@vercel/analytics/next";
 
 const geistSans = Geist({
@@ -32,7 +33,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable}`}
       >
         <Providers>
-          {children}
+          <AppChrome>{children}</AppChrome>
           <Analytics />
         </Providers>
       </body>
