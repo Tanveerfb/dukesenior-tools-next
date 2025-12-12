@@ -76,7 +76,6 @@ Generated automatically based on recent commits and build changes on 2025-08-25.
 - Restored and stabilized Phasmo Tourney 2 bracket page with explicit winners displayed (matches now render bold winners as in the original site).
 - Converted post images and markdown-rendered images to `next/image` for better LCP and automatic optimization (keeps click-to-open lightbox behavior).
 - Fixed runtime "Element type is invalid" errors by replacing fragile react-bootstrap subcomponent usage and switching a few components to plain Bootstrap markup.
-- Added a simple CLI (`scripts/postPatchNotes.js`) and an API route (`/api/patch-notes`) to append patch notes to `PATCH_NOTES.md` and optionally post them to a Discord webhook.
 
 ### Code Quality & Build
 

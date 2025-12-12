@@ -10,10 +10,7 @@ export default function AppChrome({ children }: { children: React.ReactNode }) {
   const search = useSearchParams();
   const embed = search?.get("embed") === "1";
 
-  const hideChrome =
-    embed ||
-    !!pathname?.includes("/phasmotourney-series/phasmotourney5/overlay") ||
-    !!pathname?.includes("/phasmotourney-series/phasmotourney5/cards");
+  const hideChrome = embed || false;
 
   if (hideChrome) return <>{children}</>;
   return (

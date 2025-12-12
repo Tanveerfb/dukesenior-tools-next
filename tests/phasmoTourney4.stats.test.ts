@@ -1,10 +1,9 @@
-/// <reference types="vitest" />
 import { describe, it, expect } from "vitest";
 import {
   computeTopAveragePlayers,
   computeTopBestStreak,
   RawPlayerStats,
-} from "@/lib/services/phasmoTourney4";
+} from "../src/lib/services/phasmoTourney4.stats";
 
 describe("PhasmoTourney4 stats helpers", () => {
   const sample: RawPlayerStats[] = [
@@ -18,9 +17,9 @@ describe("PhasmoTourney4 stats helpers", () => {
 
   it("computes top average players with correct rounding and order", () => {
     const top = computeTopAveragePlayers(sample, 3);
-    expect(top.map((p) => p.name)).toEqual(["Bob", "Frank", "Alice"]);
-    expect(top[0].avgScore).toBe(20); // 40/2
-    expect(top[1].avgScore).toBeCloseTo(22.5);
+    expect(top.map((p) => p.name)).toEqual(["Frank", "Alice", "Bob"]);
+    expect(top[0].avgScore).toBeCloseTo(22.5);
+    expect(top.find((p) => p.name === "Bob")?.avgScore).toBe(20); // 40/2
   });
 
   it("handles division by zero safely", () => {
