@@ -87,7 +87,47 @@ export const taggedManifest: TaggedRouteMeta[] = [
     title: "Tourney 1 Records",
     tags: ["PhasmoTourney1", "RecordedRuns", "Event", "Past"],
   },
-  // Tourney 5 entries removed (routes deleted)
+  // Tourney 5 (Current) — public pages
+  {
+    path: "/phasmotourney-series/phasmoTourney5/timeline",
+    title: "Tourney 5 Timeline",
+    tags: ["PhasmoTourney5", "Timeline", "Event", "Current"],
+  },
+  {
+    path: "/phasmotourney-series/phasmoTourney5/whats-next",
+    title: "Tourney 5 — What's Next?",
+    tags: ["PhasmoTourney5", "Next", "Event", "Current"],
+  },
+  {
+    path: "/phasmotourney-series/phasmoTourney5/current-standings",
+    title: "Tourney 5 Current Standings",
+    tags: ["PhasmoTourney5", "Standings", "Event", "Current"],
+  },
+  {
+    path: "/phasmotourney-series/phasmoTourney5/rules-and-settings",
+    title: "Tourney 5 Rules & Settings",
+    tags: ["PhasmoTourney5", "Rules", "Event", "Current"],
+  },
+  {
+    path: "/phasmotourney-series/phasmoTourney5/videos-and-stream-links",
+    title: "Tourney 5 Videos & Streams",
+    tags: ["PhasmoTourney5", "Videos", "Event", "Current"],
+  },
+  {
+    path: "/phasmotourney-series/phasmoTourney5/vote-sessions-data",
+    title: "Tourney 5 Vote Sessions Data",
+    tags: ["PhasmoTourney5", "VoteSessionsData", "Event", "Current"],
+  },
+  {
+    path: "/phasmotourney-series/phasmoTourney5/eliminator-sessions-data",
+    title: "Tourney 5 Eliminator Sessions Data",
+    tags: ["PhasmoTourney5", "EliminatorData", "Event", "Current"],
+  },
+  {
+    path: "/phasmotourney-series/phasmoTourney5/recorded-run-details",
+    title: "Tourney 5 Recorded Run Details",
+    tags: ["PhasmoTourney5", "RecordedRuns", "Event", "Current"],
+  },
 ];
 
 export function findByTag(tag: PageTag) {

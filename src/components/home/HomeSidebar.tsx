@@ -3,7 +3,6 @@ import Link from "next/link";
 import { Card, ListGroup, Stack } from "react-bootstrap";
 import { FaDiscord } from "react-icons/fa";
 import { HiOutlineArrowNarrowRight } from "react-icons/hi";
-import OpenToDoCard from "@/components/home/OpenToDoCard";
 
 const quickLinks = [
   {
@@ -27,7 +26,6 @@ const quickLinks = [
 const HomeSidebar = () => {
   return (
     <Stack gap={4}>
-      <OpenToDoCard />
       <Card className="border-0 shadow-sm">
         <Card.Body>
           <Card.Title as="h3" className="h5 fw-semibold mb-2">

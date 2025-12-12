@@ -17,7 +17,6 @@ const navSections = [
   {
     title: "Tools",
     links: [
-      { label: "To-Do board", href: "/todolist" },
       { label: "Suggestions", href: "/suggestions" },
       { label: "Style check", href: "/style-check" },
     ],

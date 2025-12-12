@@ -2,9 +2,14 @@ import React from "react";
 import { notFound } from "next/navigation";
 import ProfileHeader from "@/components/profile/ProfileHeader";
 import AboutEditor from "@/components/profile/AboutEditor";
+import UIDCopyCard from "@/components/profile/UIDCopyCard";
 import { getUserByUsername, getUserByUID } from "@/lib/services/users";
 
-export default async function ProfilePage({ params }: { params: Promise<{ username: string }> }) {
+export default async function ProfilePage({
+  params,
+}: {
+  params: Promise<{ username: string }>;
+}) {
   const { username } = (await params) as { username: string };
   let user = await getUserByUsername(username);
   if (!user) {
@@ -20,7 +25,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
         username={user.username}
         displayName={user.displayName}
         photoURL={user.photoURL}
-        bio={typeof user.bio === 'string' ? user.bio : (user.bio || '')}
+        bio={typeof user.bio === "string" ? user.bio : user.bio || ""}
         createdAt={user.createdAt}
         // additional fields (used by header)
         lastSeen={user.lastSeen}
@@ -52,10 +57,15 @@ export default async function ProfilePage({ params }: { params: Promise<{ userna
               {/* owner-only inline editor placed here */}
               {/* AboutEditor is a client component */}
               <div className="mt-2">
-                <AboutEditor uid={user.uid} bio={typeof user.bio === 'string' ? user.bio : ''} />
+                <AboutEditor
+                  uid={user.uid}
+                  bio={typeof user.bio === "string" ? user.bio : ""}
+                />
               </div>
             </div>
           </div>
+
+          <UIDCopyCard uid={user.uid} />
 
           <div className="card">
             <div className="card-body">

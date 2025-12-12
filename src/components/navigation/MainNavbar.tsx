@@ -249,6 +249,36 @@ export default function MainNavbar() {
                   >
                     Suggestions
                   </NavDropdown.Item>
+                  <NavDropdown.Divider />
+                  <NavDropdown.Header>Phasmo Tourney 5</NavDropdown.Header>
+                  <NavDropdown.Item
+                    as={InlineLink}
+                    href="/admin/phasmoTourney5/manageplayers"
+                    onClick={handleNavItemClick}
+                  >
+                    Manage players
+                  </NavDropdown.Item>
+                  <NavDropdown.Item
+                    as={InlineLink}
+                    href="/admin/phasmoTourney5/managevotesessions"
+                    onClick={handleNavItemClick}
+                  >
+                    Manage vote sessions
+                  </NavDropdown.Item>
+                  <NavDropdown.Item
+                    as={InlineLink}
+                    href="/admin/phasmoTourney5/managerounds/round1"
+                    onClick={handleNavItemClick}
+                  >
+                    Round 1: Manage runs
+                  </NavDropdown.Item>
+                  <NavDropdown.Item
+                    as={InlineLink}
+                    href="/admin/phasmoTourney5/managerounds/round2"
+                    onClick={handleNavItemClick}
+                  >
+                    Round 2: Money round
+                  </NavDropdown.Item>
                 </NavDropdown>
               )}
 
@@ -380,7 +410,7 @@ export default function MainNavbar() {
               >
                 <NavDropdown.Item
                   as={InlineLink}
-                  href="/todolist"
+                  href="/notifications"
                   onClick={handleNavItemClick}
                 >
                   To-Do List
