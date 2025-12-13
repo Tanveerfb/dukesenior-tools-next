@@ -1,5 +1,6 @@
 "use client";
 import { Container, Alert } from "react-bootstrap";
+import RoundSettingsViewer from "../../../../components/tourney/RoundSettingsViewer";
 
 export default function Tourney5RulesSettingsPage() {
   return (
@@ -7,7 +8,8 @@ export default function Tourney5RulesSettingsPage() {
       <h1 className="h4 fw-semibold mb-3">
         Phasmo Tourney 5 — Rules & Settings
       </h1>
-      <Alert variant="info">TODO: Publish rules and game settings.</Alert>
+      <Alert variant="info">Rules TBD. Game settings per round below.</Alert>
+      <RoundSettingsViewer initialRoundId="round1" />
     </Container>
   );
 }

@@ -12,6 +12,7 @@ import {
 } from "react-bootstrap";
 import { useAuth } from "@/hooks/useAuth";
 
+import GameSettingsAdminEditor from "../../../../../components/tourney/GameSettingsAdminEditor";
 interface Player {
   id: string;
   name: string;
@@ -186,6 +187,11 @@ export default function Round1ManageRunsPage() {
           </Form>
         </Card.Body>
       </Card>
+
+      <section className="mb-4">
+        <h2 className="h5">Round Settings</h2>
+        <GameSettingsAdminEditor roundId="round1" />
+      </section>
 
       <Card className="border-0 shadow-sm mb-4">
         <Card.Body>

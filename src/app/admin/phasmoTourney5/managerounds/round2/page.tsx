@@ -11,6 +11,7 @@ import {
   Table,
 } from "react-bootstrap";
 import { useAuth } from "@/hooks/useAuth";
+import GameSettingsAdminEditor from "../../../../../components/tourney/GameSettingsAdminEditor";
 
 interface Player {
   id: string;
@@ -208,9 +209,7 @@ export default function Round2ManageMoneyPage() {
               ))}
               {sortedResults.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="text-muted">
-                    No results yet.
-                  </td>
+                  <td colSpan={6} className="text-muted">No results yet.</td>
                 </tr>
               )}
             </tbody>
@@ -221,6 +220,11 @@ export default function Round2ManageMoneyPage() {
           </Alert>
         </Card.Body>
       </Card>
+
+      <section className="mb-4">
+        <h2 className="h5">Round Settings</h2>
+        <GameSettingsAdminEditor roundId="round2" />
+      </section>
     </Container>
   );
 }

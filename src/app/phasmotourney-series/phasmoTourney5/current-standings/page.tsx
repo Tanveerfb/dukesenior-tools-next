@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Container, Alert, Button, Modal, Table } from "react-bootstrap";
+import RoundSettingsViewer from "../../../../components/tourney/RoundSettingsViewer";
 
 export default function Tourney5CurrentStandingsPage() {
   const [showR1, setShowR1] = useState(false);
@@ -10,6 +11,7 @@ export default function Tourney5CurrentStandingsPage() {
         Phasmo Tourney 5 — Current Standings
       </h1>
       <Alert variant="info">TODO: Display current standings.</Alert>
+      <RoundSettingsViewer initialRoundId="round1" />
       <div className="d-flex justify-content-end mb-3">
         <Button variant="outline-primary" onClick={() => setShowR1(true)}>
           Show Round 1 Results
