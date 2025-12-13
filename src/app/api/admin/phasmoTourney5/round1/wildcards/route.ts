@@ -1,12 +1,9 @@
 import { NextResponse } from "next/server";
-import { promises as fs } from "fs";
-import path from "path";
+import { db } from "@/lib/firebase/client";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 
-const FILE = path.join(
-  process.cwd(),
-  "data",
-  "phasmoTourney5Round1Wildcards.json"
-);
+const COLLECTION = "Phasmophobia Tourney#5 Round1 Wildcards";
+const DOC_ID = "Choices";
 
 function randomChoice() {
   const items = [
@@ -27,18 +24,20 @@ function randomChoice() {
 }
 
 async function ensureWildcards() {
-  try {
-    const buf = await fs.readFile(FILE, "utf-8");
-    const json = JSON.parse(buf);
-    if (Array.isArray(json) && json.length >= 8) return json.slice(0, 8);
-  } catch (e: any) {
-    if (e?.code !== "ENOENT") throw e;
-  }
+  const ref = doc(db, COLLECTION, DOC_ID);
+  const snap = await getDoc(ref);
+  const existing: string[] = Array.isArray((snap.data() as any)?.Values)
+    ? ((snap.data() as any).Values as string[])
+    : [];
+  if (existing.length >= 8) return existing.slice(0, 8);
   const set = new Set<string>();
   while (set.size < 8) set.add(randomChoice());
   const arr = Array.from(set);
-  await fs.mkdir(path.dirname(FILE), { recursive: true });
-  await fs.writeFile(FILE, JSON.stringify(arr, null, 2), "utf-8");
+  await setDoc(
+    ref,
+    { Values: arr, UpdatedAt: serverTimestamp() },
+    { merge: true }
+  );
   return arr;
 }
 
@@ -57,13 +56,14 @@ export async function PUT(req: Request) {
       );
     }
     const cleaned = body.map((x) => String(x)).filter((x) => x.trim() !== "");
-    await fs.mkdir(path.dirname(FILE), { recursive: true });
-    await fs.writeFile(
-      FILE,
-      JSON.stringify(cleaned.slice(0, 32), null, 2),
-      "utf-8"
+    const values = cleaned.slice(0, 32);
+    const ref = doc(db, COLLECTION, DOC_ID);
+    await setDoc(
+      ref,
+      { Values: values, UpdatedAt: serverTimestamp() },
+      { merge: true }
     );
-    return NextResponse.json(cleaned.slice(0, 32));
+    return NextResponse.json(values);
   } catch (e: any) {
     return NextResponse.json(
       { error: e?.message || "Failed to save" },

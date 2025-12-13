@@ -168,7 +168,14 @@ export default function ManagePlayersPage() {
           status: form.status,
         }),
       });
-      if (!res.ok) throw new Error(`Failed to add player: ${res.status}`);
+      if (!res.ok) {
+        let msg = `Failed to add player: ${res.status}`;
+        try {
+          const err = await res.json();
+          if (err?.error) msg = err.error;
+        } catch {}
+        throw new Error(msg);
+      }
       const created: Player = await res.json();
       setPlayers((prev) => [created, ...prev]);
       setForm({
@@ -480,6 +487,34 @@ export default function ManagePlayersPage() {
                         }}
                       >
                         Edit
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline-danger"
+                        className="ms-2"
+                        onClick={async () => {
+                          const confirmed = window.confirm(
+                            `Delete player "${p.name}"? This can be undone only by re-adding.`
+                          );
+                          if (!confirmed) return;
+                          try {
+                            const res = await fetch(
+                              `/api/admin/phasmoTourney5/players/${p.id}`,
+                              { method: "DELETE" }
+                            );
+                            if (!res.ok)
+                              throw new Error(
+                                `Failed to delete player: ${res.status}`
+                              );
+                            setPlayers((prev) =>
+                              prev.filter((x) => x.id !== p.id)
+                            );
+                          } catch (e: any) {
+                            setError(e?.message || "Failed to delete player");
+                          }
+                        }}
+                      >
+                        Delete
                       </Button>
                     </td>
                   </tr>

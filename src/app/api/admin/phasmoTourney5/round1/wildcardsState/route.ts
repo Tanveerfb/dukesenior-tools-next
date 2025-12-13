@@ -1,29 +1,33 @@
 import { NextRequest, NextResponse } from "next/server";
-import { promises as fs } from "fs";
-import path from "path";
+import { db } from "@/lib/firebase/client";
+import {
+  doc,
+  getDoc,
+  setDoc,
+  deleteDoc,
+  serverTimestamp,
+} from "firebase/firestore";
 
 type WildcardStateItem = { name: string; used: boolean };
 
-const baseDir = path.join(process.cwd(), "data", "phasmoTourney5");
-const stateFile = path.join(baseDir, "round1WildcardsState.json");
-
-async function ensureDir() {
-  await fs.mkdir(baseDir, { recursive: true });
-}
+const COLLECTION = "Phasmophobia Tourney#5 Round1 WildcardsState";
+const DOC_ID = "State";
 
 export async function GET() {
   try {
-    await ensureDir();
-    try {
-      const raw = await fs.readFile(stateFile, "utf-8");
-      const json = JSON.parse(raw) as WildcardStateItem[];
-      return NextResponse.json(json, { status: 200 });
-    } catch {
-      return NextResponse.json([], { status: 200 });
-    }
-  } catch (e) {
+    const ref = doc(db, COLLECTION, DOC_ID);
+    const snap = await getDoc(ref);
+    const items = Array.isArray((snap.data() as any)?.Items)
+      ? ((snap.data() as any).Items as { Name: string; Used: boolean }[])
+      : [];
+    const normalized: WildcardStateItem[] = items.map((i) => ({
+      name: i.Name,
+      used: Boolean(i.Used),
+    }));
+    return NextResponse.json(normalized, { status: 200 });
+  } catch (e: any) {
     return NextResponse.json(
-      { error: "Failed to read wildcard state" },
+      { error: e?.message || "Failed to read wildcard state" },
       { status: 500 }
     );
   }
@@ -35,12 +39,20 @@ export async function PUT(req: NextRequest) {
     if (!Array.isArray(body)) {
       return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
     }
-    await ensureDir();
-    await fs.writeFile(stateFile, JSON.stringify(body, null, 2), "utf-8");
+    const ref = doc(db, COLLECTION, DOC_ID);
+    const items = body.map((b) => ({
+      Name: String(b.name),
+      Used: Boolean(b.used),
+    }));
+    await setDoc(
+      ref,
+      { Items: items, UpdatedAt: serverTimestamp() },
+      { merge: true }
+    );
     return NextResponse.json(body, { status: 200 });
-  } catch (e) {
+  } catch (e: any) {
     return NextResponse.json(
-      { error: "Failed to save wildcard state" },
+      { error: e?.message || "Failed to save wildcard state" },
       { status: 500 }
     );
   }
@@ -48,14 +60,12 @@ export async function PUT(req: NextRequest) {
 
 export async function DELETE() {
   try {
-    await ensureDir();
-    try {
-      await fs.unlink(stateFile);
-    } catch {}
+    const ref = doc(db, COLLECTION, DOC_ID);
+    await deleteDoc(ref);
     return NextResponse.json({ ok: true }, { status: 200 });
-  } catch (e) {
+  } catch (e: any) {
     return NextResponse.json(
-      { error: "Failed to reset wildcard state" },
+      { error: e?.message || "Failed to reset wildcard state" },
       { status: 500 }
     );
   }

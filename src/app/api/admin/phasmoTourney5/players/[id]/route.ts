@@ -1,29 +1,8 @@
 import { NextResponse } from "next/server";
-import { promises as fs } from "fs";
-import path from "path";
+import { db } from "@/lib/firebase/client";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 
-const DATA_PATH = path.join(
-  process.cwd(),
-  "data",
-  "phasmoTourney5Players.json"
-);
-
-async function readPlayers() {
-  try {
-    const buf = await fs.readFile(DATA_PATH, "utf-8");
-    const json = JSON.parse(buf);
-    return Array.isArray(json) ? json : [];
-  } catch (e: any) {
-    if (e?.code === "ENOENT") return [];
-    throw e;
-  }
-}
-
-async function writePlayers(players: any[]) {
-  const dir = path.dirname(DATA_PATH);
-  await fs.mkdir(dir, { recursive: true });
-  await fs.writeFile(DATA_PATH, JSON.stringify(players, null, 2), "utf-8");
-}
+const COLLECTION = "Phasmophobia Tourney#5 Players";
 
 export async function PATCH(
   req: Request,
@@ -32,72 +11,102 @@ export async function PATCH(
   const { id: playerId } = await params;
   const body = await req.json();
 
-  const players = await readPlayers();
-  const playerIndex = players.findIndex((p: any) => p.id === playerId);
-
-  if (playerIndex === -1) {
-    return NextResponse.json({ error: "Player not found" }, { status: 404 });
-  }
-
-  const player = players[playerIndex];
-
-  // Update allowed fields
-  if ("name" in body) player.name = String(body.name);
-  if ("twitch" in body) player.twitch = String(body.twitch);
-  if ("youtube" in body)
-    player.youtube = body.youtube ? String(body.youtube) : undefined;
-  if ("discord" in body) player.discord = String(body.discord);
-  if ("prestige" in body) {
-    const prestigeAllowed = [
-      "I",
-      "II",
-      "III",
-      "IV",
-      "V",
-      "VI",
-      "VII",
-      "VIII",
-      "IX",
-      "X",
-      "XI",
-      "XII",
-      "XIII",
-      "XIV",
-      "XV",
-      "XVI",
-      "XVII",
-      "XVIII",
-      "XIX",
-      "XX",
-    ];
-    if (!prestigeAllowed.includes(body.prestige)) {
-      return NextResponse.json({ error: "Invalid prestige" }, { status: 400 });
+  try {
+    const ref = doc(db, COLLECTION, playerId);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) {
+      return NextResponse.json({ error: "Player not found" }, { status: 404 });
     }
-    player.prestige = String(body.prestige);
-  }
-  if ("timezone" in body) player.timezone = String(body.timezone);
-  if ("uid" in body) player.uid = body.uid ? String(body.uid) : undefined;
-  if ("auditionDone" in body) player.auditionDone = body.auditionDone === true;
-  if ("immune" in body) player.immune = body.immune === true;
-  if ("status" in body) {
-    if (["Active", "Inactive", "Eliminated"].includes(body.status)) {
-      player.status = body.status;
+
+    const updates: any = {};
+    if ("name" in body) updates.Name = String(body.name);
+    if ("twitch" in body) updates.Twitch = String(body.twitch);
+    if ("youtube" in body)
+      updates.Youtube = body.youtube ? String(body.youtube) : "N/A";
+    if ("discord" in body) updates.Discord = String(body.discord);
+    if ("prestige" in body) {
+      const prestigeAllowed = [
+        "I",
+        "II",
+        "III",
+        "IV",
+        "V",
+        "VI",
+        "VII",
+        "VIII",
+        "IX",
+        "X",
+        "XI",
+        "XII",
+        "XIII",
+        "XIV",
+        "XV",
+        "XVI",
+        "XVII",
+        "XVIII",
+        "XIX",
+        "XX",
+      ];
+      if (!prestigeAllowed.includes(body.prestige)) {
+        return NextResponse.json(
+          { error: "Invalid prestige" },
+          { status: 400 }
+        );
+      }
+      updates.Prestige = String(body.prestige);
     }
+    if ("timezone" in body) updates.Timezone = String(body.timezone);
+    if ("uid" in body) updates.UID = body.uid ? String(body.uid) : "N/A";
+    if ("auditionDone" in body)
+      updates.AuditionDone = body.auditionDone === true;
+    if ("immune" in body) updates.Immune = body.immune === true;
+    if ("status" in body) {
+      if (["Active", "Inactive", "Eliminated"].includes(body.status)) {
+        updates.Status = body.status;
+      }
+    }
+
+    await setDoc(ref, updates, { merge: true });
+    const updated = await getDoc(ref);
+    const data = updated.data() as any;
+    return NextResponse.json({
+      id: playerId,
+      name: data.Name,
+      twitch: data.Twitch,
+      youtube: data.Youtube,
+      discord: data.Discord,
+      prestige: data.Prestige,
+      timezone: data.Timezone,
+      uid: data.UID,
+      auditionDone: Boolean(data.AuditionDone),
+      immune: Boolean(data.Immune),
+      status: data.Status,
+    });
+  } catch (e: any) {
+    return NextResponse.json(
+      { error: e?.message || "Failed to update player" },
+      { status: 500 }
+    );
   }
-  if ("money" in body && typeof body.money === "number")
-    player.money = body.money;
-  if ("currentTeamMember" in body)
-    player.currentTeamMember = body.currentTeamMember
-      ? String(body.currentTeamMember)
-      : "";
-  if ("pastTeamMembers" in body && Array.isArray(body.pastTeamMembers))
-    player.pastTeamMembers = body.pastTeamMembers.map(String);
-  if ("TeamNumber" in body)
-    player.TeamNumber =
-      typeof body.TeamNumber === "number" ? body.TeamNumber : null;
+}
 
-  players[playerIndex] = player;
-  await writePlayers(players);
-
-  return NextResponse.json(player);
+export async function DELETE(
+  _req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id: playerId } = await params;
+  try {
+    const ref = doc(db, COLLECTION, playerId);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) {
+      return NextResponse.json({ error: "Player not found" }, { status: 404 });
+    }
+    await setDoc(ref, { Deleted: true }, { merge: true });
+    return NextResponse.json({ ok: true });
+  } catch (e: any) {
+    return NextResponse.json(
+      { error: e?.message || "Failed to delete player" },
+      { status: 500 }
+    );
+  }
 }

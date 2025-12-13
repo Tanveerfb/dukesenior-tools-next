@@ -5,7 +5,16 @@ import { getFirestore } from "firebase-admin/firestore";
 // Uses applicationDefault credentials (set GOOGLE_APPLICATION_CREDENTIALS) or fallback no-op if missing.
 if (!getApps().length) {
   try {
-    initializeApp({ credential: applicationDefault() });
+    // Prefer ADC if available, otherwise fall back to explicit project id
+    const cred = applicationDefault();
+    const projectId =
+      process.env.FIREBASE_PROJECT_ID ||
+      process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+    if (projectId) {
+      initializeApp({ credential: cred, projectId });
+    } else {
+      initializeApp({ credential: cred });
+    }
   } catch {
     // ignore init error in local without creds
   }
