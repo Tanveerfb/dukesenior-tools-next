@@ -17,15 +17,20 @@ type Props = {
   initialRoundId?: (typeof ROUND_IDS)[number];
 };
 
-export default function RoundSettingsViewer({ initialRoundId = "round1" }: Props) {
-  const [roundId, setRoundId] = useState<(typeof ROUND_IDS)[number]>(initialRoundId);
+export default function RoundSettingsViewer({
+  initialRoundId = "round1",
+}: Props) {
+  const [roundId, setRoundId] =
+    useState<(typeof ROUND_IDS)[number]>(initialRoundId);
   return (
     <Card className="mb-3">
       <Card.Header className="d-flex align-items-center justify-content-between">
         <strong>Game Settings</strong>
         <Form.Select
           value={roundId}
-          onChange={(e) => setRoundId(e.target.value as (typeof ROUND_IDS)[number])}
+          onChange={(e) =>
+            setRoundId(e.target.value as (typeof ROUND_IDS)[number])
+          }
           style={{ maxWidth: 180 }}
         >
           {ROUND_IDS.map((r) => (

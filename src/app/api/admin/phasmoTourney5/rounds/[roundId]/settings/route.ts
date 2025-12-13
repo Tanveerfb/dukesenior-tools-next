@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { defaultGameSettings, type GameSettings } from "../../../../../../../types/gameSettings";
+import {
+  defaultGameSettings,
+  type GameSettings,
+} from "../../../../../../../types/gameSettings";
 import { promises as fs } from "fs";
 import path from "path";
 
@@ -13,7 +16,10 @@ function filePath(roundId: string) {
   return path.join(baseDir, `${roundId}.json`);
 }
 
-export async function GET(req: NextRequest, { params }: { params: Promise<{ roundId: string }> }) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ roundId: string }> }
+) {
   try {
     const { roundId } = await params;
     await ensureDir();
@@ -33,11 +39,17 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ roun
       return NextResponse.json(fallback, { status: 200 });
     }
   } catch (e) {
-    return NextResponse.json({ error: "Failed to read settings" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to read settings" },
+      { status: 500 }
+    );
   }
 }
 
-export async function PUT(req: NextRequest, { params }: { params: Promise<{ roundId: string }> }) {
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: Promise<{ roundId: string }> }
+) {
   try {
     const { roundId } = await params;
     const body = await req.json();
@@ -57,7 +69,10 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ roun
       typeof settings.contract.setupTimeSeconds === "number";
 
     if (!valid) {
-      return NextResponse.json({ error: "Invalid GameSettings payload" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid GameSettings payload" },
+        { status: 400 }
+      );
     }
 
     await ensureDir();
@@ -73,6 +88,9 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ roun
     await fs.writeFile(fp, JSON.stringify(doc, null, 2), "utf-8");
     return NextResponse.json(doc, { status: 200 });
   } catch (e) {
-    return NextResponse.json({ error: "Failed to save settings" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to save settings" },
+      { status: 500 }
+    );
   }
 }

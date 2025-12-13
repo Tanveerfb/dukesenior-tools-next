@@ -209,7 +209,9 @@ export default function Round2ManageMoneyPage() {
               ))}
               {sortedResults.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="text-muted">No results yet.</td>
+                  <td colSpan={6} className="text-muted">
+                    No results yet.
+                  </td>
                 </tr>
               )}
             </tbody>

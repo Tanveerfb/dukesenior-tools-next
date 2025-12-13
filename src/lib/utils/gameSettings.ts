@@ -10,14 +10,16 @@ export const CURSED_POSSESSIONS: CursedPossession[] = [
   "Voodoo Doll",
 ];
 
-export function formatGameSettings(settings: GameSettings): Record<string, string | number> {
+export function formatGameSettings(
+  settings: GameSettings
+): Record<string, string | number> {
   return {
     "Starting sanity": settings.player.startingSanity,
     "Sanity Pill restoration (%)": settings.player.sanityPillRestorationPercent,
     "Sanity drain speed (%)": settings.player.sanityDrainSpeedPercent,
-    "Sprinting": settings.player.sprinting,
+    Sprinting: settings.player.sprinting,
     "Player speed (%)": settings.player.playerSpeedPercent,
-    "Flashlights": settings.player.flashlights,
+    Flashlights: settings.player.flashlights,
     "Lose items and consumables": settings.player.loseItemsAndConsumables,
     "Ghost speed (%)": settings.ghost.ghostSpeedPercent,
     "Roaming frequency": settings.ghost.roamingFrequency,
@@ -31,7 +33,7 @@ export function formatGameSettings(settings: GameSettings): Record<string, strin
     "Fingerprint chance (%)": settings.ghost.fingerprintChancePercent,
     "Fingerprint duration (s)": settings.ghost.fingerprintDurationSeconds,
     "Setup time (s)": settings.contract.setupTimeSeconds,
-    "Weather": settings.contract.weather,
+    Weather: settings.contract.weather,
     "Doors starting open": settings.contract.doorsStartingOpen,
     "Number of hiding places": settings.contract.numberOfHidingPlaces,
     "Sanity monitor": settings.contract.sanityMonitor,
@@ -42,6 +44,8 @@ export function formatGameSettings(settings: GameSettings): Record<string, strin
   };
 }
 
-export function isValidCursedPossession(value: string): value is CursedPossession {
+export function isValidCursedPossession(
+  value: string
+): value is CursedPossession {
   return (CURSED_POSSESSIONS as string[]).includes(value);
 }
