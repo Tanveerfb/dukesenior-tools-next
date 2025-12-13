@@ -13,6 +13,12 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 
 import GameSettingsAdminEditor from "../../../../../components/tourney/GameSettingsAdminEditor";
+import {
+  computeRound5Marks,
+  tourney5ExportRun,
+} from "@/lib/services/phasmoTourney5";
+import EliminatorCard from "@/components/tourney/EliminatorCard";
+import ImmunityAssigner from "@/components/tourney/ImmunityAssigner";
 interface Player {
   id: string;
   name: string;
@@ -24,7 +30,12 @@ export default function Round1ManageRunsPage() {
   const officer = user?.displayName || user?.email || "Unknown";
   const [players, setPlayers] = useState<Player[]>([]);
   const [wildcards, setWildcards] = useState<string[]>([]);
+  const [wildcardState, setWildcardState] = useState<
+    { name: string; used: boolean }[]
+  >([]);
   const [editingWildcards, setEditingWildcards] = useState<string>("");
+  const [showWildcardEditor, setShowWildcardEditor] = useState<boolean>(false);
+  const [showRoundSettings, setShowRoundSettings] = useState<boolean>(false);
   const [form, setForm] = useState({
     playerId: "",
     ghostPicture: false,
@@ -62,6 +73,19 @@ export default function Round1ManageRunsPage() {
         setEditingWildcards(list.join("\n"));
       } catch {}
     })();
+    // Load wildcard usage state
+    (async () => {
+      try {
+        const res = await fetch(
+          "/api/admin/phasmoTourney5/round1/wildcardsState",
+          { cache: "no-cache" }
+        );
+        if (res.ok) {
+          const state = await res.json();
+          if (Array.isArray(state)) setWildcardState(state);
+        }
+      } catch {}
+    })();
   }, []);
 
   function resetForm() {
@@ -82,8 +106,37 @@ export default function Round1ManageRunsPage() {
 
   async function submitRun(e: React.FormEvent) {
     e.preventDefault();
-    // TODO: Persist run details for Round 1 and compute standings
-    alert("TODO: Submit Round 1 run details");
+    const marks = computeRound5Marks({
+      objective1: form.objective1,
+      objective2: form.objective2,
+      objective3: form.objective3,
+      ghostPicture: form.ghostPicture,
+      bonePicture: form.bonePicture,
+      survived: form.survived,
+      correctGhostType: form.correctGhostType,
+      perfectGame: form.perfectGame,
+    });
+    try {
+      const id = await tourney5ExportRun({
+        officer,
+        playerId: form.playerId,
+        notes: form.notes,
+        objective1: form.objective1,
+        objective2: form.objective2,
+        objective3: form.objective3,
+        ghostPicture: form.ghostPicture,
+        bonePicture: form.bonePicture,
+        cursedItemUse: form.cursedItemUse,
+        correctGhostType: form.correctGhostType,
+        survived: form.survived,
+        perfectGame: form.perfectGame,
+        marks,
+      });
+      alert(`Run recorded (id: ${id}).`);
+      resetForm();
+    } catch (e: any) {
+      alert(e?.message || "Failed to record run");
+    }
   }
 
   if (!admin) {
@@ -98,99 +151,173 @@ export default function Round1ManageRunsPage() {
     <Container className="py-4">
       <h1 className="h4 fw-semibold mb-3">Round 1 — Manage Runs (Admin)</h1>
 
-      <Card className="border-0 shadow-sm mb-4">
-        <Card.Body>
-          <Card.Title as="h2" className="h5 fw-semibold">
-            Round 1 Environment
-          </Card.Title>
-          <Alert variant="info" className="mt-2">
-            TODO: Configure map, settings, and score system for Round 1.
-          </Alert>
-        </Card.Body>
-      </Card>
+      {/* Removed initial TODO alert section */}
 
       <Card className="border-0 shadow-sm mb-4">
         <Card.Body>
-          <Card.Title as="h2" className="h5 fw-semibold">
-            Wildcard Choices
-          </Card.Title>
-          <Alert variant="secondary" className="mt-2">
-            Generated list below. You can edit the JSON later.
-          </Alert>
-          <Table responsive size="sm" className="mt-2">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Wildcard</th>
-              </tr>
-            </thead>
-            <tbody>
-              {wildcards.map((w, i) => (
-                <tr key={i}>
-                  <td>{i + 1}</td>
-                  <td>{w}</td>
-                </tr>
-              ))}
-              {wildcards.length === 0 && (
-                <tr>
-                  <td colSpan={2} className="text-muted">
-                    No wildcards found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </Table>
-          <Form
-            className="mt-3"
-            onSubmit={async (e) => {
-              e.preventDefault();
-              const lines = editingWildcards
-                .split(/\r?\n/)
-                .map((s) => s.trim())
-                .filter(Boolean);
-              try {
-                const res = await fetch(
-                  "/api/admin/phasmoTourney5/round1/wildcards",
-                  {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(lines),
-                  }
-                );
-                if (!res.ok) throw new Error(`Save failed: ${res.status}`);
-                const saved = await res.json();
-                setWildcards(saved);
-              } catch (e: any) {
-                alert(e?.message || "Failed to save wildcards");
-              }
-            }}
-          >
-            <Form.Label>Edit wildcards (one per line)</Form.Label>
-            <Form.Control
-              as="textarea"
-              rows={6}
-              value={editingWildcards}
-              onChange={(e) => setEditingWildcards(e.target.value)}
-            />
-            <div className="d-flex gap-2 mt-2">
-              <Button type="submit" variant="primary">
-                Save Wildcards
-              </Button>
+          <div className="d-flex align-items-center justify-content-between">
+            <Card.Title as="h2" className="h5 fw-semibold mb-0">
+              Wildcard Choices
+            </Card.Title>
+            <div className="d-flex gap-2">
               <Button
-                type="button"
-                variant="outline-secondary"
-                onClick={() => setEditingWildcards(wildcards.join("\n"))}
+                variant={showWildcardEditor ? "outline-secondary" : "secondary"}
+                onClick={() => setShowWildcardEditor((v) => !v)}
               >
-                Reset
+                {showWildcardEditor ? "Hide Editor" : "Edit Wildcards"}
               </Button>
             </div>
-          </Form>
+          </div>
+          <div className="mt-3">
+            <Row className="g-2">
+              {(wildcards.length ? wildcards : []).map((w) => {
+                const used =
+                  wildcardState.find((it) => it.name === w)?.used || false;
+                return (
+                  <Col key={w} xs={12} md={6} lg={4}>
+                    <Card className={`h-100 ${used ? "opacity-50" : ""}`}>
+                      <Card.Body className="d-flex align-items-center justify-content-between">
+                        <span>{w}</span>
+                        <Form.Check
+                          type="switch"
+                          id={`wc-${w}`}
+                          label={used ? "Used" : "Available"}
+                          checked={used}
+                          onChange={() => {
+                            setWildcardState((prev) => {
+                              const next = [...prev];
+                              const idx = next.findIndex((it) => it.name === w);
+                              const nextUsed = !used;
+                              if (idx >= 0)
+                                next[idx] = { name: w, used: nextUsed };
+                              else next.push({ name: w, used: nextUsed });
+                              return next;
+                            });
+                          }}
+                        />
+                      </Card.Body>
+                    </Card>
+                  </Col>
+                );
+              })}
+            </Row>
+            <div className="d-flex gap-2 mt-2">
+              <Button
+                variant="primary"
+                onClick={async () => {
+                  try {
+                    const payload = wildcards.map((name) => ({
+                      name,
+                      used:
+                        wildcardState.find((it) => it.name === name)?.used ||
+                        false,
+                    }));
+                    const res = await fetch(
+                      "/api/admin/phasmoTourney5/round1/wildcardsState",
+                      {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(payload),
+                      }
+                    );
+                    if (!res.ok) throw new Error("Failed to save state");
+                    const saved = await res.json();
+                    setWildcardState(saved);
+                  } catch (e: any) {
+                    alert(e?.message || "Failed to save wildcard state");
+                  }
+                }}
+              >
+                Save State
+              </Button>
+              <Button
+                variant="outline-danger"
+                onClick={async () => {
+                  if (
+                    !confirm(
+                      "Reset all wildcard cards? This will clear usage state."
+                    )
+                  )
+                    return;
+                  try {
+                    const res = await fetch(
+                      "/api/admin/phasmoTourney5/round1/wildcardsState",
+                      { method: "DELETE" }
+                    );
+                    if (!res.ok) throw new Error("Failed to reset state");
+                    setWildcardState([]);
+                  } catch (e: any) {
+                    alert(e?.message || "Failed to reset wildcard state");
+                  }
+                }}
+              >
+                Reset Cards
+              </Button>
+            </div>
+          </div>
+          {/* Inline editor is toggled via button */}
+          {showWildcardEditor && (
+            <Form
+              className="mt-3"
+              onSubmit={async (e) => {
+                e.preventDefault();
+                const lines = editingWildcards
+                  .split(/\r?\n/)
+                  .map((s) => s.trim())
+                  .filter(Boolean);
+                try {
+                  const res = await fetch(
+                    "/api/admin/phasmoTourney5/round1/wildcards",
+                    {
+                      method: "PUT",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify(lines),
+                    }
+                  );
+                  if (!res.ok) throw new Error(`Save failed: ${res.status}`);
+                  const saved = await res.json();
+                  setWildcards(saved);
+                } catch (e: any) {
+                  alert(e?.message || "Failed to save wildcards");
+                }
+              }}
+            >
+              <Form.Label>Edit wildcards (one per line)</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={6}
+                value={editingWildcards}
+                onChange={(e) => setEditingWildcards(e.target.value)}
+              />
+              <div className="d-flex gap-2 mt-2">
+                <Button type="submit" variant="primary">
+                  Save Wildcards
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline-secondary"
+                  onClick={() => setEditingWildcards(wildcards.join("\n"))}
+                >
+                  Reset
+                </Button>
+              </div>
+            </Form>
+          )}
+          {/* Removed duplicate inline editor; editor is now toggled above */}
         </Card.Body>
       </Card>
 
       <section className="mb-4">
-        <h2 className="h5">Round Settings</h2>
-        <GameSettingsAdminEditor roundId="round1" />
+        <div className="d-flex align-items-center justify-content-between">
+          <h2 className="h5 mb-0">Round Settings</h2>
+          <Button
+            variant={showRoundSettings ? "outline-secondary" : "secondary"}
+            onClick={() => setShowRoundSettings((v) => !v)}
+          >
+            {showRoundSettings ? "Hide" : "Show"}
+          </Button>
+        </div>
+        {showRoundSettings && <GameSettingsAdminEditor roundId="round1" />}
       </section>
 
       <Card className="border-0 shadow-sm mb-4">
@@ -284,15 +411,15 @@ export default function Round1ManageRunsPage() {
         </Card.Body>
       </Card>
 
-      <Card className="border-0 shadow-sm">
-        <Card.Body>
-          <Alert variant="light" className="mt-2">
-            Note: All recorded run details will appear on a public page
-            "Recorded run details" with filters by round and player. TODO: Build
-            that page.
-          </Alert>
-        </Card.Body>
-      </Card>
+      <section className="mt-4">
+        <EliminatorCard />
+      </section>
+
+      <section className="mt-4">
+        <ImmunityAssigner roundLabel="Round 1" />
+      </section>
+
+      {/* Removed bottom note alert */}
     </Container>
   );
 }

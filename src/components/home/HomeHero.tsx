@@ -14,24 +14,55 @@ const HomeHero = () => {
   const primaryHref = normalizeRoutePath(activeEvent.primaryRoute.path);
   const secondary = activeEvent.extraRoutes[0];
 
+  // Resolve special quick links for Tourney 5 when current
+  const tourney5Links: { title: string; href: string }[] = [];
+  if (activeEvent && activeEvent.eventTag === "PhasmoTourney5") {
+    // Map manifest entries to required quick links
+    const linkMap: { tag: string; title: string }[] = [
+      { tag: "Timeline", title: "Timeline" },
+      { tag: "Next", title: "What's Next?" },
+      { tag: "Videos", title: "Videos & Streams" },
+      { tag: "Rules", title: "Rules & Settings" },
+    ];
+    linkMap.forEach(({ tag, title }) => {
+      const route = activeEvent.routes.find((r) => r.tags.includes(tag));
+      if (route) {
+        tourney5Links.push({
+          title,
+          href: normalizeRoutePath(route.path),
+        });
+      }
+    });
+  }
+
   return (
-    <section className="bg-body-tertiary border-bottom">
+    <section
+      className="border-bottom"
+      style={{
+        background:
+          "linear-gradient(135deg, var(--bs-body-bg) 0%, rgba(13,110,253,.08) 50%, var(--bs-body-bg) 100%)",
+      }}
+    >
       <Container className="py-5">
         <Row className="align-items-center gy-4">
           <Col lg={7}>
             <Badge bg="primary" className="text-uppercase small fw-semibold">
               Now Live
             </Badge>
-            <Card className="border-0 mt-3">
+            <Card className="border-0 mt-3 bg-transparent">
               <Card.Body className="p-0">
-                <h1 className="h3 fw-semibold mb-2">
+                <h1 className="display-6 fw-semibold mb-2">
                   {activeEvent.displayName}
                 </h1>
-                <p className="text-muted mb-3">
-                  Brackets, recorded runs, and stats — all in one place.
+                <p className="text-muted mb-4">
+                  Brackets, recorded runs, settings, and streams — all in one
+                  place.
                 </p>
                 <Stack direction="horizontal" gap={3} className="flex-wrap">
-                  <Link href={primaryHref} className="btn btn-primary px-4">
+                  <Link
+                    href={primaryHref}
+                    className="btn btn-primary px-4 py-2"
+                  >
                     Open {activeEvent.displayName}
                   </Link>
                   {secondary && (
@@ -52,26 +83,40 @@ const HomeHero = () => {
                 <Card.Subtitle className="text-uppercase small text-muted mb-2">
                   Quick links
                 </Card.Subtitle>
-                <ul className="list-unstyled small mb-4">
-                  <li className="mb-1">
-                    <Link
-                      href={primaryHref}
-                      className="text-decoration-none fw-semibold"
-                    >
-                      {activeEvent.primaryRoute.title}
-                    </Link>
-                  </li>
-                  {activeEvent.extraRoutes.slice(0, 2).map((route) => (
-                    <li key={route.path} className="mb-1">
+                {tourney5Links.length > 0 ? (
+                  <Stack gap={2} className="mb-3">
+                    {tourney5Links.map((l) => (
                       <Link
-                        href={normalizeRoutePath(route.path)}
-                        className="text-decoration-none"
+                        key={l.href}
+                        href={l.href}
+                        className="btn btn-light text-start"
                       >
-                        {route.title}
+                        {l.title}
+                      </Link>
+                    ))}
+                  </Stack>
+                ) : (
+                  <ul className="list-unstyled small mb-4">
+                    <li className="mb-1">
+                      <Link
+                        href={primaryHref}
+                        className="text-decoration-none fw-semibold"
+                      >
+                        {activeEvent.primaryRoute.title}
                       </Link>
                     </li>
-                  ))}
-                </ul>
+                    {activeEvent.extraRoutes.slice(0, 2).map((route) => (
+                      <li key={route.path} className="mb-1">
+                        <Link
+                          href={normalizeRoutePath(route.path)}
+                          className="text-decoration-none"
+                        >
+                          {route.title}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                )}
                 <a
                   href="https://twitch.tv/DukeSenior"
                   target="_blank"

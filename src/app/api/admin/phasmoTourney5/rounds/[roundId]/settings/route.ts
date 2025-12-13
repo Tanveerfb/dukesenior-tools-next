@@ -68,6 +68,24 @@ export async function PUT(
       typeof settings.ghost.evidenceGiven !== "undefined" &&
       typeof settings.contract.setupTimeSeconds === "number";
 
+    // Optional: mapName, if present must be one of known maps
+    const allowedMaps = new Set([
+      "6 Tanglewood Drive",
+      "42 Edgefield Road",
+      "10 Ridgeview Court",
+      "Nell's Diner",
+      "13 Willow Street",
+      "Point Hope",
+      "Grafton Farmhouse",
+      "Bleasdale Farmhouse",
+    ]);
+    if (
+      settings?.contract?.mapName &&
+      !allowedMaps.has(String(settings.contract.mapName))
+    ) {
+      return NextResponse.json({ error: "Invalid mapName" }, { status: 400 });
+    }
+
     if (!valid) {
       return NextResponse.json(
         { error: "Invalid GameSettings payload" },

@@ -14,6 +14,11 @@ import {
 } from "react-bootstrap";
 import * as ct from "countries-and-timezones";
 import { formatNowInTimezone } from "@/lib/utils/time";
+import {
+  listTeams,
+  upsertTeam,
+  deleteTeam,
+} from "@/lib/services/phasmoTourney5";
 
 interface Player {
   id: string;
@@ -77,6 +82,7 @@ export default function ManagePlayersPage() {
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [liveTime, setLiveTime] = useState<{ [key: string]: string }>({});
   const timezones = useMemo(() => getTimezones(), []);
+  // Teams management moved to round-specific pages (Round 3 & 6)
 
   const [form, setForm] = useState<{
     name: string;
@@ -119,6 +125,8 @@ export default function ManagePlayersPage() {
     }
     if (admin) fetchPlayers();
   }, [admin]);
+
+  // Removed global teams fetching; teams are managed per-round
 
   // Live time updates every second
   useEffect(() => {
@@ -227,13 +235,7 @@ export default function ManagePlayersPage() {
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h1 className="h4 fw-semibold mb-0">Manage Players</h1>
         <Stack direction="horizontal" gap={2} className="mb-3">
-          <Button
-            as={Link as any}
-            href="/admin/phasmoTourney5/manageteams"
-            variant="outline-primary"
-          >
-            Manage Teams
-          </Button>
+          {/* Teams management is handled in Round 3 and Round 6 */}
           <Button
             as={Link as any}
             href="/admin/phasmoTourney5/manageeliminator"
@@ -679,6 +681,8 @@ export default function ManagePlayersPage() {
           </Button>
         </Modal.Footer>
       </Modal>
+
+      {/* Teams management removed; handled per-round */}
     </Container>
   );
 }

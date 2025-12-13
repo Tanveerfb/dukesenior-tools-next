@@ -56,12 +56,18 @@ export interface ContractSettings {
   fuseBoxAtStartOfContract: OnOff;
   fuseBoxVisibleOnMap: OnOff;
   cursedPossession: CursedPossession | "Random" | "None";
+  mapName?: string; // Optional map selection per round
+}
+
+export interface RoundMetaSettings {
+  scoreSystemAssigned?: boolean; // Admin can assign/unassign scoring rubric for round
 }
 
 export interface GameSettings {
   player: PlayerSettings;
   ghost: GhostSettings;
   contract: ContractSettings;
+  meta?: RoundMetaSettings;
 }
 
 export const defaultGameSettings: GameSettings = {
@@ -97,5 +103,9 @@ export const defaultGameSettings: GameSettings = {
     fuseBoxAtStartOfContract: "Off",
     fuseBoxVisibleOnMap: "Off",
     cursedPossession: "Random",
+    mapName: undefined,
+  },
+  meta: {
+    scoreSystemAssigned: false,
   },
 };

@@ -1,6 +1,15 @@
 "use client";
 import React, { useEffect, useMemo, useState } from "react";
-import { Form, Button, Row, Col, Card, Tabs, Tab } from "react-bootstrap";
+import {
+  Form,
+  Button,
+  Row,
+  Col,
+  Card,
+  Tabs,
+  Tab,
+  Table,
+} from "react-bootstrap";
 import type { GameSettings } from "../../types/gameSettings";
 import { defaultGameSettings } from "../../types/gameSettings";
 import { CURSED_POSSESSIONS } from "../../lib/utils/gameSettings";
@@ -94,6 +103,52 @@ export default function GameSettingsAdminEditor({ roundId }: Props) {
         ) : (
           <Row>
             <Col md={6}>
+              <Form.Group className="mb-3">
+                <Form.Label>Map</Form.Label>
+                <Form.Select
+                  value={settings.contract.mapName || ""}
+                  disabled={disabled}
+                  onChange={(e) =>
+                    update("contract", {
+                      ...settings.contract,
+                      mapName: e.target.value || undefined,
+                    })
+                  }
+                >
+                  <option value="">Select map…</option>
+                  {[
+                    "6 Tanglewood Drive",
+                    "42 Edgefield Road",
+                    "10 Ridgeview Court",
+                    "Nell's Diner",
+                    "13 Willow Street",
+                    "Point Hope",
+                    "Grafton Farmhouse",
+                    "Bleasdale Farmhouse",
+                  ].map((m) => (
+                    <option key={m} value={m}>
+                      {m}
+                    </option>
+                  ))}
+                </Form.Select>
+              </Form.Group>
+              <Form.Group className="mb-3">
+                <Form.Check
+                  type="switch"
+                  id="toggle-score-system"
+                  label="Assign score system to this round"
+                  disabled={disabled}
+                  checked={Boolean(settings.meta?.scoreSystemAssigned)}
+                  onChange={() =>
+                    update("meta", {
+                      ...(settings.meta || {}),
+                      scoreSystemAssigned: !Boolean(
+                        settings.meta?.scoreSystemAssigned
+                      ),
+                    })
+                  }
+                />
+              </Form.Group>
               <Tabs
                 defaultActiveKey="player"
                 id="admin-game-settings-tabs"
@@ -672,7 +727,64 @@ export default function GameSettingsAdminEditor({ roundId }: Props) {
               {message && <div className="mt-2 text-muted">{message}</div>}
             </Col>
             <Col md={6}>
-              <GameSettingsCard roundId={roundId} />
+              <GameSettingsCard roundId={roundId} hideScoring />
+              {Boolean(settings.meta?.scoreSystemAssigned) && (
+                <Card className="mt-3">
+                  <Card.Header>
+                    <strong>Scoring System</strong>
+                  </Card.Header>
+                  <Card.Body>
+                    <Table responsive size="sm">
+                      <thead>
+                        <tr>
+                          <th>Criterion</th>
+                          <th>Points</th>
+                          <th>Notes</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>Completed Objectives</td>
+                          <td>+2 each</td>
+                          <td>Max 3 → +6</td>
+                        </tr>
+                        <tr>
+                          <td>Ghost Picture</td>
+                          <td>+5</td>
+                          <td></td>
+                        </tr>
+                        <tr>
+                          <td>Bone Picture</td>
+                          <td>+3</td>
+                          <td></td>
+                        </tr>
+                        <tr>
+                          <td>Player Survival</td>
+                          <td>+3</td>
+                          <td></td>
+                        </tr>
+                        <tr>
+                          <td>Correct Ghost</td>
+                          <td>+3</td>
+                          <td></td>
+                        </tr>
+                        <tr>
+                          <td>Perfect Game</td>
+                          <td>+5</td>
+                          <td></td>
+                        </tr>
+                      </tbody>
+                      <tfoot>
+                        <tr>
+                          <td colSpan={3} className="text-muted">
+                            Max total: 25
+                          </td>
+                        </tr>
+                      </tfoot>
+                    </Table>
+                  </Card.Body>
+                </Card>
+              )}
             </Col>
           </Row>
         )}

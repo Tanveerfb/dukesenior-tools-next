@@ -265,20 +265,80 @@ export default function MainNavbar() {
                   >
                     Manage vote sessions
                   </NavDropdown.Item>
-                  <NavDropdown.Item
-                    as={InlineLink}
-                    href="/admin/phasmoTourney5/managerounds/round1"
-                    onClick={handleNavItemClick}
-                  >
-                    Round 1: Manage runs
-                  </NavDropdown.Item>
-                  <NavDropdown.Item
-                    as={InlineLink}
-                    href="/admin/phasmoTourney5/managerounds/round2"
-                    onClick={handleNavItemClick}
-                  >
-                    Round 2: Money round
-                  </NavDropdown.Item>
+                  <NavDropdown.Divider />
+                  <NavDropdown.ItemText className="px-3">
+                    <button
+                      type="button"
+                      className="dropdown-section-toggle w-100 text-start"
+                      onClick={(event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        setOpenSections((prev) => ({
+                          ...prev,
+                          adminManageRounds: !(prev.adminManageRounds ?? true),
+                        }));
+                      }}
+                      aria-expanded={
+                        openSections.adminManageRounds ?? true ? true : false
+                      }
+                    >
+                      <span>Manage Rounds</span>
+                      <FaChevronDown className="dropdown-section-toggle-icon" />
+                    </button>
+                  </NavDropdown.ItemText>
+                  {(openSections.adminManageRounds ?? true) && (
+                    <>
+                      <NavDropdown.Item
+                        as={InlineLink}
+                        href="/admin/phasmoTourney5/managerounds/round1"
+                        onClick={handleNavItemClick}
+                      >
+                        Round 1: Standard
+                      </NavDropdown.Item>
+                      <NavDropdown.Item
+                        as={InlineLink}
+                        href="/admin/phasmoTourney5/managerounds/round2"
+                        onClick={handleNavItemClick}
+                      >
+                        Round 2: Money round
+                      </NavDropdown.Item>
+                      <NavDropdown.Item
+                        as={InlineLink}
+                        href="/admin/phasmoTourney5/managerounds/round3"
+                        onClick={handleNavItemClick}
+                      >
+                        Round 3: Teams & Eliminator
+                      </NavDropdown.Item>
+                      <NavDropdown.Item
+                        as={InlineLink}
+                        href="/admin/phasmoTourney5/manage-twitch-chat-round"
+                        onClick={handleNavItemClick}
+                      >
+                        Round 4: Twitch Chat Round
+                      </NavDropdown.Item>
+                      <NavDropdown.Item
+                        as={InlineLink}
+                        href="/admin/phasmoTourney5/managerounds/round5"
+                        onClick={handleNavItemClick}
+                      >
+                        Round 5: Tourney 5 Special
+                      </NavDropdown.Item>
+                      <NavDropdown.Item
+                        as={InlineLink}
+                        href="/admin/phasmoTourney5/managerounds/round6"
+                        onClick={handleNavItemClick}
+                      >
+                        Round 6: Pick Your Friend
+                      </NavDropdown.Item>
+                      <NavDropdown.Item
+                        as={InlineLink}
+                        href="/admin/phasmoTourney5/managerounds/round7"
+                        onClick={handleNavItemClick}
+                      >
+                        Round 7: Finale
+                      </NavDropdown.Item>
+                    </>
+                  )}
                 </NavDropdown>
               )}
 

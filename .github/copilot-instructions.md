@@ -1,64 +1,64 @@
 # Copilot Project Instructions
 
-Concise, codebase-specific guidance so AI agents are productive immediately.
+Practical, codebase-specific guidance so AI agents are productive immediately.
 
-## 1) Architecture & Tech Stack
+## Architecture & Tech Stack
 
 - Framework: Next.js App Router (TypeScript) under `src/app/*`.
-- UI: React-Bootstrap imported once in `components/Providers.tsx`; project SCSS in `src/styles/global.scss` and brand helpers in `styles/brand-from-image.scss`.
-- Context: `components/ThemeProvider.tsx` (light/dark via `data-bs-theme`, font scaling via CSS var `--font-scale`) and `hooks/useAuth.tsx` (Firebase auth; client-only admin gating by allowlist).
-- Data: Firebase Firestore via service modules under `src/lib/services/*` (e.g., `phasmoTourney4.ts`); avoid direct Firestore calls inside components.
-- Tags: Static manifest `src/lib/content/tags.ts` + Firestore overrides via `/api/tags/*` produce a registry (metadata like color) and effective tags per route.
-- Navigation & Search: `components/navigation/MainNavbar.tsx` and `components/navigation/SearchModal.tsx` consume effective tags to build Events/Tools and search results.
+- UI: React-Bootstrap loaded once via `components/Providers.tsx`; global styles in `src/styles/global.scss` and brand helpers in `styles/brand-from-image.scss`.
+- State/Context: `components/ThemeProvider.tsx` controls light/dark via `data-bs-theme` and font scaling via CSS var `--font-scale`. Auth via `hooks/useAuth.tsx` (Firebase; client-only admin gating by allowlist).
+- Data/Services: Firestore accessed through modules in `src/lib/services/*` (e.g., `phasmoTourney4.ts`). Do not call Firestore directly in React components.
+- Tags System: Static manifest in `src/lib/content/tags.ts` merged with Firestore overrides via `/api/tags/*` to produce a tag registry (includes `color`) and effective tags per route.
+- Navigation & Search: `components/navigation/MainNavbar.tsx` and `components/navigation/SearchModal.tsx` consume effective tags to render Events/Tools and search results.
 
-## 2) Core Conventions & Patterns
+## Core Conventions
 
-- Tag-driven UI: Pages define `path`, `title`, `tags`. Overrides can MERGE or REPLACE (`mode` field). Detail pages (`[id]`) are excluded from Events dropdown.
-- Tournament grouping: Detect `PhasmoTourney\d+` → label `Tourney N`. Current vs Past based on `Current`/`Past` tags. Fallback regex on path if tag missing.
-- Route placeholders: Map `[id]`/`[param]` to safe sample values when linking globally (navbar/search) to avoid broken navigation.
-- Admin gating: Use `useAuth().admin` on client for admin pages; server-side endpoints must validate Firebase token.
-- Styling: Prefer Bootstrap utilities and SCSS variables; do not reintroduce bespoke navbar/mobile CSS.
-- Stats logic: Keep standings/derived metrics in services (e.g., average before slicing top N) to keep pages lean.
+- Tag-driven pages: Each page defines `path`, `title`, `tags`. Overrides can MERGE or REPLACE via `mode`. Dynamic detail routes like `[id]` are excluded from Events dropdown.
+- Tournament grouping: Detect `PhasmoTourney\d+` to label `Tourney N`. Use `Current`/`Past` tags to place in sections; fallback to path regex if missing.
+- Placeholder routing: Map `[id]`/`[param]` to safe sample values when linking globally (navbar/search) to prevent broken links.
+- Admin gating: Use `useAuth().admin` on client for admin pages; server endpoints must validate Firebase tokens.
+- Styling discipline: Prefer Bootstrap utilities and SCSS variables; do not add bespoke navbar/mobile CSS.
+- Stats placement: Compute standings/derived metrics in services (e.g., average before slicing top N) to keep pages lean.
 
-## 3) Tag Management (`/admin/tags`)
+## Tag Management (`/admin/tags`)
 
-- Fetch one route at a time from the static manifest via `/api/tags/route?path=...` (known inefficiency; batching is a future improvement).
-- Overrides: Store `tags` + `mode`; delete removes override. Registry CRUD manages tag metadata (`color`, `description`) used for badge styling.
-- New pages: Update `taggedManifest` or add an override so they surface in nav/search without redeploy.
+- Fetch: Use `/api/tags/route?path=...` to pull one route at a time from static manifest (inefficient by design; batching is future work).
+- Overrides: Store `tags` and `mode`; deletion removes override. Registry CRUD manages tag metadata (`color`, `description`) used for badge styles.
+- Surfacing new pages: Update `taggedManifest` or add an override so pages appear in nav/search without redeploy.
 
-## 4) Adding Features Safely
+## Feature Additions
 
 - New tournament: Add manifest entries for bracket, standings, recorded runs, stats with tags `PhasmoTourneyX`, role tags (`Bracket`, `Standings`, etc.), `Event`, and `Current`/`Past`.
-- New tool page: Tag with `Tool` plus up to two domain tags (e.g., `AI`, `ToDo`) so it appears in Tools.
-- Dynamic routes: Tag pages but ensure navbar/search filters out detail routes (`rundetails|details`).
-- Tag colors: Upsert registry entries with a `color` hex to style badges.
+- New tool page: Tag with `Tool` plus up to two domain tags (e.g., `AI`, `ToDo`) to appear in Tools.
+- Dynamic routes: Tag pages but ensure navbar/search filter out detail routes (`rundetails|details`).
+- Tag colors: Upsert registry entries with a hex `color` to style badges.
 
-## 5) Typical Data Flows
+## Data Flows
 
-- Navbar mount: Fetch `/api/tags/effective` → merge static + overrides → classify routes → render dropdown.
-- Search modal open: Parallel fetch effective + registry → local substring filter → show up to first 3 tags per result.
-- Tourney T4 submission: `tourney4ExportRun` writes a run; match helpers (e.g., `setMatchRunIDs`) compute winner/loser and update player stats via `processWinner/Loser/Tied`.
+- Navbar mount: Fetch `/api/tags/effective` → merge static + overrides → classify routes → render dropdowns.
+- Search open: Parallel fetch effective + registry → local substring filter → show up to first 3 tags per result.
+- Tourney T4 submission: `tourney4ExportRun` writes a run; helpers like `setMatchRunIDs` compute winner/loser and update player stats via `processWinner`/`processLoser`/`processTied`.
 
-## 6) Guardrails & Edge Cases
+## Guardrails
 
-- Do not navigate directly to sample `[id]` links in production; they are UX placeholders. Consider safe 404/redirect if visited.
-- Handle tag fetch failures: Navbar sets `loading=false` in `finally`; maintain this to avoid spinner lock.
+- Do not navigate directly to sample `[id]` links in production; they are UX placeholders. Consider safe 404/redirect if reached.
+- Handle tag fetch failures: Navbar sets `loading=false` in `finally`; preserve this to avoid spinner locks.
 - Respect font scaling: Multiply any custom sizing by `var(--font-scale,1)`.
-- Bootstrap import: Keep global Bootstrap CSS import only in `components/Providers.tsx`.
+- Bootstrap import policy: Keep global Bootstrap import only in `components/Providers.tsx`.
 
-## 7) Build, Run, Test
+## Build, Run, Test
 
-- Dev: `npm run dev` (standard Next.js). Build: `npm run build`.
-- Tests: Jest tests live in `tests/*` (e.g., `tests/phasmoTourney4.stats.test.ts`). Run with `npm test` if script present; otherwise add one before running.
-- Do not run `npm run build` or commit changes unless requested by the user.
+- Dev: `npm run dev` (Next.js). Build: `npm run build`.
+- Tests: Jest under `tests/*` (e.g., `tests/phasmoTourney4.stats.test.ts`). Use `npm test` if present; add scripts before running if missing.
+- Avoid `npm run build` or committing changes unless requested.
 
-## 8) Editing Guidelines
+## Editing Guidelines
 
-- Extend service layer for Firebase mutations and stats; keep components focused on presentation/orchestration.
-- Consolidate tag-driven logic in navigation or helpers; avoid scattering across pages.
-- Ensure responsive design with Bootstrap breakpoints and test in light/dark themes and font-scale range 0.8–1.6.
+- Extend service layer for Firebase mutations and stats; keep components focused on presentation.
+- Centralize tag logic in navigation/helpers; avoid scattering across pages.
+- Ensure responsive design with Bootstrap breakpoints; verify in light/dark themes and font-scale 0.8–1.6.
 
-## 9) Quick References
+## Quick References
 
 - Manifest: `src/lib/content/tags.ts`
 - Auth: `src/hooks/useAuth.tsx`

@@ -216,3 +216,63 @@ h6 {
 .tourney-hero .btn {
   backdrop-filter: blur(6px);
 }
+
+// Dark mode contrast fixes for outline buttons
+[data-bs-theme="dark"] .btn-outline-secondary {
+  color: #e6e6e6;
+  border-color: rgba(230, 230, 230, 0.55);
+}
+[data-bs-theme="dark"] .btn-outline-secondary:hover,
+[data-bs-theme="dark"] .btn-outline-secondary:focus {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.7);
+}
+[data-bs-theme="dark"] .btn-outline-secondary:active,
+[data-bs-theme="dark"] .btn-outline-secondary.active,
+[data-bs-theme="dark"] .btn-outline-secondary.show {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.85);
+}
+
+// Provide a consistent tertiary outline variant
+.btn-outline-tertiary {
+  color: $tertiary;
+  border-color: color.scale($tertiary, $lightness: -5%);
+}
+.btn-outline-tertiary:hover,
+.btn-outline-tertiary:focus {
+  color: color.scale($tertiary, $lightness: -15%);
+  background-color: rgba(
+    color.red($tertiary),
+    color.green($tertiary),
+    color.blue($tertiary),
+    0.1
+  );
+  border-color: color.scale($tertiary, $lightness: -12%);
+}
+.btn-outline-tertiary:active,
+.btn-outline-tertiary.active,
+.btn-outline-tertiary.show {
+  color: #fff;
+  background-color: $tertiary;
+  border-color: color.scale($tertiary, $lightness: -15%);
+}
+[data-bs-theme="dark"] .btn-outline-tertiary {
+  color: #e6e6e6;
+  border-color: rgba(230, 230, 230, 0.55);
+}
+[data-bs-theme="dark"] .btn-outline-tertiary:hover,
+[data-bs-theme="dark"] .btn-outline-tertiary:focus {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.7);
+}
+[data-bs-theme="dark"] .btn-outline-tertiary:active,
+[data-bs-theme="dark"] .btn-outline-tertiary.active,
+[data-bs-theme="dark"] .btn-outline-tertiary.show {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.85);
+}
