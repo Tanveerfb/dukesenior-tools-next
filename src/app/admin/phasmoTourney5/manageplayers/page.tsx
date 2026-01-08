@@ -14,11 +14,6 @@ import {
 } from "react-bootstrap";
 import * as ct from "countries-and-timezones";
 import { formatNowInTimezone } from "@/lib/utils/time";
-import {
-  listTeams,
-  upsertTeam,
-  deleteTeam,
-} from "@/lib/services/phasmoTourney5";
 
 interface Player {
   id: string;
@@ -64,7 +59,7 @@ function getTimezones(): string[] {
   if (tzs.length) return tzs.sort();
   // Fallback to Intl if package fails
   try {
-    // @ts-ignore
+    // @ts-expect-error - supportedValuesOf may not exist in older environments
     const vals = Intl.supportedValuesOf?.("timeZone");
     if (Array.isArray(vals) && vals.length) return vals;
   } catch {}

@@ -9,7 +9,7 @@ import SkipToContent from "../navigation/SkipToContent";
 import PageTransition from "../ui/PageTransition";
 
 export default function AppChrome({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
+  const _pathname = usePathname();
   const search = useSearchParams();
   const embed = search?.get("embed") === "1";
 

@@ -87,7 +87,7 @@ export default function TwitchPollResultsCard() {
         imageUrl = url;
       });
     }
-    const id = await addRound4TwitchPollRecord({
+    const _id = await addRound4TwitchPollRecord({
       officer,
       matchNumber,
       playerId: form.playerId,

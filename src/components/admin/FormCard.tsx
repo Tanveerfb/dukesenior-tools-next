@@ -16,10 +16,10 @@ interface FormCardProps {
 
 /**
  * FormCard - Reusable card component for admin forms
- * 
+ *
  * Provides a consistent styled card wrapper for forms with optional
  * submit button and collapsible functionality.
- * 
+ *
  * @example
  * ```tsx
  * <FormCard
@@ -40,8 +40,8 @@ export default function FormCard({
   submitLabel = "Submit",
   submitDisabled = false,
   footer,
-  collapsible = false,
-  defaultCollapsed = false,
+  collapsible: _collapsible = false,
+  defaultCollapsed: _defaultCollapsed = false,
 }: FormCardProps) {
   const content = (
     <>
@@ -69,9 +69,5 @@ export default function FormCard({
     </>
   );
 
-  return (
-    <Card className="border-0 shadow-sm mb-4">
-      {content}
-    </Card>
-  );
+  return <Card className="border-0 shadow-sm mb-4">{content}</Card>;
 }

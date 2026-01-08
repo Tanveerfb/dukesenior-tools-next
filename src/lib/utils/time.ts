@@ -14,7 +14,7 @@ export function formatNowInTimezone(timezone: string): string {
       second: "2-digit",
     });
     return formatter.format(now);
-  } catch (e) {
+  } catch (_e) {
     // Invalid timezone fallback
     return "N/A";
   }
@@ -39,7 +39,7 @@ export function formatNowInTimezoneWithDate(timezone: string): string {
       hour12: false,
     });
     return formatter.format(now);
-  } catch (e) {
+  } catch (_e) {
     return "N/A";
   }
 }

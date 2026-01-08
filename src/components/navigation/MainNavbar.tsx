@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   Badge,
@@ -14,12 +13,12 @@ import {
 } from "react-bootstrap";
 import {
   FaCalendarAlt,
-  FaChevronDown,
   FaChevronRight,
   FaFont,
   FaMoon,
   FaSearch,
   FaSun,
+  FaTools,
   FaUserCircle,
   FaShieldAlt,
   FaNewspaper,
@@ -158,7 +157,13 @@ export default function MainNavbar() {
     });
   }, [eventSections]);
 
-
+  const tools = useMemo(
+    () =>
+      effective
+        .filter((meta) => meta.effective.includes("Tool"))
+        .sort((a, b) => (a.title || a.path).localeCompare(b.title || b.path)),
+    [effective]
+  );
 
   const navbarStyle: React.CSSProperties =
     theme === "dark"
@@ -668,16 +673,15 @@ export default function MainNavbar() {
                       <div className="user-email">{user.email}</div>
                     </div>
                   </div>
-                  <Button
-                    variant="outline-primary"
-                    className="mobile-action-btn"
-                    as={InlineLink}
+                  <InlineLink
                     href={profileHref}
                     onClick={handleNavItemClick}
+                    className="btn btn-outline-primary mobile-action-btn"
+                    role="button"
                   >
                     <FaUserCircle className="me-2" />
                     View Profile
-                  </Button>
+                  </InlineLink>
                   <Button
                     variant="outline-danger"
                     className="mobile-action-btn"

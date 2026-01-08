@@ -140,10 +140,11 @@ h6 {
 // ============================================
 
 .modern-navbar {
-  backdrop-filter: blur(16px);
+  backdrop-filter: blur(32px);
   -webkit-backdrop-filter: blur(16px);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 1030;
+  position: sticky;
 
   .navbar-container {
     padding: calc(0.75rem * var(--font-scale, 1))

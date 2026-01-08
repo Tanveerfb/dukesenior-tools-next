@@ -10,7 +10,6 @@ import {
   Modal,
   Table,
 } from "react-bootstrap";
-import { taggedManifest } from "@/lib/content/tags";
 import type { EffectiveMeta } from "@/types/tags";
 import { useAuth } from "@/hooks/useAuth";
 

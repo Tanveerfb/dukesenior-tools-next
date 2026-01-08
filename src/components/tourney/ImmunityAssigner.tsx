@@ -33,7 +33,7 @@ export default function ImmunityAssigner({
             }))
         : [];
       setPlayers(list);
-    } catch (e) {
+    } catch (_e) {
       setMessage("Failed to load players");
     }
   }

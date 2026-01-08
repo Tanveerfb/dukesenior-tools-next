@@ -50,6 +50,7 @@ export default function VotingResults({ round }: { round: number }) {
   }
   useEffect(() => {
     load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [round]);
 
   async function persistReveal(sessionId: string) {

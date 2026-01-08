@@ -67,7 +67,7 @@ export default function BestOutOfThree(props: {
       alert("Select both players first");
       return;
     }
-    const rows = rowSelections.map((row, idx) => ({
+    const rows = rowSelections.map((row, _idx) => ({
       p1RunId: row.p1RunId,
       p2RunId: row.p2RunId,
       outcome:

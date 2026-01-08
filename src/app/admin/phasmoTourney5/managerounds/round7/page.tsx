@@ -122,6 +122,12 @@ export default function Round7AdminPage() {
     }
   }
 
+  const playerNameById = useMemo(() => {
+    const map: Record<string, string> = {};
+    players.forEach((p) => (map[p.id] = p.name));
+    return map;
+  }, [players]);
+
   if (!admin) {
     return (
       <Container className="py-4">
@@ -129,12 +135,6 @@ export default function Round7AdminPage() {
       </Container>
     );
   }
-
-  const playerNameById = useMemo(() => {
-    const map: Record<string, string> = {};
-    players.forEach((p) => (map[p.id] = p.name));
-    return map;
-  }, [players]);
 
   return (
     <Container className="py-4">

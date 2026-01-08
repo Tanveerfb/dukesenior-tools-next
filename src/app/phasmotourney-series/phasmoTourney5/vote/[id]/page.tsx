@@ -28,25 +28,10 @@ export default function VoteSessionPage() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [choice, setChoice] = useState<string>("");
   const [submitted, setSubmitted] = useState(false);
-  const [idToken, setIdToken] = useState<string | null>(null);
-
-  // Require login before using the page
-  if (!user) {
-    return (
-      <Container className="py-4">
-        <Alert variant="warning" className="mb-3">
-          Login required to vote.{" "}
-          <Link href="/login" className="alert-link">
-            Log in
-          </Link>
-        </Alert>
-      </Container>
-    );
-  }
 
   useEffect(() => {
     const id = params?.id as string;
-    if (!id) return;
+    if (!id || !user) return;
     (async () => {
       setLoading(true);
       setError(null);
@@ -66,7 +51,7 @@ export default function VoteSessionPage() {
         setLoading(false);
       }
     })();
-  }, [params?.id]);
+  }, [params?.id, user]);
 
   const active = useMemo(
     () => players.filter((p) => p.status === "Active"),
@@ -80,6 +65,20 @@ export default function VoteSessionPage() {
     () => (session?.type === "vote-out" ? nonImmuneActive : active),
     [session?.type, active, nonImmuneActive]
   );
+
+  // Require login before using the page
+  if (!user) {
+    return (
+      <Container className="py-4">
+        <Alert variant="warning" className="mb-3">
+          Login required to vote.{" "}
+          <Link href="/login" className="alert-link">
+            Log in
+          </Link>
+        </Alert>
+      </Container>
+    );
+  }
 
   async function submitVote() {
     if (!session) return;

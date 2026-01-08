@@ -193,7 +193,7 @@ export default function TeamsManager(props: {
                         teamForm.member1 === teamForm.member2
                       )
                         return;
-                      const id = await upsertTeam({
+                      const _id = await upsertTeam({
                         teamId: teamForm.teamId,
                         teamName: teamForm.teamName.trim(),
                         members: [teamForm.member1, teamForm.member2],

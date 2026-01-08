@@ -12,7 +12,6 @@ export interface VotingPanelProps {
 
 export default function VotingPanel({
   sessionId,
-  round,
   candidates,
   immunePlayerIds = [],
 }: VotingPanelProps) {

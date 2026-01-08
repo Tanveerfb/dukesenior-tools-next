@@ -9,20 +9,20 @@ interface Player {
 
 /**
  * useAdminPlayers - Custom hook for loading and managing player data
- * 
+ *
  * Fetches players from the API and provides loading/error states.
  * Can optionally filter out eliminated players.
- * 
+ *
  * @param filterEliminated - Whether to exclude eliminated players (default: true)
  * @returns Object containing players array, loading state, error state, and refetch function
- * 
+ *
  * @example
  * ```tsx
  * const { players, loading, error, refetch } = useAdminPlayers();
- * 
+ *
  * if (loading) return <Spinner />;
  * if (error) return <Alert variant="danger">{error}</Alert>;
- * 
+ *
  * return <PlayerSelector players={players} ... />;
  * ```
  */
@@ -41,7 +41,7 @@ export default function useAdminPlayers(filterEliminated: boolean = true) {
       }
       const json = await res.json();
       const playerList = Array.isArray(json) ? json : [];
-      
+
       setPlayers(
         filterEliminated
           ? playerList.filter((p: Player) => p.status !== "Eliminated")
@@ -57,6 +57,7 @@ export default function useAdminPlayers(filterEliminated: boolean = true) {
 
   useEffect(() => {
     fetchPlayers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterEliminated]);
 
   return {

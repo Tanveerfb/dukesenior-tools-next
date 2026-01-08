@@ -23,10 +23,18 @@ const eslintConfig = [
   // Project overrides: relax overly strict rules blocking builds
   {
     rules: {
-      '@typescript-eslint/no-explicit-any': 'off',
-  'react/no-unescaped-entities': 'off',
-  'prefer-const': 'off'
-    }
+      "@typescript-eslint/no-explicit-any": "off",
+      "react/no-unescaped-entities": "off",
+      "prefer-const": "off",
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
+    },
   },
 ];
 
