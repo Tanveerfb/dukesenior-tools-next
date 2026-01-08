@@ -15,11 +15,14 @@ import {
 import {
   FaCalendarAlt,
   FaChevronDown,
+  FaChevronRight,
   FaFont,
   FaMoon,
   FaSearch,
   FaSun,
   FaUserCircle,
+  FaShieldAlt,
+  FaNewspaper,
 } from "react-icons/fa";
 import { HiOutlineSparkles } from "react-icons/hi";
 import InlineLink from "@/components/ui/InlineLink";
@@ -161,12 +164,13 @@ export default function MainNavbar() {
     theme === "dark"
       ? {
           background:
-            "linear-gradient(110deg, rgba(45,20,66,0.95), rgba(24,58,42,0.9))",
+            "linear-gradient(135deg, rgba(30,20,50,0.98), rgba(20,35,35,0.96))",
+          borderBottom: "1px solid rgba(171, 47, 177, 0.2)",
         }
       : {
           background:
-            "linear-gradient(110deg, rgba(248,242,255,0.92), rgba(228,247,238,0.92))",
-          borderBottom: "1px solid rgba(0,0,0,0.08)",
+            "linear-gradient(135deg, rgba(255,252,255,0.95), rgba(240,250,245,0.95))",
+          borderBottom: "1px solid rgba(171, 47, 177, 0.15)",
         };
 
   const toggleSection = (sectionId: string) => {
@@ -199,34 +203,102 @@ export default function MainNavbar() {
         fixed="top"
         expanded={navExpanded}
         onToggle={(value) => setNavExpanded(Boolean(value))}
-        className="shadow-sm border-0 enhanced-navbar"
+        className="modern-navbar shadow-sm"
         style={navbarStyle}
       >
-        <Container fluid className="py-2 px-3">
+        <Container fluid className="navbar-container">
+          {/* Brand Section */}
           <Navbar.Brand
             as={InlineLink}
             href="/"
-            className="fw-bold d-flex align-items-center gap-2"
+            className="brand-link"
             onClick={handleNavItemClick}
           >
-            <HiOutlineSparkles size={24} />
-            <span>The Lair of Evil</span>
+            <HiOutlineSparkles className="brand-icon" />
+            <span className="brand-text">The Lair of Evil</span>
           </Navbar.Brand>
 
+          {/* Desktop Action Buttons */}
+          <div className="d-none d-lg-flex align-items-center gap-2 order-lg-3">
+            <Button
+              variant="link"
+              className="icon-btn search-btn"
+              onClick={openSearch}
+              aria-label="Search"
+            >
+              <FaSearch />
+            </Button>
+
+            <Button
+              variant="link"
+              className="icon-btn theme-btn"
+              onClick={toggleTheme}
+              aria-label={`Switch to ${
+                theme === "dark" ? "light" : "dark"
+              } theme`}
+            >
+              {theme === "dark" ? <FaSun /> : <FaMoon />}
+            </Button>
+
+            {user ? (
+              <NavDropdown
+                id="nav-user-desktop"
+                align="end"
+                title={
+                  <div className="user-avatar">
+                    <FaUserCircle />
+                  </div>
+                }
+                className="user-dropdown"
+              >
+                <div className="user-info">
+                  <div className="user-name">{user.displayName || "User"}</div>
+                  <div className="user-email">{user.email}</div>
+                </div>
+                <NavDropdown.Divider />
+                <NavDropdown.Item
+                  as={InlineLink}
+                  href={profileHref}
+                  onClick={handleNavItemClick}
+                >
+                  <FaUserCircle className="me-2" />
+                  Profile
+                </NavDropdown.Item>
+                <NavDropdown.Divider />
+                <NavDropdown.Item onClick={handleLogout}>
+                  Logout
+                </NavDropdown.Item>
+              </NavDropdown>
+            ) : (
+              <Button
+                variant="primary"
+                onClick={handleLogin}
+                className="login-btn"
+              >
+                Log in
+              </Button>
+            )}
+          </div>
+
+          {/* Mobile Toggle */}
           <Navbar.Toggle aria-controls="main-navbar" className="border-0" />
 
           <Navbar.Collapse id="main-navbar">
-            <Nav className="me-auto align-items-lg-center gap-2 mt-3 mt-lg-0">{admin && (
+            {/* Main Navigation */}
+            <Nav className="navbar-nav-main">
+              {/* Admin Dropdown - Only show if admin */}
+              {admin && (
                 <NavDropdown
                   id="nav-admin"
                   title={
-                    <span className="d-flex align-items-center gap-1">
-                      <FaUserCircle />
-                      <span className="d-none d-lg-inline">Admin</span>
-                    </span>
+                    <>
+                      <FaShieldAlt className="nav-icon" />
+                      <span>Admin</span>
+                    </>
                   }
+                  className="main-dropdown"
                 >
-                  <NavDropdown.Header>General</NavDropdown.Header>
+                  <div className="dropdown-header-custom">General</div>
                   <NavDropdown.Item
                     as={InlineLink}
                     href="/admin/cms"
@@ -242,7 +314,7 @@ export default function MainNavbar() {
                     Suggestions
                   </NavDropdown.Item>
                   <NavDropdown.Divider />
-                  <NavDropdown.Header>Phasmo Tourney 5</NavDropdown.Header>
+                  <div className="dropdown-header-custom">Phasmo Tourney 5</div>
                   <NavDropdown.Item
                     as={InlineLink}
                     href="/admin/phasmoTourney5/manageplayers"
@@ -258,124 +330,123 @@ export default function MainNavbar() {
                     Manage vote sessions
                   </NavDropdown.Item>
                   <NavDropdown.Divider />
-                  <NavDropdown.ItemText className="px-3">
+
+                  {/* Collapsible Rounds Section */}
+                  <div className="nested-section">
                     <button
                       type="button"
-                      className="dropdown-section-toggle w-100 text-start"
-                      onClick={(event) => {
-                        event.preventDefault();
-                        event.stopPropagation();
+                      className="section-toggle"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
                         setOpenSections((prev) => ({
                           ...prev,
                           adminManageRounds: !(prev.adminManageRounds ?? true),
                         }));
                       }}
-                      aria-expanded={
-                        openSections.adminManageRounds ?? true ? true : false
-                      }
+                      aria-expanded={openSections.adminManageRounds ?? true}
                     >
                       <span>Manage Rounds</span>
-                      <FaChevronDown className="dropdown-section-toggle-icon" />
+                      <FaChevronRight className="section-icon" />
                     </button>
-                  </NavDropdown.ItemText>
-                  {(openSections.adminManageRounds ?? true) && (
-                    <>
-                      <NavDropdown.Item
-                        as={InlineLink}
-                        href="/admin/phasmoTourney5/managerounds/round1"
-                        onClick={handleNavItemClick}
-                      >
-                        Round 1: Standard
-                      </NavDropdown.Item>
-                      <NavDropdown.Item
-                        as={InlineLink}
-                        href="/admin/phasmoTourney5/managerounds/round2"
-                        onClick={handleNavItemClick}
-                      >
-                        Round 2: Money round
-                      </NavDropdown.Item>
-                      <NavDropdown.Item
-                        as={InlineLink}
-                        href="/admin/phasmoTourney5/managerounds/round3"
-                        onClick={handleNavItemClick}
-                      >
-                        Round 3: Teams & Eliminator
-                      </NavDropdown.Item>
-                      <NavDropdown.Item
-                        as={InlineLink}
-                        href="/admin/phasmoTourney5/manage-twitch-chat-round"
-                        onClick={handleNavItemClick}
-                      >
-                        Round 4: Twitch Chat Round
-                      </NavDropdown.Item>
-                      <NavDropdown.Item
-                        as={InlineLink}
-                        href="/admin/phasmoTourney5/managerounds/round5"
-                        onClick={handleNavItemClick}
-                      >
-                        Round 5: Tourney 5 Special
-                      </NavDropdown.Item>
-                      <NavDropdown.Item
-                        as={InlineLink}
-                        href="/admin/phasmoTourney5/managerounds/round6"
-                        onClick={handleNavItemClick}
-                      >
-                        Round 6: Pick Your Friend
-                      </NavDropdown.Item>
-                      <NavDropdown.Item
-                        as={InlineLink}
-                        href="/admin/phasmoTourney5/managerounds/round7"
-                        onClick={handleNavItemClick}
-                      >
-                        Round 7: Finale
-                      </NavDropdown.Item>
-                    </>
-                  )}
+                    {(openSections.adminManageRounds ?? true) && (
+                      <div className="nested-items">
+                        <NavDropdown.Item
+                          as={InlineLink}
+                          href="/admin/phasmoTourney5/managerounds/round1"
+                          onClick={handleNavItemClick}
+                        >
+                          Round 1: Standard
+                        </NavDropdown.Item>
+                        <NavDropdown.Item
+                          as={InlineLink}
+                          href="/admin/phasmoTourney5/managerounds/round2"
+                          onClick={handleNavItemClick}
+                        >
+                          Round 2: Money round
+                        </NavDropdown.Item>
+                        <NavDropdown.Item
+                          as={InlineLink}
+                          href="/admin/phasmoTourney5/managerounds/round3"
+                          onClick={handleNavItemClick}
+                        >
+                          Round 3: Teams & Eliminator
+                        </NavDropdown.Item>
+                        <NavDropdown.Item
+                          as={InlineLink}
+                          href="/admin/phasmoTourney5/manage-twitch-chat-round"
+                          onClick={handleNavItemClick}
+                        >
+                          Round 4: Twitch Chat Round
+                        </NavDropdown.Item>
+                        <NavDropdown.Item
+                          as={InlineLink}
+                          href="/admin/phasmoTourney5/managerounds/round5"
+                          onClick={handleNavItemClick}
+                        >
+                          Round 5: Tourney 5 Special
+                        </NavDropdown.Item>
+                        <NavDropdown.Item
+                          as={InlineLink}
+                          href="/admin/phasmoTourney5/managerounds/round6"
+                          onClick={handleNavItemClick}
+                        >
+                          Round 6: Pick Your Friend
+                        </NavDropdown.Item>
+                        <NavDropdown.Item
+                          as={InlineLink}
+                          href="/admin/phasmoTourney5/managerounds/round7"
+                          onClick={handleNavItemClick}
+                        >
+                          Round 7: Finale
+                        </NavDropdown.Item>
+                      </div>
+                    )}
+                  </div>
                 </NavDropdown>
               )}
 
+              {/* Events Dropdown */}
               <NavDropdown
                 id="nav-events"
                 title={
-                  <span className="d-flex align-items-center gap-2">
-                    <FaCalendarAlt />
+                  <>
+                    <FaCalendarAlt className="nav-icon" />
                     <span>Events</span>
-                  </span>
+                  </>
                 }
-                className="mobile-optimized-dropdown"
+                className="main-dropdown events-dropdown"
               >
-                <NavDropdown.Header>Current Events</NavDropdown.Header>
+                <div className="dropdown-header-custom">Current Events</div>
                 {loading && (
-                  <NavDropdown.ItemText className="text-muted small px-3">
-                    <Spinner animation="border" size="sm" className="me-2" />
-                    Loading events…
-                  </NavDropdown.ItemText>
+                  <div className="dropdown-loading">
+                    <Spinner animation="border" size="sm" />
+                    <span>Loading events…</span>
+                  </div>
                 )}
                 {!loading && eventSections.current.length === 0 && (
-                  <NavDropdown.ItemText className="text-muted small px-3">
-                    No active events yet.
-                  </NavDropdown.ItemText>
+                  <div className="dropdown-empty">No active events yet.</div>
                 )}
                 {eventSections.current.map((section) => {
                   const sectionId = `current-${section.key}`;
                   const isOpen = openSections[sectionId] ?? true;
                   return (
-                    <div key={sectionId} className="dropdown-section">
+                    <div key={sectionId} className="nested-section">
                       <button
                         type="button"
-                        className="dropdown-section-toggle"
-                        onClick={(event) => {
-                          event.preventDefault();
-                          event.stopPropagation();
+                        className="section-toggle"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
                           toggleSection(sectionId);
                         }}
                         aria-expanded={isOpen}
                       >
                         <span>{section.key}</span>
-                        <FaChevronDown className="dropdown-section-toggle-icon" />
+                        <FaChevronRight className="section-icon" />
                       </button>
                       {isOpen && (
-                        <div className="dropdown-section-items">
+                        <div className="nested-items">
                           {section.routes.map(
                             ({ meta, label, href, tourTag }) => (
                               <NavDropdown.Item
@@ -383,11 +454,10 @@ export default function MainNavbar() {
                                 key={meta.path}
                                 href={href}
                                 onClick={handleNavItemClick}
-                                className="d-flex justify-content-between align-items-center gap-2"
                               >
                                 <span>{label}</span>
                                 {tourTag && (
-                                  <Badge bg="secondary" pill>
+                                  <Badge bg="primary" pill className="ms-auto">
                                     {tourTag.replace("PhasmoTourney", "T")}
                                   </Badge>
                                 )}
@@ -401,32 +471,30 @@ export default function MainNavbar() {
                 })}
 
                 <NavDropdown.Divider />
-                <NavDropdown.Header>Past Events</NavDropdown.Header>
+                <div className="dropdown-header-custom">Past Events</div>
                 {eventSections.past.length === 0 && (
-                  <NavDropdown.ItemText className="text-muted small px-3">
-                    No archived events yet.
-                  </NavDropdown.ItemText>
+                  <div className="dropdown-empty">No archived events yet.</div>
                 )}
                 {eventSections.past.map((section) => {
                   const sectionId = `past-${section.key}`;
                   const isOpen = openSections[sectionId] ?? false;
                   return (
-                    <div key={sectionId} className="dropdown-section">
+                    <div key={sectionId} className="nested-section">
                       <button
                         type="button"
-                        className="dropdown-section-toggle"
-                        onClick={(event) => {
-                          event.preventDefault();
-                          event.stopPropagation();
+                        className="section-toggle"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
                           toggleSection(sectionId);
                         }}
                         aria-expanded={isOpen}
                       >
                         <span>{section.key}</span>
-                        <FaChevronDown className="dropdown-section-toggle-icon" />
+                        <FaChevronRight className="section-icon" />
                       </button>
                       {isOpen && (
-                        <div className="dropdown-section-items">
+                        <div className="nested-items">
                           {section.routes.map(
                             ({ meta, label, href, tourTag }) => (
                               <NavDropdown.Item
@@ -434,11 +502,14 @@ export default function MainNavbar() {
                                 key={meta.path}
                                 href={href}
                                 onClick={handleNavItemClick}
-                                className="d-flex justify-content-between align-items-center gap-2"
                               >
                                 <span>{label}</span>
                                 {tourTag && (
-                                  <Badge bg="secondary" pill>
+                                  <Badge
+                                    bg="secondary"
+                                    pill
+                                    className="ms-auto"
+                                  >
                                     {tourTag.replace("PhasmoTourney", "T")}
                                   </Badge>
                                 )}
@@ -452,127 +523,186 @@ export default function MainNavbar() {
                 })}
               </NavDropdown>
 
+              {/* Tools Dropdown */}
+              <NavDropdown
+                id="nav-tools"
+                title={
+                  <>
+                    <FaTools className="nav-icon" />
+                    <span>Tools</span>
+                  </>
+                }
+                className="main-dropdown"
+              >
+                <NavDropdown.Item
+                  as={InlineLink}
+                  href="/notifications"
+                  onClick={handleNavItemClick}
+                >
+                  To-Do List
+                </NavDropdown.Item>
+                {tools.length > 0 && <NavDropdown.Divider />}
+                {tools.length === 0 && (
+                  <div className="dropdown-empty">No tools available yet.</div>
+                )}
+                {tools.map((meta) => {
+                  const badges = meta.effective
+                    .filter((tag) => ["AI", "ToDo"].includes(tag))
+                    .slice(0, 2);
+                  return (
+                    <NavDropdown.Item
+                      as={InlineLink}
+                      href={mapHref(meta.path)}
+                      key={meta.path}
+                      onClick={handleNavItemClick}
+                    >
+                      <span>{meta.title || meta.path}</span>
+                      {badges.length > 0 && (
+                        <span className="ms-auto d-flex gap-1">
+                          {badges.map((badge) => (
+                            <Badge key={badge} bg="info" className="tool-badge">
+                              {badge}
+                            </Badge>
+                          ))}
+                        </span>
+                      )}
+                    </NavDropdown.Item>
+                  );
+                })}
+              </NavDropdown>
+
+              {/* Community Updates Link */}
               <Nav.Link
                 as={InlineLink}
                 href="/posts"
                 onClick={handleNavItemClick}
-                className="nav-link-enhanced"
+                className="nav-link-main"
               >
-                Community Updates
+                <FaNewspaper className="nav-icon" />
+                <span>Community Updates</span>
               </Nav.Link>
             </Nav>
 
-            <Nav className="ms-auto align-items-lg-center gap-2 mt-3 mt-lg-0">
+            {/* Mobile-only Section */}
+            <div className="mobile-only-section">
+              <div className="mobile-divider" />
+
+              {/* Search Button - Mobile */}
               <Button
-                variant={
-                  theme === "dark" ? "outline-light" : "outline-secondary"
-                }
-                className="d-flex align-items-center gap-2 w-100 w-lg-auto justify-content-center"
+                variant="outline-primary"
+                className="mobile-action-btn"
                 onClick={openSearch}
               >
-                <FaSearch />
-                <span>Search</span>
+                <FaSearch className="me-2" />
+                Search
               </Button>
 
-              <NavDropdown
-                id="nav-display"
-                title={
-                  <span className="d-flex align-items-center gap-2">
-                    <FaFont />
-                    <span>Display</span>
-                  </span>
-                }
-                align="end"
-                className="mobile-dropdown"
-              >
-                <NavDropdown.Header>Text size</NavDropdown.Header>
-                <NavDropdown.ItemText className="text-muted small px-3">
-                  Currently {fontPercent}%
-                </NavDropdown.ItemText>
-                <Stack direction="horizontal" gap={2} className="px-3 pb-3">
-                  <Button
-                    size="sm"
-                    variant="outline-secondary"
-                    onClick={decreaseFont}
-                    aria-label="Decrease text size"
-                    className="flex-fill"
-                  >
-                    A-
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline-secondary"
-                    onClick={resetFont}
-                    aria-label="Reset text size"
-                    className="flex-fill"
-                  >
-                    Reset
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline-secondary"
-                    onClick={increaseFont}
-                    aria-label="Increase text size"
-                    className="flex-fill"
-                  >
-                    A+
-                  </Button>
-                </Stack>
-                <NavDropdown.Divider />
-                <NavDropdown.Header>Theme</NavDropdown.Header>
-                <NavDropdown.Item
-                  as="button"
-                  className="btn btn-outline-secondary mx-3 mb-2 d-flex align-items-center gap-2"
+              {/* Display Settings - Mobile */}
+              <div className="mobile-settings">
+                <div className="settings-label">Display Settings</div>
+
+                {/* Theme Toggle */}
+                <Button
+                  variant="outline-secondary"
+                  className="mobile-action-btn"
                   onClick={toggleTheme}
                 >
                   {theme === "dark" ? (
                     <>
-                      <FaSun /> Light theme
+                      <FaSun className="me-2" />
+                      Light Theme
                     </>
                   ) : (
                     <>
-                      <FaMoon /> Dark theme
+                      <FaMoon className="me-2" />
+                      Dark Theme
                     </>
                   )}
-                </NavDropdown.Item>
-              </NavDropdown>
+                </Button>
 
+                {/* Font Size Controls */}
+                <div className="font-controls">
+                  <div className="font-label">
+                    <FaFont className="me-2" />
+                    Text Size: {fontPercent}%
+                  </div>
+                  <Stack direction="horizontal" gap={2}>
+                    <Button
+                      size="sm"
+                      variant="outline-secondary"
+                      onClick={decreaseFont}
+                      className="flex-fill"
+                    >
+                      A-
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline-secondary"
+                      onClick={resetFont}
+                      className="flex-fill"
+                    >
+                      Reset
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline-secondary"
+                      onClick={increaseFont}
+                      className="flex-fill"
+                    >
+                      A+
+                    </Button>
+                  </Stack>
+                </div>
+              </div>
+
+              {/* User Section - Mobile */}
               {user ? (
-                <NavDropdown
-                  id="nav-user"
-                  align="end"
-                  title={
-                    <span className="d-flex align-items-center gap-2">
-                      <FaUserCircle size={20} />
-                      <span className="d-lg-none">
-                        {user.displayName || user.email || "Profile"}
-                      </span>
-                    </span>
-                  }
-                  className="mobile-dropdown"
-                >
-                  <NavDropdown.Item
+                <div className="mobile-user-section">
+                  <div className="mobile-divider" />
+                  <div className="user-info-mobile">
+                    <FaUserCircle size={24} />
+                    <div>
+                      <div className="user-name">
+                        {user.displayName || "User"}
+                      </div>
+                      <div className="user-email">{user.email}</div>
+                    </div>
+                  </div>
+                  <Button
+                    variant="outline-primary"
+                    className="mobile-action-btn"
                     as={InlineLink}
                     href={profileHref}
                     onClick={handleNavItemClick}
                   >
-                    Profile
-                  </NavDropdown.Item>
-                  <NavDropdown.Divider />
-                  <NavDropdown.Item onClick={handleLogout}>
+                    <FaUserCircle className="me-2" />
+                    View Profile
+                  </Button>
+                  <Button
+                    variant="outline-danger"
+                    className="mobile-action-btn"
+                    onClick={handleLogout}
+                  >
                     Logout
-                  </NavDropdown.Item>
-                </NavDropdown>
+                  </Button>
+                </div>
               ) : (
-                <Button variant="primary" onClick={handleLogin} className="w-100 w-lg-auto">
-                  Log in
-                </Button>
+                <div className="mobile-user-section">
+                  <div className="mobile-divider" />
+                  <Button
+                    variant="primary"
+                    className="mobile-action-btn w-100"
+                    onClick={handleLogin}
+                  >
+                    Log in
+                  </Button>
+                </div>
               )}
-            </Nav>
+            </div>
           </Navbar.Collapse>
         </Container>
       </Navbar>
-      <div style={{ height: "72px" }} />
+      <div className="navbar-spacer" />
       <SearchModal show={showSearch} onHide={() => setShowSearch(false)} />
     </>
   );
