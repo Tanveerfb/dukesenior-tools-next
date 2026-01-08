@@ -70,6 +70,43 @@ body {
   font-size: 1rem; // keep base context; rem units scale via html font-size
 }
 
+// Dark mode brand integration (Bootstrap-friendly via CSS variables)
+// Uses hair pink (primary), umbrella red (danger), outfit black (surfaces)
+[data-bs-theme="dark"] {
+  // Core brand tokens
+  --brand-pink: #f1a9d7;
+  --brand-red: #d6242f;
+  --brand-black: #0b0b0d;
+  --brand-surface: #17171b;
+  --brand-border: #3a3b44;
+  --brand-text: #e9ecf1;
+  --brand-muted: #9aa0ac;
+
+  // Bootstrap variable bridges
+  --bs-body-bg: var(--brand-black);
+  --bs-body-color: var(--brand-text);
+  --bs-border-color: var(--brand-border);
+
+  --bs-primary: var(--brand-pink);
+  --bs-primary-rgb: 241, 169, 215;
+
+  --bs-secondary: var(--brand-muted);
+  --bs-secondary-rgb: 154, 160, 172;
+
+  --bs-danger: var(--brand-red);
+  --bs-danger-rgb: 214, 36, 47;
+
+  --bs-dark: #121317;
+  --bs-dark-rgb: 18, 19, 23;
+
+  --bs-link-color: var(--brand-pink);
+  --bs-link-hover-color: #e384c5;
+
+  // Common component hints
+  --bs-card-bg: var(--brand-surface);
+  --bs-btn-border-color: var(--brand-border);
+}
+
 // Optionally scale headings slightly less aggressively (clamp effect)
 h1,
 h2,
