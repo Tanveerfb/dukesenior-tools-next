@@ -64,10 +64,13 @@ $theme-colors: (
 html {
   font-size: calc(16px * var(--font-scale, 1));
   transition: font-size 0.15s ease-in-out;
+  scroll-behavior: smooth;
 }
 
 body {
   font-size: 1rem; // keep base context; rem units scale via html font-size
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 // Optionally scale headings slightly less aggressively (clamp effect)
@@ -275,4 +278,187 @@ h6 {
   color: #ffffff;
   background-color: rgba(255, 255, 255, 0.22);
   border-color: rgba(255, 255, 255, 0.85);
+}
+
+// ============================================
+// Enhanced UI/UX Improvements
+// ============================================
+
+// Smooth transitions for all interactive elements
+* {
+  transition-property: background-color, border-color, box-shadow, transform;
+  transition-duration: 0.2s;
+  transition-timing-function: ease-in-out;
+}
+
+// Enhanced card styles
+.card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12) !important;
+  }
+}
+
+[data-bs-theme="dark"] .card {
+  border-color: rgba(255, 255, 255, 0.1);
+  
+  &:hover {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4) !important;
+  }
+}
+
+// Enhanced button styles
+.btn {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 500;
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+// Improved link hover states
+a {
+  transition: color 0.2s ease-in-out, opacity 0.2s ease-in-out;
+  
+  &:hover {
+    opacity: 0.85;
+  }
+}
+
+// Enhanced focus states for accessibility
+*:focus-visible {
+  outline: 2px solid $primary;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+[data-bs-theme="dark"] *:focus-visible {
+  outline-color: color.scale($primary, $lightness: 20%);
+}
+
+// Skeleton loader animation
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.06) 25%,
+    rgba(0, 0, 0, 0.12) 50%,
+    rgba(0, 0, 0, 0.06) 75%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+  border-radius: 4px;
+}
+
+[data-bs-theme="dark"] .skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.06) 25%,
+    rgba(255, 255, 255, 0.12) 50%,
+    rgba(255, 255, 255, 0.06) 75%
+  );
+  background-size: 1000px 100%;
+}
+
+// Improved shadow system
+.shadow-sm {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+}
+
+.shadow {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) !important;
+}
+
+.shadow-lg {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+}
+
+[data-bs-theme="dark"] .shadow-sm {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
+[data-bs-theme="dark"] .shadow {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+}
+
+[data-bs-theme="dark"] .shadow-lg {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+}
+
+// Enhanced badge styles
+.badge {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 0.35em 0.65em;
+  transition: all 0.2s ease-in-out;
+}
+
+// Smooth page transitions
+.page-transition-enter {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.page-transition-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+.page-transition-exit {
+  opacity: 1;
+}
+
+.page-transition-exit-active {
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+// Loading spinner enhancement
+.spinner-border,
+.spinner-grow {
+  animation-duration: 0.75s;
+}
+
+// Better empty state styling
+.empty-state {
+  padding: 3rem 1.5rem;
+  text-align: center;
+  color: var(--bs-secondary-color);
+}
+
+.empty-state-icon {
+  font-size: 3rem;
+  opacity: 0.5;
+  margin-bottom: 1rem;
+}
+
+// Improved list group items
+.list-group-item {
+  transition: all 0.2s ease-in-out;
+  
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+  }
+}
+
+[data-bs-theme="dark"] .list-group-item:hover {
+  background-color: rgba(255, 255, 255, 0.05);
 }
