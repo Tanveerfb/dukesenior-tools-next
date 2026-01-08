@@ -19,7 +19,6 @@ import {
   FaMoon,
   FaSearch,
   FaSun,
-  FaTools,
   FaUserCircle,
 } from "react-icons/fa";
 import { HiOutlineSparkles } from "react-icons/hi";
@@ -156,13 +155,7 @@ export default function MainNavbar() {
     });
   }, [eventSections]);
 
-  const tools = useMemo(
-    () =>
-      effective
-        .filter((meta) => meta.effective.includes("Tool"))
-        .sort((a, b) => (a.title || a.path).localeCompare(b.title || b.path)),
-    [effective]
-  );
+
 
   const navbarStyle: React.CSSProperties =
     theme === "dark"
@@ -455,61 +448,6 @@ export default function MainNavbar() {
                         </div>
                       )}
                     </div>
-                  );
-                })}
-              </NavDropdown>
-
-              <NavDropdown
-                id="nav-tools"
-                title={
-                  <span className="d-flex align-items-center gap-2">
-                    <FaTools />
-                    <span>Tools</span>
-                  </span>
-                }
-                className="mobile-optimized-dropdown"
-              >
-                <NavDropdown.Item
-                  as={InlineLink}
-                  href="/notifications"
-                  onClick={handleNavItemClick}
-                >
-                  To-Do List
-                </NavDropdown.Item>
-                <NavDropdown.Divider />
-                {tools.length === 0 && (
-                  <NavDropdown.ItemText className="text-muted small px-3">
-                    No tools available yet.
-                  </NavDropdown.ItemText>
-                )}
-                {tools.map((meta) => {
-                  const badges = meta.effective
-                    .filter((tag) => ["AI", "ToDo"].includes(tag))
-                    .slice(0, 2);
-                  return (
-                    <NavDropdown.Item
-                      as={InlineLink}
-                      href={mapHref(meta.path)}
-                      key={meta.path}
-                      onClick={handleNavItemClick}
-                      className="d-flex justify-content-between align-items-center gap-2"
-                    >
-                      <span>{meta.title || meta.path}</span>
-                      {badges.length > 0 && (
-                        <span className="d-flex gap-1">
-                          {badges.map((badge) => (
-                            <Badge
-                              key={badge}
-                              bg="secondary"
-                              className="text-uppercase"
-                              style={{ fontSize: "0.6rem" }}
-                            >
-                              {badge}
-                            </Badge>
-                          ))}
-                        </span>
-                      )}
-                    </NavDropdown.Item>
                   );
                 })}
               </NavDropdown>

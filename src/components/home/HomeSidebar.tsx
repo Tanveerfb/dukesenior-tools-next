@@ -13,11 +13,6 @@ const quickLinks = [
       "Browse brackets, stats, and match history across every tourney.",
   },
   {
-    title: "Notifications",
-    href: "/notifications",
-    description: "Catch up on match-day announcements and automated updates.",
-  },
-  {
     title: "Community suggestions",
     href: "/suggestions",
     description: "Share ideas, report issues, and vote on what ships next.",

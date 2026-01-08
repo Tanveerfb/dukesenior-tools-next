@@ -83,17 +83,8 @@ function extractHeadings(markdown = ''){
 
 // Extract @username tokens and call server API to create notifications
 async function notifyMentions(text: string, postId: string, commentId?: string, postSlug?: string){
-  try {
-    const re = /@([A-Za-z0-9_]{3,32})/g;
-    const set = new Set<string>();
-    let m: RegExpExecArray | null;
-    while((m = re.exec(text))){ set.add(m[1].toLowerCase()); }
-    if(set.size === 0) return;
-    const list = Array.from(set);
-    let idToken = '';
-    try { const auth = getAuth(); idToken = await auth.currentUser?.getIdToken() || ''; } catch(e) { /* ignore */ }
-  await fetch('/api/notifications/mention', { method: 'POST', headers: { 'Content-Type':'application/json', 'Authorization': idToken? `Bearer ${idToken}` : '' }, body: JSON.stringify({ usernames: list, postId, postSlug: postSlug || '', commentId, context: '' }) });
-  } catch (e){ console.warn('notifyMentions error', e); }
+  // Notifications functionality removed - this is a no-op now
+  return;
 }
 
 export default function PostView(){
