@@ -206,25 +206,24 @@ export default function MainNavbar() {
         fixed="top"
         expanded={navExpanded}
         onToggle={(value) => setNavExpanded(Boolean(value))}
-        className="shadow-sm border-0 compact-navbar"
+        className="shadow-sm border-0 enhanced-navbar"
         style={navbarStyle}
       >
-        <Container fluid className="py-1">
+        <Container fluid className="py-2 px-3">
           <Navbar.Brand
             as={InlineLink}
             href="/"
-            className="fw-semibold d-flex align-items-center gap-1"
+            className="fw-bold d-flex align-items-center gap-2"
             onClick={handleNavItemClick}
           >
-            <HiOutlineSparkles size={20} />
+            <HiOutlineSparkles size={24} />
             <span>The Lair of Evil</span>
           </Navbar.Brand>
 
-          <Navbar.Toggle aria-controls="main-navbar" />
+          <Navbar.Toggle aria-controls="main-navbar" className="border-0" />
 
           <Navbar.Collapse id="main-navbar">
-            <Nav className="me-auto align-items-lg-center gap-1">
-              {admin && (
+            <Nav className="me-auto align-items-lg-center gap-2 mt-3 mt-lg-0">{admin && (
                 <NavDropdown
                   id="nav-admin"
                   title={
@@ -345,11 +344,12 @@ export default function MainNavbar() {
               <NavDropdown
                 id="nav-events"
                 title={
-                  <span className="d-flex align-items-center gap-1">
+                  <span className="d-flex align-items-center gap-2">
                     <FaCalendarAlt />
-                    <span className="d-none d-lg-inline">Events</span>
+                    <span>Events</span>
                   </span>
                 }
+                className="mobile-optimized-dropdown"
               >
                 <NavDropdown.Header>Current Events</NavDropdown.Header>
                 {loading && (
@@ -462,11 +462,12 @@ export default function MainNavbar() {
               <NavDropdown
                 id="nav-tools"
                 title={
-                  <span className="d-flex align-items-center gap-1">
+                  <span className="d-flex align-items-center gap-2">
                     <FaTools />
-                    <span className="d-none d-lg-inline">Tools</span>
+                    <span>Tools</span>
                   </span>
                 }
+                className="mobile-optimized-dropdown"
               >
                 <NavDropdown.Item
                   as={InlineLink}
@@ -517,51 +518,55 @@ export default function MainNavbar() {
                 as={InlineLink}
                 href="/posts"
                 onClick={handleNavItemClick}
+                className="nav-link-enhanced"
               >
                 Community Updates
               </Nav.Link>
             </Nav>
 
-            <Nav className="ms-auto align-items-lg-center gap-1">
+            <Nav className="ms-auto align-items-lg-center gap-2 mt-3 mt-lg-0">
               <Button
                 variant={
                   theme === "dark" ? "outline-light" : "outline-secondary"
                 }
-                className="d-flex align-items-center gap-1"
+                className="d-flex align-items-center gap-2 w-100 w-lg-auto justify-content-center"
                 onClick={openSearch}
               >
                 <FaSearch />
-                <span className="d-none d-lg-inline">Search</span>
+                <span>Search</span>
               </Button>
 
               <NavDropdown
                 id="nav-display"
                 title={
-                  <span className="d-flex align-items-center gap-1">
+                  <span className="d-flex align-items-center gap-2">
                     <FaFont />
-                    <span className="d-none d-lg-inline">Display</span>
+                    <span>Display</span>
                   </span>
                 }
                 align="end"
+                className="mobile-dropdown"
               >
                 <NavDropdown.Header>Text size</NavDropdown.Header>
                 <NavDropdown.ItemText className="text-muted small px-3">
                   Currently {fontPercent}%
                 </NavDropdown.ItemText>
-                <Stack direction="horizontal" gap={2} className="px-3 pb-2">
+                <Stack direction="horizontal" gap={2} className="px-3 pb-3">
                   <Button
                     size="sm"
                     variant="outline-secondary"
                     onClick={decreaseFont}
                     aria-label="Decrease text size"
+                    className="flex-fill"
                   >
-                    -
+                    A-
                   </Button>
                   <Button
                     size="sm"
                     variant="outline-secondary"
                     onClick={resetFont}
                     aria-label="Reset text size"
+                    className="flex-fill"
                   >
                     Reset
                   </Button>
@@ -570,25 +575,26 @@ export default function MainNavbar() {
                     variant="outline-secondary"
                     onClick={increaseFont}
                     aria-label="Increase text size"
+                    className="flex-fill"
                   >
-                    +
+                    A+
                   </Button>
                 </Stack>
                 <NavDropdown.Divider />
                 <NavDropdown.Header>Theme</NavDropdown.Header>
                 <NavDropdown.Item
                   as="button"
-                  className="btn btn-outline-secondary mx-3 mb-2"
+                  className="btn btn-outline-secondary mx-3 mb-2 d-flex align-items-center gap-2"
                   onClick={toggleTheme}
                 >
                   {theme === "dark" ? (
-                    <span className="d-flex align-items-center gap-2">
+                    <>
                       <FaSun /> Light theme
-                    </span>
+                    </>
                   ) : (
-                    <span className="d-flex align-items-center gap-1">
+                    <>
                       <FaMoon /> Dark theme
-                    </span>
+                    </>
                   )}
                 </NavDropdown.Item>
               </NavDropdown>
@@ -598,13 +604,14 @@ export default function MainNavbar() {
                   id="nav-user"
                   align="end"
                   title={
-                    <span className="d-flex align-items-center gap-1">
-                      <FaUserCircle />
-                      <span className="d-none d-lg-inline">
+                    <span className="d-flex align-items-center gap-2">
+                      <FaUserCircle size={20} />
+                      <span className="d-lg-none">
                         {user.displayName || user.email || "Profile"}
                       </span>
                     </span>
                   }
+                  className="mobile-dropdown"
                 >
                   <NavDropdown.Item
                     as={InlineLink}
@@ -619,7 +626,7 @@ export default function MainNavbar() {
                   </NavDropdown.Item>
                 </NavDropdown>
               ) : (
-                <Button variant="primary" onClick={handleLogin}>
+                <Button variant="primary" onClick={handleLogin} className="w-100 w-lg-auto">
                   Log in
                 </Button>
               )}
@@ -627,7 +634,7 @@ export default function MainNavbar() {
           </Navbar.Collapse>
         </Container>
       </Navbar>
-      <div style={{ height: "64px" }} />
+      <div style={{ height: "72px" }} />
       <SearchModal show={showSearch} onHide={() => setShowSearch(false)} />
     </>
   );

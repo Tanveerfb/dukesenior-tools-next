@@ -4,6 +4,9 @@ import React from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import MainNavbar from "../navigation/MainNavbar";
 import Footer from "../ui/Footer";
+import DynamicBreadcrumb from "../navigation/DynamicBreadcrumb";
+import SkipToContent from "../navigation/SkipToContent";
+import PageTransition from "../ui/PageTransition";
 
 export default function AppChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -15,8 +18,12 @@ export default function AppChrome({ children }: { children: React.ReactNode }) {
   if (hideChrome) return <>{children}</>;
   return (
     <>
+      <SkipToContent />
       <MainNavbar />
-      <main>{children}</main>
+      <DynamicBreadcrumb />
+      <main id="main-content">
+        <PageTransition>{children}</PageTransition>
+      </main>
       <Footer />
     </>
   );
