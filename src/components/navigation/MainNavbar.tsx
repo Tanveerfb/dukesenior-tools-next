@@ -344,11 +344,12 @@ export default function MainNavbar() {
               <NavDropdown
                 id="nav-events"
                 title={
-                  <span className="d-flex align-items-center gap-1">
+                  <span className="d-flex align-items-center gap-2">
                     <FaCalendarAlt />
-                    <span className="d-none d-lg-inline">Events</span>
+                    <span>Events</span>
                   </span>
                 }
+                className="mobile-optimized-dropdown"
               >
                 <NavDropdown.Header>Current Events</NavDropdown.Header>
                 {loading && (
@@ -461,11 +462,12 @@ export default function MainNavbar() {
               <NavDropdown
                 id="nav-tools"
                 title={
-                  <span className="d-flex align-items-center gap-1">
+                  <span className="d-flex align-items-center gap-2">
                     <FaTools />
-                    <span className="d-none d-lg-inline">Tools</span>
+                    <span>Tools</span>
                   </span>
                 }
+                className="mobile-optimized-dropdown"
               >
                 <NavDropdown.Item
                   as={InlineLink}
