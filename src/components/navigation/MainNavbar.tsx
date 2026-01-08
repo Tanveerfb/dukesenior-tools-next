@@ -20,7 +20,6 @@ import {
   FaMoon,
   FaSearch,
   FaSun,
-  FaTools,
   FaUserCircle,
   FaShieldAlt,
   FaNewspaper,
@@ -159,13 +158,7 @@ export default function MainNavbar() {
     });
   }, [eventSections]);
 
-  const tools = useMemo(
-    () =>
-      effective
-        .filter((meta) => meta.effective.includes("Tool"))
-        .sort((a, b) => (a.title || a.path).localeCompare(b.title || b.path)),
-    [effective]
-  );
+
 
   const navbarStyle: React.CSSProperties =
     theme === "dark"

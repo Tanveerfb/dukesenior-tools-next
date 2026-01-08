@@ -11,7 +11,6 @@ const navSections = [
     links: [
       { label: "Phasmo Tourney series", href: "/phasmotourney-series" },
       { label: "Posts & updates", href: "/posts" },
-      { label: "Notifications", href: "/notifications" },
     ],
   },
   {

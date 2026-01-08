@@ -96,12 +96,11 @@ export default function SearchModal({
         )
     : [];
 
-  // Suggestions when no query: top events & tools
+  // Suggestions when no query: top events
   const suggestions = !normalized
     ? data
         .filter((d) => d.effective.includes("Event"))
         .slice(0, 5)
-        .concat(data.filter((d) => d.effective.includes("Tool")).slice(0, 5))
     : [];
 
   useEffect(() => {
