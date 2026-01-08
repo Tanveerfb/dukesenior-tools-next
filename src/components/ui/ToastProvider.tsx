@@ -1,5 +1,5 @@
 "use client";
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import { Toast, ToastContainer } from "react-bootstrap";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -20,6 +20,8 @@ interface ToastContextType {
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
+let toastCounter = 0;
+
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
@@ -28,18 +30,25 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     variant: ToastMessage["variant"] = "info",
     duration = 3000
   ) => {
-    const id = Math.random().toString(36).substring(7);
+    const id = `toast-${++toastCounter}`;
     const newToast: ToastMessage = { id, message, variant, duration };
     setToasts((prev) => [...prev, newToast]);
-
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, duration);
   };
 
   const removeToast = (id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
+
+  useEffect(() => {
+    if (toasts.length === 0) return;
+
+    const latestToast = toasts[toasts.length - 1];
+    const timeoutId = setTimeout(() => {
+      removeToast(latestToast.id);
+    }, latestToast.duration);
+
+    return () => clearTimeout(timeoutId);
+  }, [toasts]);
 
   return (
     <ToastContext.Provider value={{ showToast }}>

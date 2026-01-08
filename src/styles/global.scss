@@ -284,9 +284,17 @@ h6 {
 // Enhanced UI/UX Improvements
 // ============================================
 
-// Smooth transitions for all interactive elements
-* {
-  transition-property: background-color, border-color, box-shadow, transform;
+// Smooth transitions for interactive elements only
+button,
+a,
+.card,
+.btn,
+.list-group-item,
+.badge,
+input,
+select,
+textarea {
+  transition-property: background-color, border-color, box-shadow, transform, opacity;
   transition-duration: 0.2s;
   transition-timing-function: ease-in-out;
 }
