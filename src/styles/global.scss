@@ -94,6 +94,214 @@ h6 {
   margin-left: auto !important;
 }
 
+// ============================================
+// Enhanced Navbar Styles for Better Mobile UX
+// ============================================
+
+.enhanced-navbar {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  .navbar-brand {
+    font-size: 1.1rem;
+    transition: all 0.2s ease-in-out;
+
+    &:hover {
+      opacity: 0.85;
+      transform: scale(1.02);
+    }
+  }
+
+  .navbar-toggler {
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    transition: all 0.2s ease-in-out;
+
+    &:focus {
+      box-shadow: 0 0 0 0.2rem rgba($primary, 0.25);
+      outline: none;
+    }
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.05);
+      transform: scale(1.05);
+    }
+  }
+
+  [data-bs-theme="dark"] & {
+    .navbar-toggler {
+      border-color: rgba(255, 255, 255, 0.2);
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+    }
+  }
+
+  // Mobile menu improvements
+  @media (max-width: 991px) {
+    .navbar-collapse {
+      margin-top: 1rem;
+      padding: 1.5rem;
+      background: rgba(255, 255, 255, 0.98);
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    [data-bs-theme="dark"] & .navbar-collapse {
+      background: rgba(30, 30, 30, 0.98);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .nav-link,
+    .dropdown-toggle {
+      padding: 1rem 1.25rem;
+      margin: 0.25rem 0;
+      border-radius: 10px;
+      font-weight: 500;
+      font-size: 1.05rem;
+      transition: all 0.2s ease-in-out;
+
+      &:hover, &:focus {
+        background: rgba(0, 0, 0, 0.06);
+        transform: translateX(4px);
+      }
+
+      &:active {
+        transform: translateX(2px) scale(0.98);
+      }
+    }
+
+    [data-bs-theme="dark"] & {
+      .nav-link,
+      .dropdown-toggle {
+        &:hover, &:focus {
+          background: rgba(255, 255, 255, 0.1);
+        }
+      }
+    }
+
+    .dropdown-menu {
+      border: none;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+      margin-top: 0.5rem;
+      border-radius: 12px;
+      padding: 0.75rem;
+    }
+
+    .dropdown-item {
+      padding: 0.875rem 1.25rem;
+      border-radius: 8px;
+      margin: 0.25rem 0;
+      transition: all 0.2s ease-in-out;
+      font-size: 1rem;
+
+      &:hover, &:focus {
+        transform: translateX(4px);
+      }
+
+      &:active {
+        transform: translateX(2px) scale(0.98);
+      }
+    }
+
+    .btn {
+      padding: 0.875rem 1.5rem;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 1.05rem;
+      transition: all 0.2s ease-in-out;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+    }
+
+    // Mobile-specific dropdown positioning
+    .mobile-dropdown .dropdown-menu {
+      position: static !important;
+      transform: none !important;
+      width: 100%;
+      margin-top: 0.5rem;
+    }
+  }
+
+  // Desktop improvements
+  @media (min-width: 992px) {
+    .nav-link,
+    .dropdown-toggle {
+      padding: 0.625rem 1rem;
+      border-radius: 8px;
+      transition: all 0.2s ease-in-out;
+      font-weight: 500;
+
+      &:hover {
+        background: rgba(0, 0, 0, 0.05);
+        transform: translateY(-1px);
+      }
+    }
+
+    [data-bs-theme="dark"] & {
+      .nav-link,
+      .dropdown-toggle {
+        &:hover {
+          background: rgba(255, 255, 255, 0.08);
+        }
+      }
+    }
+
+    .dropdown-menu {
+      border: none;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      margin-top: 0.5rem;
+      border-radius: 12px;
+      padding: 0.75rem;
+      min-width: 250px;
+    }
+
+    [data-bs-theme="dark"] & .dropdown-menu {
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    }
+
+    .dropdown-item {
+      padding: 0.625rem 1rem;
+      border-radius: 8px;
+      transition: all 0.2s ease-in-out;
+      margin: 0.125rem 0;
+
+      &:hover {
+        transform: translateX(4px);
+      }
+    }
+
+    .btn {
+      transition: all 0.2s ease-in-out;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+    }
+  }
+}
+
+.nav-link-enhanced {
+  @media (max-width: 991px) {
+    font-size: 1.05rem;
+    font-weight: 500;
+  }
+}
+
+// Keep original compact navbar styles for compatibility
 .compact-navbar .navbar-brand,
 .compact-navbar .navbar-nav .nav-link,
 .compact-navbar .dropdown-toggle {
