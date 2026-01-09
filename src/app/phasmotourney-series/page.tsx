@@ -10,6 +10,13 @@ import Stack from "react-bootstrap/Stack";
 
 const SERIES_ITEMS = [
   {
+    id: "t5",
+    title: "Phasmo Tourney 5",
+    href: "/phasmotourney-series/phasmoTourney5",
+    blurb:
+      "Ultimate survival challenge with eliminations, voting, and immunity battles.",
+  },
+  {
     id: "t4",
     title: "Phasmo Tourney 4",
     href: "/phasmotourney-series/phasmotourney4",

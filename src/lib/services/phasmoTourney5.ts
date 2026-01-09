@@ -676,3 +676,73 @@ export async function deleteRound6TeamRunDetail(detailId: string) {
   const docRef = doc(db, ROUND6_TEAM_RUN_DETAILS, detailId);
   await deleteDoc(docRef);
 }
+
+// ----- Video Links -----
+const VIDEO_LINKS = "Phasmophobia Tourney#5 VideoLinks";
+
+export async function addVideoLink(params: {
+  officer: string;
+  title: string;
+  url: string;
+  platform: "youtube" | "twitch";
+  roundId?: string;
+  notes?: string;
+}) {
+  const colRef = collection(db, VIDEO_LINKS);
+  const timestamp = Date.now();
+  const docRef = await addDoc(colRef, {
+    Officer: params.officer,
+    Title: params.title,
+    URL: params.url,
+    Platform: params.platform,
+    RoundId: params.roundId || "",
+    Notes: params.notes || "",
+    TimeSubmitted: timestamp,
+  });
+  return docRef.id;
+}
+
+export async function listVideoLinks() {
+  const colRef = collection(db, VIDEO_LINKS);
+  const qcol = query(colRef, orderBy("TimeSubmitted", "desc"));
+  const snap = await getDocs(qcol);
+  const list: Array<{
+    id: string;
+    title: string;
+    url: string;
+    platform: "youtube" | "twitch";
+    roundId?: string;
+    notes?: string;
+    officer: string;
+    createdAt: number;
+  }> = [];
+  snap.forEach((d) => {
+    const data: any = d.data();
+    // Validate platform value
+    const platform = data.Platform === "youtube" || data.Platform === "twitch" 
+      ? data.Platform 
+      : "youtube"; // Default to youtube with console warning
+    
+    if (data.Platform && platform !== data.Platform) {
+      console.warn(`Invalid platform "${data.Platform}" for video link ${d.id}, defaulting to youtube`);
+    }
+    
+    list.push({
+      id: d.id,
+      title: data.Title || "",
+      url: data.URL || "",
+      platform,
+      roundId: data.RoundId || undefined,
+      notes: data.Notes || "",
+      officer: data.Officer || "",
+      createdAt: Number(data.TimeSubmitted || Date.now()),
+    });
+  });
+  return list;
+}
+
+export async function deleteVideoLink(linkId: string) {
+  const docRef = doc(db, VIDEO_LINKS, linkId);
+  await deleteDoc(docRef);
+}
+
