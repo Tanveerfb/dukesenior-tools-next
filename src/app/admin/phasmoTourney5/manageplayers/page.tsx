@@ -59,7 +59,6 @@ function getTimezones(): string[] {
   if (tzs.length) return tzs.sort();
   // Fallback to Intl if package fails
   try {
-    // @ts-expect-error - supportedValuesOf may not exist in older environments
     const vals = Intl.supportedValuesOf?.("timeZone");
     if (Array.isArray(vals) && vals.length) return vals;
   } catch {}
