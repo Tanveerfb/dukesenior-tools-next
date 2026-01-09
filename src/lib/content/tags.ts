@@ -89,6 +89,11 @@ export const taggedManifest: TaggedRouteMeta[] = [
   },
   // Tourney 5 (Current) — public pages
   {
+    path: "/phasmotourney-series/phasmoTourney5",
+    title: "Phasmo Tourney 5",
+    tags: ["PhasmoTourney5", "Event", "Current"],
+  },
+  {
     path: "/phasmotourney-series/phasmoTourney5/timeline",
     title: "Tourney 5 Timeline",
     tags: ["PhasmoTourney5", "Timeline", "Event", "Current"],
@@ -97,11 +102,6 @@ export const taggedManifest: TaggedRouteMeta[] = [
     path: "/phasmotourney-series/phasmoTourney5/whats-next",
     title: "Tourney 5 — What's Next?",
     tags: ["PhasmoTourney5", "Next", "Event", "Current"],
-  },
-  {
-    path: "/phasmotourney-series/phasmoTourney5/current-standings",
-    title: "Tourney 5 Current Standings",
-    tags: ["PhasmoTourney5", "Standings", "Event", "Current"],
   },
   {
     path: "/phasmotourney-series/phasmoTourney5/rules-and-settings",
