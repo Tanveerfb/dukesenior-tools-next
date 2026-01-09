@@ -122,8 +122,8 @@ export default function Tourney5TimelinePage() {
   function getRoundEvents(round: number): RoundEvent[] {
     const events: RoundEvent[] = [];
 
-    // Add eliminator events for this round
-    // Note: We don't have round info in eliminator sessions, so we show all
+    // TODO: Store round info in eliminator sessions for proper filtering
+    // Currently showing all eliminator events since round data not tracked
     eliminatorSessions.forEach((session) => {
       events.push({
         type: "eliminator",
@@ -244,7 +244,7 @@ export default function Tourney5TimelinePage() {
           </Card.Title>
           {roundEvents.length === 0 ? (
             <Alert variant="info" className="mb-0">
-              No events recorded for Round {selectedRound} yet. Events from all rounds are currently shown below since round-specific data is not stored in eliminator sessions.
+              No events recorded for Round {selectedRound} yet.
             </Alert>
           ) : (
             <Stack gap={3}>

@@ -68,10 +68,17 @@ function VideoEmbed({ link }: { link: VideoLink }) {
         </Alert>
       );
     }
+    // Twitch requires parent domain for iframe embedding
+    // TODO: Move to environment config
+    const ALLOWED_DOMAINS = ['localhost', 'dukesenior-tools.web.app'];
+    const currentHost = typeof window !== 'undefined' ? window.location.hostname : '';
+    const parentDomain = ALLOWED_DOMAINS.includes(currentHost) 
+      ? currentHost 
+      : ALLOWED_DOMAINS[1];
     return (
       <div className="ratio ratio-16x9">
         <iframe
-          src={`https://player.twitch.tv/?video=${videoId}&parent=${window.location.hostname}`}
+          src={`https://player.twitch.tv/?video=${videoId}&parent=${parentDomain}`}
           title={link.title}
           allowFullScreen
         />

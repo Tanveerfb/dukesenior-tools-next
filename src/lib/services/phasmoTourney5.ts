@@ -718,11 +718,20 @@ export async function listVideoLinks() {
   }> = [];
   snap.forEach((d) => {
     const data: any = d.data();
+    // Validate platform value
+    const platform = data.Platform === "youtube" || data.Platform === "twitch" 
+      ? data.Platform 
+      : "youtube"; // Default to youtube with console warning
+    
+    if (data.Platform && platform !== data.Platform) {
+      console.warn(`Invalid platform "${data.Platform}" for video link ${d.id}, defaulting to youtube`);
+    }
+    
     list.push({
       id: d.id,
       title: data.Title || "",
       url: data.URL || "",
-      platform: (data.Platform as any) || "youtube",
+      platform,
       roundId: data.RoundId || undefined,
       notes: data.Notes || "",
       officer: data.Officer || "",
