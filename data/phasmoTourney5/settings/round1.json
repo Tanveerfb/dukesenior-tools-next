@@ -1,0 +1,45 @@
+{
+  "roundId": "round1",
+  "settings": {
+    "player": {
+      "startingSanity": 100,
+      "sanityPillRestorationPercent": 10,
+      "sanityDrainSpeedPercent": 200,
+      "sprinting": "On",
+      "playerSpeedPercent": 100,
+      "flashlights": "On",
+      "loseItemsAndConsumables": "On"
+    },
+    "ghost": {
+      "ghostSpeedPercent": 100,
+      "roamingFrequency": "High",
+      "changingFavouriteRoom": "High",
+      "activityLevel": "Low",
+      "eventFrequency": "Medium",
+      "friendlyGhost": "Off",
+      "gracePeriodSeconds": 0,
+      "huntDuration": "High",
+      "evidenceGiven": 1,
+      "fingerprintChancePercent": 100,
+      "fingerprintDurationSeconds": 60
+    },
+    "contract": {
+      "setupTimeSeconds": 0,
+      "weather": "Windy",
+      "doorsStartingOpen": "High",
+      "numberOfHidingPlaces": "Low",
+      "sanityMonitor": "On",
+      "activityMonitor": "Off",
+      "fuseBoxAtStartOfContract": "Off",
+      "fuseBoxVisibleOnMap": "On",
+      "cursedPossession": "Music Box",
+      "mapName": "6 Tanglewood Drive"
+    },
+    "meta": {
+      "scoreSystemAssigned": true
+    }
+  },
+  "updatedBy": "DukeSenior",
+  "updatedAt": "2026-01-09T12:33:37.765Z",
+  "notes": "Round 1"
+}
