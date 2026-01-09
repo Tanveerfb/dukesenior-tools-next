@@ -10,6 +10,8 @@ import {
   Form,
   Row,
   Table,
+  Modal,
+  Badge,
 } from "react-bootstrap";
 import { useAuth } from "@/hooks/useAuth";
 import GameSettingsAdminEditor from "../../../../../components/tourney/GameSettingsAdminEditor";
@@ -17,6 +19,7 @@ import {
   listTeams,
   addTeamRunResult,
   listTeamRunResults,
+  deleteTeamRunResult,
 } from "@/lib/services/phasmoTourney5";
 import TeamsManager from "../../../../../components/tourney/TeamsManager";
 import EliminatorCard from "@/components/tourney/EliminatorCard";
@@ -56,6 +59,15 @@ export default function Round3AdminPage() {
     money: "",
     notes: "",
   });
+  const [deleteModal, setDeleteModal] = useState<{
+    show: boolean;
+    resultId: string | null;
+  }>({ show: false, resultId: null });
+  const [viewModal, setViewModal] = useState<{
+    show: boolean;
+    result: TeamRunResult | null;
+  }>({ show: false, result: null });
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -80,27 +92,6 @@ export default function Round3AdminPage() {
       } catch {}
     })();
   }, []);
-  <Card className="border-0 shadow-sm mb-4">
-    <Card.Body>
-      <Card.Title as="h2" className="h5 fw-semibold">
-        Manage Teams
-      </Card.Title>
-      <TeamsManager
-        players={players}
-        listTeams={listTeams}
-        upsertTeam={async (p) => {
-          // reuse existing Round 3 team services via upsertTeam/listTeams
-          const { upsertTeam } = await import("@/lib/services/phasmoTourney5");
-          return upsertTeam(p);
-        }}
-        deleteTeam={async (id) => {
-          const { deleteTeam } = await import("@/lib/services/phasmoTourney5");
-          return deleteTeam(id);
-        }}
-        showMoneyFields={true}
-      />
-    </Card.Body>
-  </Card>;
 
   const sortedResults = useMemo(() => {
     return [...results].sort((a, b) => b.money - a.money);
@@ -128,6 +119,21 @@ export default function Round3AdminPage() {
       resetForm();
     } catch (e: any) {
       alert(e?.message || "Failed to record team result");
+    }
+  }
+
+  async function handleDeleteResult() {
+    if (!deleteModal.resultId) return;
+    setDeleting(true);
+    try {
+      await deleteTeamRunResult(deleteModal.resultId);
+      const r = await listTeamRunResults();
+      setResults(r);
+      setDeleteModal({ show: false, resultId: null });
+    } catch (e: any) {
+      alert(e?.message || "Failed to delete result");
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -161,6 +167,31 @@ export default function Round3AdminPage() {
       <section className="mt-4">
         <ImmunityAssigner roundLabel="Round 3" />
       </section>
+
+      <Card className="border-0 shadow-sm mb-4">
+        <Card.Body>
+          <Card.Title as="h2" className="h5 fw-semibold">
+            Manage Teams
+          </Card.Title>
+          <TeamsManager
+            players={players}
+            listTeams={listTeams}
+            upsertTeam={async (p) => {
+              const { upsertTeam } = await import(
+                "@/lib/services/phasmoTourney5"
+              );
+              return upsertTeam(p);
+            }}
+            deleteTeam={async (id) => {
+              const { deleteTeam } = await import(
+                "@/lib/services/phasmoTourney5"
+              );
+              return deleteTeam(id);
+            }}
+            showMoneyFields={true}
+          />
+        </Card.Body>
+      </Card>
 
       <Card className="border-0 shadow-sm mb-4">
         <Card.Body>
@@ -250,6 +281,7 @@ export default function Round3AdminPage() {
                 <th>Officer</th>
                 <th>Time</th>
                 <th>Notes</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -263,11 +295,32 @@ export default function Round3AdminPage() {
                     {new Date(r.createdAt).toLocaleString()}
                   </td>
                   <td className="text-muted small">{r.notes || "-"}</td>
+                  <td>
+                    <Button
+                      size="sm"
+                      variant="outline-info"
+                      onClick={() => setViewModal({ show: true, result: r })}
+                    >
+                      View
+                    </Button>
+                    {admin && (
+                      <Button
+                        size="sm"
+                        variant="outline-danger"
+                        className="ms-2"
+                        onClick={() =>
+                          setDeleteModal({ show: true, resultId: r.id })
+                        }
+                      >
+                        Delete
+                      </Button>
+                    )}
+                  </td>
                 </tr>
               ))}
               {sortedResults.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="text-muted">
+                  <td colSpan={7} className="text-muted">
                     No results yet.
                   </td>
                 </tr>
@@ -276,6 +329,89 @@ export default function Round3AdminPage() {
           </Table>
         </Card.Body>
       </Card>
+
+      <Modal
+        show={deleteModal.show}
+        onHide={() => setDeleteModal({ show: false, resultId: null })}
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Delete</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          Are you sure you want to delete this team result? This action cannot
+          be undone.
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={() => setDeleteModal({ show: false, resultId: null })}
+            disabled={deleting}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="danger"
+            onClick={handleDeleteResult}
+            disabled={deleting}
+          >
+            {deleting ? "Deleting..." : "Delete Result"}
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal
+        show={viewModal.show}
+        onHide={() => setViewModal({ show: false, result: null })}
+        size="lg"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Team Result Details</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {viewModal.result && (
+            <Table bordered size="sm">
+              <tbody>
+                <tr>
+                  <td className="fw-semibold">Team</td>
+                  <td>{viewModal.result.teamName}</td>
+                </tr>
+                <tr>
+                  <td className="fw-semibold">Money Earned</td>
+                  <td>
+                    <Badge bg="success" className="fs-6">
+                      ${viewModal.result.money.toLocaleString()}
+                    </Badge>
+                  </td>
+                </tr>
+                <tr>
+                  <td className="fw-semibold">Officer</td>
+                  <td>{viewModal.result.officer}</td>
+                </tr>
+                <tr>
+                  <td className="fw-semibold">Date</td>
+                  <td>
+                    {new Date(viewModal.result.createdAt).toLocaleString()}
+                  </td>
+                </tr>
+                {viewModal.result.notes && (
+                  <tr>
+                    <td className="fw-semibold">Notes</td>
+                    <td>{viewModal.result.notes}</td>
+                  </tr>
+                )}
+              </tbody>
+            </Table>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={() => setViewModal({ show: false, result: null })}
+          >
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
       <section className="mt-4">
         <EliminatorCard />

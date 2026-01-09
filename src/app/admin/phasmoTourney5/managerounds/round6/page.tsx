@@ -2,11 +2,13 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   Alert,
+  Badge,
   Button,
   Card,
   Col,
   Container,
   Form,
+  Modal,
   Row,
   Table,
 } from "react-bootstrap";
@@ -19,6 +21,7 @@ import {
   deleteRound6Team,
   listRound6TeamRunDetails,
   addRound6TeamRunDetail,
+  deleteRound6TeamRunDetail,
 } from "@/lib/services/phasmoTourney5";
 import { computeRound5Marks } from "@/lib/services/phasmoTourney5";
 
@@ -50,6 +53,15 @@ export default function Round6AdminPage() {
   const [showRoundSettings, setShowRoundSettings] = useState(false);
   const [teams, setTeams] = useState<Team[]>([]);
   const [results, setResults] = useState<TeamRunResult[]>([]);
+  const [deleteModal, setDeleteModal] = useState<{
+    show: boolean;
+    id: string | null;
+  }>({ show: false, id: null });
+  const [viewModal, setViewModal] = useState<{
+    show: boolean;
+    result: TeamRunResult | null;
+  }>({ show: false, result: null });
+  const [deleting, setDeleting] = useState(false);
   const [form, setForm] = useState<any>({
     teamId: "",
     ghostPicture: false,
@@ -89,6 +101,21 @@ export default function Round6AdminPage() {
   const sortedResults = useMemo(() => {
     return [...results].sort((a, b) => a.createdAt - b.createdAt);
   }, [results]);
+
+  async function handleDeleteResult() {
+    if (!deleteModal.id) return;
+    setDeleting(true);
+    try {
+      await deleteRound6TeamRunDetail(deleteModal.id);
+      const r = await listRound6TeamRunDetails();
+      setResults(r);
+      setDeleteModal({ show: false, id: null });
+    } catch (e: any) {
+      alert("Failed to delete team run result: " + (e?.message || ""));
+    } finally {
+      setDeleting(false);
+    }
+  }
 
   async function submitTeamResult(e: React.FormEvent) {
     e.preventDefault();
@@ -306,6 +333,7 @@ export default function Round6AdminPage() {
                 <th>Officer</th>
                 <th>Time</th>
                 <th>Notes</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -319,11 +347,28 @@ export default function Round6AdminPage() {
                     {new Date(r.createdAt).toLocaleString()}
                   </td>
                   <td className="text-muted small">{r.notes || "-"}</td>
+                  <td>
+                    <Button
+                      size="sm"
+                      variant="outline-primary"
+                      onClick={() => setViewModal({ show: true, result: r })}
+                      className="me-1"
+                    >
+                      View
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline-danger"
+                      onClick={() => setDeleteModal({ show: true, id: r.id })}
+                    >
+                      Delete
+                    </Button>
+                  </td>
                 </tr>
               ))}
               {sortedResults.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="text-muted">
+                  <td colSpan={7} className="text-muted">
                     No results yet.
                   </td>
                 </tr>
@@ -332,6 +377,80 @@ export default function Round6AdminPage() {
           </Table>
         </Card.Body>
       </Card>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        show={deleteModal.show}
+        onHide={() => setDeleteModal({ show: false, id: null })}
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Delete</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          Are you sure you want to delete this team run result? This action
+          cannot be undone.
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={() => setDeleteModal({ show: false, id: null })}
+            disabled={deleting}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="danger"
+            onClick={handleDeleteResult}
+            disabled={deleting}
+          >
+            {deleting ? "Deleting..." : "Delete"}
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* View Details Modal */}
+      <Modal
+        show={viewModal.show}
+        onHide={() => setViewModal({ show: false, result: null })}
+        size="lg"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Team Run Details</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {viewModal.result && (
+            <div>
+              <p>
+                <strong>Team:</strong> {viewModal.result.teamName}
+              </p>
+              <p>
+                <strong>Marks:</strong>{" "}
+                <Badge bg="success">
+                  {(viewModal.result as any).marks ?? 0}
+                </Badge>
+              </p>
+              <p>
+                <strong>Officer:</strong> {viewModal.result.officer}
+              </p>
+              <p>
+                <strong>Date:</strong>{" "}
+                {new Date(viewModal.result.createdAt).toLocaleString()}
+              </p>
+              <p>
+                <strong>Notes:</strong> {viewModal.result.notes || "None"}
+              </p>
+            </div>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={() => setViewModal({ show: false, result: null })}
+          >
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Container>
   );
 }

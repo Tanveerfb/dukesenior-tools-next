@@ -1,10 +1,20 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { Card, Form, Button, Row, Col, Table } from "react-bootstrap";
+import {
+  Card,
+  Form,
+  Button,
+  Row,
+  Col,
+  Table,
+  Modal,
+  Badge,
+} from "react-bootstrap";
 import { useAuth } from "@/hooks/useAuth";
 import {
   addEliminatorSession,
   listEliminatorSessions,
+  deleteEliminatorSession,
 } from "@/lib/services/phasmoTourney5";
 
 interface Player {
@@ -18,7 +28,7 @@ export default function EliminatorCard({
 }: {
   playerCountOptions?: number[];
 }) {
-  const { user } = useAuth();
+  const { user, admin } = useAuth();
   const officer = user?.displayName || user?.email || "Unknown";
   const [players, setPlayers] = useState<Player[]>([]);
   const [challenger, setChallenger] = useState<string>("");
@@ -35,8 +45,18 @@ export default function EliminatorCard({
       winnerId: string;
       officer: string;
       createdAt: number;
+      playerCount?: number | null;
     }>
   >([]);
+  const [deleteModal, setDeleteModal] = useState<{
+    show: boolean;
+    sessionId: string | null;
+  }>({ show: false, sessionId: null });
+  const [viewModal, setViewModal] = useState<{
+    show: boolean;
+    session: (typeof sessions)[0] | null;
+  }>({ show: false, session: null });
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -93,6 +113,21 @@ export default function EliminatorCard({
 
   function playerName(id: string) {
     return players.find((p) => p.id === id)?.name || id;
+  }
+
+  async function handleDelete() {
+    if (!deleteModal.sessionId) return;
+    setDeleting(true);
+    try {
+      await deleteEliminatorSession(deleteModal.sessionId);
+      const list = await listEliminatorSessions();
+      setSessions(list);
+      setDeleteModal({ show: false, sessionId: null });
+    } catch (error: any) {
+      alert(error?.message || "Failed to delete session");
+    } finally {
+      setDeleting(false);
+    }
   }
 
   return (
@@ -234,6 +269,7 @@ export default function EliminatorCard({
               <th>Winner</th>
               <th>Officer</th>
               <th>Time</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -247,11 +283,32 @@ export default function EliminatorCard({
                 <td className="text-muted small">
                   {new Date(s.createdAt).toLocaleString()}
                 </td>
+                <td>
+                  <Button
+                    size="sm"
+                    variant="outline-info"
+                    onClick={() => setViewModal({ show: true, session: s })}
+                  >
+                    View
+                  </Button>
+                  {admin && (
+                    <Button
+                      size="sm"
+                      variant="outline-danger"
+                      className="ms-2"
+                      onClick={() =>
+                        setDeleteModal({ show: true, sessionId: s.id })
+                      }
+                    >
+                      Delete
+                    </Button>
+                  )}
+                </td>
               </tr>
             ))}
             {sessions.length === 0 && (
               <tr>
-                <td colSpan={6} className="text-muted">
+                <td colSpan={7} className="text-muted">
                   No eliminator sessions yet.
                 </td>
               </tr>
@@ -259,6 +316,91 @@ export default function EliminatorCard({
           </tbody>
         </Table>
       </Card.Body>
+
+      <Modal
+        show={deleteModal.show}
+        onHide={() => setDeleteModal({ show: false, sessionId: null })}
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Delete</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          Are you sure you want to delete this eliminator session? This action
+          cannot be undone.
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={() => setDeleteModal({ show: false, sessionId: null })}
+            disabled={deleting}
+          >
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={handleDelete} disabled={deleting}>
+            {deleting ? "Deleting..." : "Delete Session"}
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal
+        show={viewModal.show}
+        onHide={() => setViewModal({ show: false, session: null })}
+        size="lg"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Eliminator Session Details</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {viewModal.session && (
+            <>
+              <Table bordered size="sm">
+                <tbody>
+                  <tr>
+                    <td className="fw-semibold">Challenger</td>
+                    <td>{playerName(viewModal.session.challengerId)}</td>
+                  </tr>
+                  <tr>
+                    <td className="fw-semibold">Defender</td>
+                    <td>{playerName(viewModal.session.defenderId)}</td>
+                  </tr>
+                  <tr>
+                    <td className="fw-semibold">Winner</td>
+                    <td>
+                      <Badge bg="success">
+                        {playerName(viewModal.session.winnerId)}
+                      </Badge>
+                    </td>
+                  </tr>
+                  {viewModal.session.playerCount && (
+                    <tr>
+                      <td className="fw-semibold">Player Count</td>
+                      <td>{viewModal.session.playerCount}</td>
+                    </tr>
+                  )}
+                  <tr>
+                    <td className="fw-semibold">Officer</td>
+                    <td>{viewModal.session.officer}</td>
+                  </tr>
+                  <tr>
+                    <td className="fw-semibold">Date</td>
+                    <td>
+                      {new Date(viewModal.session.createdAt).toLocaleString()}
+                    </td>
+                  </tr>
+                </tbody>
+              </Table>
+            </>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={() => setViewModal({ show: false, session: null })}
+          >
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Card>
   );
 }

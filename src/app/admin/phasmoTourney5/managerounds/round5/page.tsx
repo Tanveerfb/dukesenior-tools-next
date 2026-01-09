@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Alert,
   Button,
@@ -8,29 +8,20 @@ import {
   Container,
   Form,
   Row,
-  Table,
 } from "react-bootstrap";
 import { useAuth } from "@/hooks/useAuth";
 import GameSettingsAdminEditor from "../../../../../components/tourney/GameSettingsAdminEditor";
 import {
   computeRound5Marks,
   tourney5ExportRun,
-  listRound5Runs,
 } from "@/lib/services/phasmoTourney5";
 import EliminatorCard from "@/components/tourney/EliminatorCard";
+import RecordedRunsTable from "@/components/tourney/RecordedRunsTable";
 
 interface Player {
   id: string;
   name: string;
   status: "Active" | "Inactive" | "Eliminated";
-}
-interface Round5RunSummary {
-  id: string;
-  playerId: string;
-  marks: number;
-  officer: string;
-  createdAt: number;
-  notes?: string;
 }
 
 export default function Round5AdminPage() {
@@ -38,6 +29,11 @@ export default function Round5AdminPage() {
   const officer = user?.displayName || user?.email || "Unknown";
   const [players, setPlayers] = useState<Player[]>([]);
   const [showRoundSettings, setShowRoundSettings] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [message, setMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
   const [form, setForm] = useState({
     playerId: "",
     ghostPicture: false,
@@ -51,7 +47,6 @@ export default function Round5AdminPage() {
     correctGhostType: false,
     notes: "",
   });
-  const [runs, setRuns] = useState<Round5RunSummary[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -64,22 +59,8 @@ export default function Round5AdminPage() {
             : []
         );
       } catch {}
-      try {
-        const list = await listRound5Runs();
-        setRuns(list);
-      } catch {}
     })();
   }, []);
-
-  const sortedRuns = runs; // already ordered oldest-first from service
-
-  const playerNameById = useMemo(() => {
-    const map: Record<string, string> = {};
-    players.forEach((p) => {
-      map[p.id] = p.name;
-    });
-    return map;
-  }, [players]);
 
   function resetForm() {
     setForm({
@@ -113,6 +94,7 @@ export default function Round5AdminPage() {
       await tourney5ExportRun({
         officer,
         playerId: form.playerId,
+        roundId: "round5",
         notes: form.notes,
         objective1: form.objective1,
         objective2: form.objective2,
@@ -125,8 +107,6 @@ export default function Round5AdminPage() {
         perfectGame: form.perfectGame,
         marks,
       });
-      const list = await listRound5Runs();
-      setRuns(list);
       resetForm();
     } catch (e: any) {
       alert(e?.message || "Failed to record run");
@@ -165,6 +145,15 @@ export default function Round5AdminPage() {
           <Card.Title as="h2" className="h5 fw-semibold">
             Record Run Details
           </Card.Title>
+          {message && (
+            <Alert
+              variant={message.type === "success" ? "success" : "danger"}
+              dismissible
+              onClose={() => setMessage(null)}
+            >
+              {message.text}
+            </Alert>
+          )}
           <Form onSubmit={submitRun} className="mt-3">
             <Row className="g-3">
               <Col md={6}>
@@ -236,13 +225,14 @@ export default function Round5AdminPage() {
               </Col>
             </Row>
             <div className="d-flex gap-2 mt-3">
-              <Button type="submit" variant="primary">
-                Submit
+              <Button type="submit" variant="primary" disabled={submitting}>
+                {submitting ? "Submitting..." : "Submit"}
               </Button>
               <Button
                 type="button"
                 variant="outline-secondary"
                 onClick={resetForm}
+                disabled={submitting}
               >
                 Reset
               </Button>
@@ -251,46 +241,9 @@ export default function Round5AdminPage() {
         </Card.Body>
       </Card>
 
-      <Card className="border-0 shadow-sm mb-4">
-        <Card.Body>
-          <Card.Title as="h2" className="h5 fw-semibold">
-            Runs Summary (lowest first)
-          </Card.Title>
-          <Table responsive size="sm" className="mt-2">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Player</th>
-                <th>Marks</th>
-                <th>Officer</th>
-                <th>Time</th>
-                <th>Notes</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sortedRuns.map((r, i) => (
-                <tr key={r.id}>
-                  <td>{i + 1}</td>
-                  <td>{playerNameById[r.playerId] || r.playerId}</td>
-                  <td>{r.marks}</td>
-                  <td className="text-muted small">{r.officer}</td>
-                  <td className="text-muted small">
-                    {new Date(r.createdAt).toLocaleString()}
-                  </td>
-                  <td className="text-muted small">{r.notes || "-"}</td>
-                </tr>
-              ))}
-              {sortedRuns.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="text-muted">
-                    No runs yet.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </Table>
-        </Card.Body>
-      </Card>
+      <section className="mt-4">
+        <RecordedRunsTable roundId="round5" showAdminControls={true} />
+      </section>
 
       <section className="mt-4">
         <EliminatorCard />

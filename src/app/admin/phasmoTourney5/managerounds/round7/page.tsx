@@ -17,6 +17,7 @@ import {
   listRound7Runs,
 } from "@/lib/services/phasmoTourney5";
 import BestOutOfThree from "../../../../../components/tourney/BestOutOfThree";
+import RecordedRunsTable from "@/components/tourney/RecordedRunsTable";
 
 interface Player {
   id: string;
@@ -37,6 +38,11 @@ export default function Round7AdminPage() {
   const officer = user?.displayName || user?.email || "Unknown";
   const [players, setPlayers] = useState<Player[]>([]);
   const [showRoundSettings, setShowRoundSettings] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [message, setMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
   const [form, setForm] = useState({
     playerId: "",
     ghostPicture: false,
@@ -88,6 +94,8 @@ export default function Round7AdminPage() {
 
   async function submitRun(e: React.FormEvent) {
     e.preventDefault();
+    setSubmitting(true);
+    setMessage(null);
     const marks = computeRound5Marks({
       objective1: form.objective1,
       objective2: form.objective2,
@@ -102,6 +110,7 @@ export default function Round7AdminPage() {
       await tourney5ExportRun({
         officer,
         playerId: form.playerId,
+        roundId: "round7",
         notes: form.notes,
         objective1: form.objective1,
         objective2: form.objective2,
@@ -116,9 +125,12 @@ export default function Round7AdminPage() {
       });
       const list = await listRound7Runs();
       setRuns(list);
+      setMessage({ type: "success", text: "Run recorded successfully" });
       resetForm();
     } catch (e: any) {
-      alert(e?.message || "Failed to record run");
+      setMessage({ type: "error", text: e?.message || "Failed to record run" });
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -158,6 +170,15 @@ export default function Round7AdminPage() {
           <Card.Title as="h2" className="h5 fw-semibold">
             Record Run Details
           </Card.Title>
+          {message && (
+            <Alert
+              variant={message.type === "success" ? "success" : "danger"}
+              dismissible
+              onClose={() => setMessage(null)}
+            >
+              {message.text}
+            </Alert>
+          )}
           <Form onSubmit={submitRun} className="mt-3">
             <Row className="g-3">
               <Col md={6}>
@@ -242,13 +263,14 @@ export default function Round7AdminPage() {
               </Col>
             </Row>
             <div className="d-flex gap-2 mt-3">
-              <Button type="submit" variant="primary">
-                Submit
+              <Button type="submit" variant="primary" disabled={submitting}>
+                {submitting ? "Submitting..." : "Submit"}
               </Button>
               <Button
                 type="button"
                 variant="outline-secondary"
                 onClick={resetForm}
+                disabled={submitting}
               >
                 Reset
               </Button>
@@ -256,6 +278,10 @@ export default function Round7AdminPage() {
           </Form>
         </Card.Body>
       </Card>
+
+      <section className="mt-4">
+        <RecordedRunsTable roundId="round7" showAdminControls={true} />
+      </section>
 
       <BestOutOfThree
         players={players}

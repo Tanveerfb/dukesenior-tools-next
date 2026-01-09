@@ -5,8 +5,10 @@ import {
   getDocs,
   orderBy,
   query,
+  where,
   doc,
   setDoc,
+  deleteDoc,
 } from "firebase/firestore";
 
 const TOURNEY5_RECORDS = "Phasmophobia Tourney#5 Records";
@@ -14,6 +16,7 @@ const TOURNEY5_RECORDS = "Phasmophobia Tourney#5 Records";
 export async function tourney5ExportRun(params: {
   officer: string;
   playerId: string;
+  roundId: string;
   notes: string;
   objective1: boolean;
   objective2: boolean;
@@ -31,6 +34,7 @@ export async function tourney5ExportRun(params: {
   const docRef = await addDoc(colRef, {
     Officer: params.officer,
     PlayerId: params.playerId,
+    RoundId: params.roundId,
     Notes: params.notes,
     Objective1: params.objective1,
     Objective2: params.objective2,
@@ -47,13 +51,23 @@ export async function tourney5ExportRun(params: {
   return docRef.id;
 }
 
-export async function listRound5Runs() {
+export async function listRound5Runs(roundId?: string) {
   const colRef = collection(db, TOURNEY5_RECORDS);
-  const qcol = query(colRef, orderBy("TimeSubmitted", "asc"));
+  let qcol;
+  if (roundId) {
+    qcol = query(
+      colRef,
+      where("RoundId", "==", roundId),
+      orderBy("TimeSubmitted", "asc")
+    );
+  } else {
+    qcol = query(colRef, orderBy("TimeSubmitted", "asc"));
+  }
   const snap = await getDocs(qcol);
   const list: Array<{
     id: string;
     playerId: string;
+    roundId: string;
     marks: number;
     officer: string;
     createdAt: number;
@@ -73,6 +87,7 @@ export async function listRound5Runs() {
     list.push({
       id: d.id,
       playerId: data.PlayerId,
+      roundId: data.RoundId || "round1",
       marks: Number(data.Marks || 0),
       officer: data.Officer || "",
       createdAt: Number(data.TimeSubmitted || Date.now()),
@@ -91,9 +106,18 @@ export async function listRound5Runs() {
   return list;
 }
 
+export async function deleteRun(runId: string) {
+  const docRef = doc(db, TOURNEY5_RECORDS, runId);
+  await deleteDoc(docRef);
+}
+
 export async function listRound7Runs() {
   const colRef = collection(db, TOURNEY5_RECORDS);
-  const qcol = query(colRef, orderBy("TimeSubmitted", "asc"));
+  const qcol = query(
+    colRef,
+    where("RoundId", "==", "round7"),
+    orderBy("TimeSubmitted", "asc")
+  );
   const snap = await getDocs(qcol);
   const list: Array<{
     id: string;
@@ -361,6 +385,11 @@ export async function listTeamRunResults() {
   return list;
 }
 
+export async function deleteTeamRunResult(resultId: string) {
+  const docRef = doc(db, ROUND3_TEAM_RUNS, resultId);
+  await deleteDoc(docRef);
+}
+
 // ----- Eliminator -----
 const ELIMINATOR = "Phasmophobia Tourney#5 Eliminator";
 
@@ -409,6 +438,11 @@ export async function listEliminatorSessions() {
     });
   });
   return list;
+}
+
+export async function deleteEliminatorSession(sessionId: string) {
+  const docRef = doc(db, ELIMINATOR, sessionId);
+  await deleteDoc(docRef);
 }
 
 // ----- Round 4 Twitch Poll Records -----
@@ -636,4 +670,9 @@ export async function listRound6TeamRunDetails() {
     });
   });
   return list;
+}
+
+export async function deleteRound6TeamRunDetail(detailId: string) {
+  const docRef = doc(db, ROUND6_TEAM_RUN_DETAILS, detailId);
+  await deleteDoc(docRef);
 }
