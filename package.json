@@ -9,7 +9,7 @@
     "lint": "eslint",
     "test": "vitest run",
     "analyze": "ANALYZE=true npm run build",
-    "prepare": "husky || true"
+    "prepare": "husky"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.90.20",
@@ -38,6 +38,11 @@
     "remark-gfm": "^4.0.0",
     "sass": "^1.90.0",
     "timezones.json": "^1.7.2"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix"
+    ]
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

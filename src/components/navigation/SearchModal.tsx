@@ -7,8 +7,9 @@ import {
   Badge,
   InputGroup,
 } from "react-bootstrap";
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import InlineLink from "@/components/ui/InlineLink";
+import Fuse from "fuse.js";
 import {
   FaSearch,
   FaTimes,
@@ -60,6 +61,22 @@ export default function SearchModal({
     }
   }, [show]);
 
+  // Configure Fuse.js for fuzzy search
+  const fuse = useMemo(() => {
+    return new Fuse(data, {
+      keys: [
+        { name: "title", weight: 0.5 },
+        { name: "path", weight: 0.3 },
+        { name: "effective", weight: 0.2 },
+      ],
+      threshold: 0.4, // 0.0 = exact match, 1.0 = match anything
+      includeScore: true,
+      includeMatches: true,
+      minMatchCharLength: 2,
+      ignoreLocation: true,
+    });
+  }, [data]);
+
   const tagColor = useCallback(
     (tag: string) => registry.find((r) => r.name === tag)?.data.color,
     [registry]
@@ -74,30 +91,17 @@ export default function SearchModal({
   );
 
   const trimmed = q.trim();
-  const normalized = trimmed.toLowerCase();
   const hasQuery = trimmed.length > 0;
-  const results = normalized
-    ? data
-        .map((d) => {
-          // naive score: title match weight > path > tag
-          const title = (d.title || "").toLowerCase();
-          let score = 0;
-          if (title.includes(normalized)) score += 5;
-          if (d.path.toLowerCase().includes(normalized)) score += 3;
-          if (d.effective.some((t) => t.toLowerCase().includes(normalized)))
-            score += 1;
-          return { ...d, score };
-        })
-        .filter((d) => d.score > 0)
-        .sort(
-          (a, b) =>
-            b.score - a.score ||
-            (a.title || a.path).localeCompare(b.title || b.path)
-        )
-    : [];
+
+  // Use Fuse.js for fuzzy search
+  const results = useMemo(() => {
+    if (!trimmed) return [];
+    const fuseResults = fuse.search(trimmed);
+    return fuseResults.map((result) => result.item);
+  }, [trimmed, fuse]);
 
   // Suggestions when no query: top events
-  const suggestions = !normalized
+  const suggestions = !trimmed
     ? data
         .filter((d) => d.effective.includes("Event"))
         .slice(0, 5)
@@ -112,14 +116,14 @@ export default function SearchModal({
     if (!show) return;
     if (e.key === "ArrowDown") {
       e.preventDefault();
-      const max = (normalized ? results : suggestions).length;
+      const max = (trimmed ? results : suggestions).length;
       if (max) setActiveIdx((i) => (i + 1) % max);
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
-      const max = (normalized ? results : suggestions).length;
+      const max = (trimmed ? results : suggestions).length;
       if (max) setActiveIdx((i) => (i - 1 + max) % max);
     } else if (e.key === "Enter") {
-      const list = normalized ? results : suggestions;
+      const list = trimmed ? results : suggestions;
       const sel = list[activeIdx];
       if (sel) {
         router.push(safeHref(sel.path));
@@ -131,7 +135,8 @@ export default function SearchModal({
   };
 
   function highlight(text: string) {
-    if (!normalized) return text;
+    if (!trimmed) return text;
+    const normalized = trimmed.toLowerCase();
     const idx = text.toLowerCase().indexOf(normalized);
     if (idx === -1) return text;
     return (
@@ -178,7 +183,7 @@ export default function SearchModal({
           </Form>
           <div className="d-flex justify-content-between align-items-center mt-2 small text-muted px-1">
             <span>
-              {normalized
+              {trimmed
                 ? `${results.length} result${results.length === 1 ? "" : "s"}`
                 : "Suggestions"}
             </span>
@@ -198,7 +203,7 @@ export default function SearchModal({
         ref={listRef}
       >
         <ListGroup variant="flush">
-          {(normalized ? results : suggestions).map((r, idx) => {
+          {(trimmed ? results : suggestions).map((r, idx) => {
             const href = safeHref(r.path);
             const isActive = idx === activeIdx;
             return (
@@ -248,9 +253,9 @@ export default function SearchModal({
               </ListGroup.Item>
             );
           })}
-          {!(normalized ? results : suggestions).length && (
+          {!(trimmed ? results : suggestions).length && (
             <ListGroup.Item disabled className="text-center py-4 text-muted">
-              {normalized ? "No matches" : "No suggestions available"}
+              {trimmed ? "No matches" : "No suggestions available"}
             </ListGroup.Item>
           )}
         </ListGroup>

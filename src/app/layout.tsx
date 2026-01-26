@@ -4,6 +4,7 @@ import "@/styles/global.scss";
 import Providers from "../components/Providers";
 import AppChrome from "../components/layout/AppChrome";
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,6 +36,7 @@ export default function RootLayout({
         <Providers>
           <AppChrome>{children}</AppChrome>
           <Analytics />
+          <SpeedInsights />
         </Providers>
       </body>
     </html>

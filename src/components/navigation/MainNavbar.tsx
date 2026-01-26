@@ -23,9 +23,12 @@ import {
   FaShieldAlt,
   FaNewspaper,
 } from "react-icons/fa";
+import { FiHelpCircle } from "react-icons/fi";
 import { HiOutlineSparkles } from "react-icons/hi";
 import InlineLink from "@/components/ui/InlineLink";
 import SearchModal from "@/components/navigation/SearchModal";
+import KeyboardShortcutsModal from "@/components/ui/KeyboardShortcutsModal";
+import { useHotkeys } from "react-hotkeys-hook";
 import type { EffectiveMeta as EffectiveMetaType } from "@/types/tags";
 import { classifyEvents } from "@/lib/navigation/classify";
 import { useAuth } from "@/hooks/useAuth";
@@ -57,6 +60,7 @@ export default function MainNavbar() {
   const { user, logout, admin } = useAuth();
   const [profileHref, setProfileHref] = useState("/profile");
   const [showSearch, setShowSearch] = useState(false);
+  const [showShortcuts, setShowShortcuts] = useState(false);
   const [effective, setEffective] = useState<EffectiveMeta[]>([]);
   const [loading, setLoading] = useState(true);
   const [navExpanded, setNavExpanded] = useState(false);
@@ -71,6 +75,22 @@ export default function MainNavbar() {
   } = useTheme();
   const pathname = usePathname();
   const router = useRouter();
+
+  // Keyboard shortcuts
+  useHotkeys("mod+k", (e) => {
+    e.preventDefault();
+    setShowSearch(true);
+  });
+
+  useHotkeys("mod+/", (e) => {
+    e.preventDefault();
+    toggleTheme();
+  });
+
+  useHotkeys("mod+shift+/", (e) => {
+    e.preventDefault();
+    setShowShortcuts(true);
+  });
 
   useEffect(() => {
     let ignore = false;
@@ -243,6 +263,16 @@ export default function MainNavbar() {
               } theme`}
             >
               {theme === "dark" ? <FaSun /> : <FaMoon />}
+            </Button>
+
+            <Button
+              variant="link"
+              className="icon-btn"
+              onClick={() => setShowShortcuts(true)}
+              aria-label="Keyboard shortcuts"
+              title="Keyboard shortcuts (⌘?)"
+            >
+              <FiHelpCircle />
             </Button>
 
             {user ? (
@@ -708,6 +738,10 @@ export default function MainNavbar() {
       </Navbar>
       <div className="navbar-spacer" />
       <SearchModal show={showSearch} onHide={() => setShowSearch(false)} />
+      <KeyboardShortcutsModal
+        show={showShortcuts}
+        onHide={() => setShowShortcuts(false)}
+      />
     </>
   );
 }
