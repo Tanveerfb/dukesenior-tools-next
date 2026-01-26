@@ -59,6 +59,31 @@ $theme-colors: (
 
 :root {
   --font-scale: 1; // default; ThemeProvider updates at runtime
+  
+  // Shadow RGB values for theme-aware shadows
+  --shadow-rgb: 0, 0, 0;
+  
+  // Spacing tokens
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  --space-3xl: 4rem;
+  
+  // Fluid typography
+  --fs-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+  --fs-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+  --fs-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  --fs-lg: clamp(1.125rem, 1rem + 0.5vw, 1.5rem);
+  --fs-xl: clamp(1.5rem, 1.25rem + 1vw, 2.5rem);
+  --fs-2xl: clamp(2rem, 1.5rem + 2vw, 4rem);
+}
+
+// Dark mode adjustments
+[data-bs-theme="dark"] {
+  --shadow-rgb: 0, 0, 0;
 }
 
 html {
@@ -986,3 +1011,59 @@ a {
 [data-bs-theme="dark"] .list-group-item:hover {
   background-color: rgba(255, 255, 255, 0.05);
 }
+
+// ============================================
+// Card Elevation & Glass Effects System
+// ============================================
+
+.card-elevated {
+  box-shadow: 
+    0 2px 8px rgba(var(--shadow-rgb), 0.08),
+    0 8px 24px rgba(var(--shadow-rgb), 0.12);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+      0 4px 12px rgba(var(--shadow-rgb), 0.12),
+      0 12px 32px rgba(var(--shadow-rgb), 0.16);
+  }
+}
+
+.card-glass {
+  background: rgba(var(--bs-body-bg-rgb), 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(var(--bs-border-color-rgb), 0.2);
+}
+
+[data-bs-theme="dark"] .card-elevated {
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.3),
+    0 8px 24px rgba(0, 0, 0, 0.4);
+  
+  &:hover {
+    box-shadow: 
+      0 4px 12px rgba(0, 0, 0, 0.4),
+      0 12px 32px rgba(0, 0, 0, 0.5);
+  }
+}
+
+// ============================================
+// Skip to Content Link (Accessibility)
+// ============================================
+
+.skip-to-content {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--bs-primary);
+  color: white;
+  padding: 0.5rem 1rem;
+  z-index: 9999;
+  text-decoration: none;
+  
+  &:focus {
+    top: 0;
+  }
+}
+

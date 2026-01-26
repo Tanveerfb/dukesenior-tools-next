@@ -1,8 +1,15 @@
 import type { NextConfig } from "next";
 import path from "path";
 
+// Bundle analyzer support
+const withBundleAnalyzer = require("@next/bundle-analyzer")({
+  enabled: process.env.ANALYZE === "true",
+});
+
 // Configure remote image hosts used across the app (post banners, user avatars, Firebase storage, etc.)
 const nextConfig: NextConfig = {
+  // Add empty turbopack config to suppress Next.js 16 warning
+  turbopack: {},
   sassOptions: {
     includePaths: [
       path.join(process.cwd(), "node_modules"),
@@ -22,4 +29,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withBundleAnalyzer(nextConfig);
