@@ -16,6 +16,6 @@ export { default as SkeletonCard } from "./SkeletonCard";
 export { default as SkeletonTable } from "./SkeletonTable";
 export { default as SkeletonList } from "./SkeletonList";
 export { ThemeProvider } from "./ThemeProvider";
-export { default as ToastProvider } from "./ToastProvider";
+export { ToastProvider, useToast } from "./ToastProvider";
 
 // Future: add more shared UI exports here to avoid deep relative imports.
