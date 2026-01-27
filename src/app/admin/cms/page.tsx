@@ -28,7 +28,7 @@ export default function AdminCMSPage() {
   async function refresh() {
     setLoading(true);
     try {
-      setPosts(await listPosts(200));
+      setPosts(await listPosts(200, true)); // Include unpublished for admin
     } finally {
       setLoading(false);
     }
@@ -47,6 +47,9 @@ export default function AdminCMSPage() {
     <Container className="py-4">
       <div className="d-flex align-items-center mb-3">
         <h1 className="mb-0 me-auto">CMS Admin</h1>
+        <Button as={InlineLink as any} href="/admin/cms/analytics" variant="info" className="me-2">
+          Analytics
+        </Button>
         <Button as={InlineLink as any} href="/admin/cms/new" variant="success">
           New Post
         </Button>
@@ -56,7 +59,7 @@ export default function AdminCMSPage() {
           variant="outline-info"
           className="ms-2"
         >
-          New Comments
+          Comments
         </Button>
       </div>
 
@@ -84,11 +87,17 @@ export default function AdminCMSPage() {
             >
               {p.title}
             </div>
-            {p.pinned ? (
-              <Badge bg="warning" text="dark">
-                Pinned
-              </Badge>
-            ) : null}
+            <div className="d-flex gap-2">
+              {p.status === 'draft' && (
+                <Badge bg="secondary">Draft</Badge>
+              )}
+              {p.status === 'scheduled' && (
+                <Badge bg="primary">Scheduled</Badge>
+              )}
+              {p.pinned && (
+                <Badge bg="warning" text="dark">Pinned</Badge>
+              )}
+            </div>
           </Card.Header>
           <Card.Body>
             <div style={{ minWidth: 0 }}>
@@ -144,6 +153,16 @@ export default function AdminCMSPage() {
               <Badge bg="secondary" className="ms-2">
                 {new Date(p.createdAt).toLocaleDateString()}
               </Badge>
+              {p.views > 0 && (
+                <Badge bg="info" className="ms-2">
+                  {p.views} views
+                </Badge>
+              )}
+              {p.status === 'scheduled' && p.scheduledFor && (
+                <Badge bg="primary" className="ms-2">
+                  Scheduled: {new Date(p.scheduledFor).toLocaleString()}
+                </Badge>
+              )}
             </div>
           </Card.Body>
         </Card>

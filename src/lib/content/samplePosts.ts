@@ -37,6 +37,8 @@ export const samplePosts: CMSPost[] = [
     likeCount: 0,
     dislikeCount: 0,
     commentCount: 0,
+    status: 'published',
+    views: 0,
   },
   {
     id: 'feature-demo-demon-slayer-infinity-castle',
@@ -101,6 +103,8 @@ Enjoy testing the CMS features — leave comments, reactions, and try the image 
     likeCount: 5,
     dislikeCount: 0,
     commentCount: 0,
+    status: 'published',
+    views: 0,
   },
   {
     id: 'sample-2',
@@ -131,6 +135,8 @@ Enjoy testing the CMS features — leave comments, reactions, and try the image 
     likeCount: 0,
     dislikeCount: 0,
     commentCount: 0,
+    status: 'published',
+    views: 0,
   }
 ];
 

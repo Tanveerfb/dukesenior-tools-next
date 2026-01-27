@@ -56,6 +56,9 @@ export default function NewPostPage() {
   }>({});
   const maxImages = 10;
   const [preview, setPreview] = useState(true);
+  const [postStatus, setPostStatus] = useState<'draft' | 'published' | 'scheduled'>('published');
+  const [scheduledDate, setScheduledDate] = useState('');
+  const [scheduledTime, setScheduledTime] = useState('');
 
   useEffect(() => {
     async function init() {
@@ -75,6 +78,12 @@ export default function NewPostPage() {
             setContent(post.content || "");
             setBannerUrl(post.bannerUrl || "");
             setSelectedTags(post.tags || []);
+            setPostStatus(post.status || 'published');
+            if (post.scheduledFor) {
+              const d = new Date(post.scheduledFor);
+              setScheduledDate(d.toISOString().split('T')[0]);
+              setScheduledTime(d.toTimeString().slice(0, 5));
+            }
           }
         }
       } finally {
@@ -205,6 +214,7 @@ export default function NewPostPage() {
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [content]);
 
   const toolbar = [
@@ -246,7 +256,7 @@ export default function NewPostPage() {
         (name, pct) => {
           setFileProgress((p) => ({ ...p, [name]: pct }));
         },
-        (name, err) => {
+        (name, _err) => {
           setToasts((t) => [
             {
               id: name + Date.now(),
@@ -343,6 +353,36 @@ export default function NewPostPage() {
   async function saveWithValidation() {
     if (!user) return;
     if (!title.trim()) return;
+    
+    // Validate scheduled date/time
+    let scheduledFor: number | undefined;
+    if (postStatus === 'scheduled') {
+      if (!scheduledDate || !scheduledTime) {
+        setToasts((t) => [
+          {
+            id: "validate-" + Date.now(),
+            text: "Please provide both date and time for scheduled posts",
+            variant: "danger",
+          },
+          ...t,
+        ]);
+        return;
+      }
+      const scheduledDateTime = new Date(`${scheduledDate}T${scheduledTime}`);
+      if (scheduledDateTime.getTime() <= Date.now()) {
+        setToasts((t) => [
+          {
+            id: "validate-" + Date.now(),
+            text: "Scheduled time must be in the future",
+            variant: "danger",
+          },
+          ...t,
+        ]);
+        return;
+      }
+      scheduledFor = scheduledDateTime.getTime();
+    }
+    
     setSaving(true);
     try {
       if (bannerUrl) {
@@ -367,6 +407,8 @@ export default function NewPostPage() {
           content,
           bannerUrl,
           tags: selectedTags,
+          status: postStatus,
+          scheduledFor,
         });
       } else {
         await createPost(user!.uid, user!.email || "unknown", {
@@ -374,6 +416,8 @@ export default function NewPostPage() {
           content,
           bannerUrl,
           tags: selectedTags,
+          status: postStatus,
+          scheduledFor,
         });
       }
       router.push("/admin/cms");
@@ -425,6 +469,54 @@ export default function NewPostPage() {
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Post title"
             />
+          </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Label>Status</Form.Label>
+            <div className="d-flex gap-2 mb-2">
+              <Button
+                size="sm"
+                variant={postStatus === 'draft' ? 'primary' : 'outline-primary'}
+                onClick={() => setPostStatus('draft')}
+              >
+                Draft
+              </Button>
+              <Button
+                size="sm"
+                variant={postStatus === 'published' ? 'success' : 'outline-success'}
+                onClick={() => setPostStatus('published')}
+              >
+                Published
+              </Button>
+              <Button
+                size="sm"
+                variant={postStatus === 'scheduled' ? 'info' : 'outline-info'}
+                onClick={() => setPostStatus('scheduled')}
+              >
+                Scheduled
+              </Button>
+            </div>
+            {postStatus === 'scheduled' && (
+              <Row className="mt-2">
+                <Col md={6}>
+                  <Form.Label className="small">Date</Form.Label>
+                  <Form.Control
+                    type="date"
+                    value={scheduledDate}
+                    onChange={(e) => setScheduledDate(e.target.value)}
+                    min={new Date().toISOString().split('T')[0]}
+                  />
+                </Col>
+                <Col md={6}>
+                  <Form.Label className="small">Time</Form.Label>
+                  <Form.Control
+                    type="time"
+                    value={scheduledTime}
+                    onChange={(e) => setScheduledTime(e.target.value)}
+                  />
+                </Col>
+              </Row>
+            )}
           </Form.Group>
 
           <Form.Group className="mb-3 d-flex align-items-start gap-3">
@@ -672,7 +764,7 @@ export default function NewPostPage() {
               disabled={!title.trim() || saving}
               onClick={saveWithValidation}
             >
-              {saving ? "Saving..." : editId ? "Update Post" : "Publish Post"}
+              {saving ? "Saving..." : editId ? "Update Post" : postStatus === 'draft' ? "Save Draft" : postStatus === 'scheduled' ? "Schedule Post" : "Publish Post"}
             </Button>
             <Button variant="secondary" onClick={() => setPreview((p) => !p)}>
               {preview ? "Hide Preview" : "Show Preview"}
