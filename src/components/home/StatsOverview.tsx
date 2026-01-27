@@ -1,8 +1,7 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Box, Container, Grid, Paper, Stack, Typography } from "@mui/material";
 import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
 import { useTheme } from "@mui/material/styles";
 import {
   EmojiEvents as TrophyIcon,
@@ -32,6 +31,7 @@ function CountUpAnimation({ end, duration = 2000, suffix = "" }: { end: number; 
 
     let startTime: number | null = null;
     const startValue = 0;
+    let animationFrameId: number;
 
     const animate = (currentTime: number) => {
       if (startTime === null) startTime = currentTime;
@@ -44,13 +44,20 @@ function CountUpAnimation({ end, duration = 2000, suffix = "" }: { end: number; 
       setCount(currentCount);
 
       if (progress < 1) {
-        requestAnimationFrame(animate);
+        animationFrameId = requestAnimationFrame(animate);
       } else {
         setCount(end);
       }
     };
 
-    requestAnimationFrame(animate);
+    animationFrameId = requestAnimationFrame(animate);
+
+    // Cleanup function to cancel animation on unmount
+    return () => {
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+    };
   }, [end, duration, isInView]);
 
   return (

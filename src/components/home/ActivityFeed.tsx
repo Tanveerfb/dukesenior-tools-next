@@ -12,7 +12,7 @@ import {
   Box,
 } from "@mui/material";
 import { motion } from "framer-motion";
-import { useTheme } from "@mui/material/styles";
+import { useTheme, type Theme } from "@mui/material/styles";
 import {
   ThumbUp as ThumbUpIcon,
   VideoLibrary as VideoIcon,
@@ -100,7 +100,7 @@ function getActivityIcon(type: Activity["type"]) {
   }
 }
 
-function getActivityColor(type: Activity["type"], theme: any) {
+function getActivityColor(type: Activity["type"], theme: Theme) {
   switch (type) {
     case "vote":
       return theme.palette.success.main;

@@ -39,6 +39,7 @@ const quickActions: QuickAction[] = [
     icon: <VideoIcon />,
     label: "Recorded Runs",
     description: "Browse match recordings",
+    // Note: Both link to the tournament series page where users can navigate to specific sections
     href: "/phasmotourney-series",
   },
   {
