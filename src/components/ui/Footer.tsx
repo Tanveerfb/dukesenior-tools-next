@@ -1,9 +1,8 @@
 import Link from "next/link";
-import { Col, Container, Row, Stack } from "react-bootstrap";
+import { Box, Container, Grid, Typography, Stack, Button, Link as MuiLink } from "@mui/material";
 import { FaDiscord, FaInstagram, FaTwitter } from "react-icons/fa";
 import { RiNextjsFill } from "react-icons/ri";
-import { BsFillBootstrapFill } from "react-icons/bs";
-import { SiKofi } from "react-icons/si";
+import { SiKofi, SiMui, SiTailwindcss } from "react-icons/si";
 
 const navSections = [
   {
@@ -58,102 +57,154 @@ const socialLinks = [
 
 export default function Footer() {
   return (
-    <footer className="border-top bg-body-tertiary mt-auto">
-      <Container className="py-5">
-        <Row className="gy-5">
-          <Col lg={4}>
-            <h2 className="h4 fw-semibold mb-3">The Lair of Evil</h2>
-            <p className="text-muted small mb-4">
+    <Box
+      component="footer"
+      sx={{
+        borderTop: 1,
+        borderColor: "divider",
+        bgcolor: "background.paper",
+        mt: "auto",
+        py: 5,
+      }}
+    >
+      <Container maxWidth="xl">
+        <Grid container spacing={5}>
+          <Grid item xs={12} lg={4}>
+            <Typography variant="h5" component="h2" gutterBottom fontWeight={600}>
+              The Lair of Evil
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
               Tools, event dashboards, and community resources powering the
               Phasmo Tourney project and the DukeSenior community.
-            </p>
-            <Stack
-              direction="horizontal"
-              gap={3}
-              className="flex-wrap align-items-center"
-            >
-              <a
+            </Typography>
+            <Stack direction="row" spacing={2} flexWrap="wrap" alignItems="center" sx={{ mb: 2 }}>
+              <Button
                 href="https://ko-fi.com/dukesenior"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn btn-warning d-inline-flex align-items-center gap-2"
+                variant="contained"
+                color="warning"
+                startIcon={<SiKofi />}
+                sx={{
+                  textTransform: "none",
+                  transition: "transform 0.2s",
+                  "&:hover": {
+                    transform: "translateY(-2px)",
+                  },
+                }}
               >
-                <SiKofi /> Support on Ko-Fi
-              </a>
-              <span className="text-muted small">
+                Support on Ko-Fi
+              </Button>
+              <Typography variant="caption" color="text.secondary">
                 &copy; {new Date().getFullYear()} DukeSenior
-              </span>
+              </Typography>
             </Stack>
-            <div className="text-muted small mt-3 d-flex align-items-center gap-3">
-              <span className="d-inline-flex align-items-center gap-1">
-                <RiNextjsFill /> Next.js
-              </span>
-              <span className="d-inline-flex align-items-center gap-1">
-                <BsFillBootstrapFill /> React-Bootstrap
-              </span>
-            </div>
-          </Col>
+            <Stack direction="row" spacing={2} alignItems="center">
+              <Typography variant="caption" color="text.secondary" sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                <RiNextjsFill size={16} /> Next.js
+              </Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                <SiMui size={14} /> MUI
+              </Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                <SiTailwindcss size={14} /> Tailwind
+              </Typography>
+            </Stack>
+          </Grid>
 
           {navSections.map((section) => (
-            <Col key={section.title} xs={6} md={4} lg={2}>
-              <h3 className="text-uppercase small text-muted fw-semibold mb-3">
+            <Grid item xs={6} md={4} lg={2} key={section.title}>
+              <Typography
+                variant="overline"
+                color="text.secondary"
+                fontWeight={600}
+                sx={{ mb: 2, display: "block" }}
+              >
                 {section.title}
-              </h3>
-              <ul className="list-unstyled small mb-0">
+              </Typography>
+              <Stack component="ul" spacing={1.5} sx={{ listStyle: "none", p: 0, m: 0 }}>
                 {section.links.map((link) => (
-                  <li key={link.href} className="mb-2">
+                  <Box component="li" key={link.href}>
                     {link.external ? (
-                      <a
+                      <MuiLink
                         href={link.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-decoration-none text-reset"
+                        color="text.primary"
+                        underline="hover"
+                        sx={{
+                          fontSize: "0.875rem",
+                          transition: "color 0.2s",
+                          "&:hover": { color: "primary.main" },
+                        }}
                       >
                         {link.label}
-                      </a>
+                      </MuiLink>
                     ) : (
-                      <Link
+                      <MuiLink
+                        component={Link}
                         href={link.href}
-                        className="text-decoration-none text-reset"
+                        color="text.primary"
+                        underline="hover"
+                        sx={{
+                          fontSize: "0.875rem",
+                          transition: "color 0.2s",
+                          "&:hover": { color: "primary.main" },
+                        }}
                       >
                         {link.label}
-                      </Link>
+                      </MuiLink>
                     )}
-                  </li>
+                  </Box>
                 ))}
-              </ul>
-            </Col>
+              </Stack>
+            </Grid>
           ))}
-        </Row>
+        </Grid>
 
-        <Row className="mt-5 pt-4 border-top">
-          <Col md={6} className="text-muted small">
-            Built with care for players, casters, and crew of the Phasmo
-            Tourney.
-          </Col>
-          <Col md={6} className="mt-3 mt-md-0">
-            <Stack
-              direction="horizontal"
-              gap={3}
-              className="justify-content-md-end flex-wrap"
-            >
-              {socialLinks.map((social) => (
-                <a
-                  key={social.label}
-                  href={social.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-muted d-inline-flex align-items-center gap-2"
-                  aria-label={social.label}
-                >
-                  {social.icon}
-                  <span className="small">{social.label}</span>
-                </a>
-              ))}
-            </Stack>
-          </Col>
-        </Row>
+        <Box
+          sx={{
+            mt: 5,
+            pt: 4,
+            borderTop: 1,
+            borderColor: "divider",
+            display: "flex",
+            flexDirection: { xs: "column", md: "row" },
+            justifyContent: "space-between",
+            alignItems: { xs: "flex-start", md: "center" },
+            gap: 3,
+          }}
+        >
+          <Typography variant="body2" color="text.secondary">
+            Built with care for players, casters, and crew of the Phasmo Tourney.
+          </Typography>
+          <Stack direction="row" spacing={3} flexWrap="wrap">
+            {socialLinks.map((social) => (
+              <MuiLink
+                key={social.label}
+                href={social.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                color="text.secondary"
+                aria-label={social.label}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  transition: "color 0.2s, transform 0.2s",
+                  "&:hover": {
+                    color: "primary.main",
+                    transform: "translateY(-2px)",
+                  },
+                }}
+              >
+                {social.icon}
+                <Typography variant="caption">{social.label}</Typography>
+              </MuiLink>
+            ))}
+          </Stack>
+        </Box>
       </Container>
-    </footer>
+    </Box>
   );
 }

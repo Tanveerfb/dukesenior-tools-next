@@ -1,7 +1,8 @@
 "use client";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { Breadcrumb } from "react-bootstrap";
+import { Box, Breadcrumbs, Typography, Link as MuiLink, Container } from "@mui/material";
+import { NavigateNext as NavigateNextIcon } from "@mui/icons-material";
 import { motion } from "framer-motion";
 
 interface BreadcrumbItem {
@@ -25,6 +26,8 @@ function pathToBreadcrumbs(pathname: string): BreadcrumbItem[] {
   return breadcrumbs;
 }
 
+const MotionBox = motion(Box);
+
 export default function DynamicBreadcrumb() {
   const pathname = usePathname();
 
@@ -37,29 +40,49 @@ export default function DynamicBreadcrumb() {
   if (breadcrumbs.length <= 1) return null;
 
   return (
-    <motion.div
+    <MotionBox
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="bg-body-secondary py-2 border-bottom"
+      sx={{
+        bgcolor: "action.hover",
+        py: 1.5,
+        borderBottom: 1,
+        borderColor: "divider",
+      }}
     >
-      <div className="container">
-        <Breadcrumb className="mb-0">
+      <Container maxWidth="xl">
+        <Breadcrumbs
+          separator={<NavigateNextIcon fontSize="small" />}
+          aria-label="breadcrumb"
+        >
           {breadcrumbs.map((crumb, index) => {
             const isLast = index === breadcrumbs.length - 1;
-            return (
-              <Breadcrumb.Item
-                key={crumb.href || crumb.label}
-                active={isLast}
-                linkAs={isLast ? "span" : Link}
-                href={isLast ? undefined : crumb.href}
+            return isLast ? (
+              <Typography key={crumb.label} color="text.primary" fontSize="0.875rem">
+                {crumb.label}
+              </Typography>
+            ) : (
+              <MuiLink
+                key={crumb.href}
+                component={Link}
+                href={crumb.href!}
+                color="inherit"
+                underline="hover"
+                fontSize="0.875rem"
+                sx={{
+                  transition: "color 0.2s",
+                  "&:hover": {
+                    color: "primary.main",
+                  },
+                }}
               >
                 {crumb.label}
-              </Breadcrumb.Item>
+              </MuiLink>
             );
           })}
-        </Breadcrumb>
-      </div>
-    </motion.div>
+        </Breadcrumbs>
+      </Container>
+    </MotionBox>
   );
 }
