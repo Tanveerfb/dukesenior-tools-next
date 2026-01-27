@@ -41,7 +41,10 @@ export default function HeroSection() {
         }}
       />
 
-      <Container maxWidth="lg" sx={{ py: { xs: 6, md: 10 }, position: "relative", zIndex: 1 }}>
+      <Container
+        maxWidth="lg"
+        sx={{ py: { xs: 6, md: 10 }, position: "relative", zIndex: 1 }}
+      >
         <Stack spacing={4} alignItems="center" textAlign="center">
           <MotionBox
             initial={{ opacity: 0, y: -20 }}
@@ -54,7 +57,10 @@ export default function HeroSection() {
                 px: 2,
                 py: 0.5,
                 borderRadius: 2,
-                bgcolor: theme.palette.mode === "dark" ? "primary.dark" : "primary.light",
+                bgcolor:
+                  theme.palette.mode === "dark"
+                    ? "primary.dark"
+                    : "primary.light",
                 color: "primary.contrastText",
                 fontSize: "0.875rem",
                 fontWeight: 600,
@@ -68,7 +74,6 @@ export default function HeroSection() {
 
           <MotionTypography
             variant="h1"
-            component="h1"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
@@ -93,8 +98,8 @@ export default function HeroSection() {
               fontSize: { xs: "1rem", md: "1.25rem" },
             }}
           >
-            Brackets, recorded runs, stats, leaderboards, and community features — all in one place.
-            Join the DukeSenior community today.
+            Brackets, recorded runs, stats, leaderboards, and community features
+            — all in one place. Join the DukeSenior community today.
           </MotionTypography>
 
           <MotionBox
@@ -102,29 +107,33 @@ export default function HeroSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
           >
-            <Stack direction={{ xs: "column", sm: "row" }} spacing={2} justifyContent="center">
-              <MotionButton
-                component={Link}
-                href="/phasmotourney-series"
-                variant="contained"
-                size="large"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                sx={{ px: 4, py: 1.5, fontSize: "1rem" }}
-              >
-                View Tournaments
-              </MotionButton>
-              <MotionButton
-                component={Link}
-                href="/suggestions"
-                variant="outlined"
-                size="large"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                sx={{ px: 4, py: 1.5, fontSize: "1rem" }}
-              >
-                Community Hub
-              </MotionButton>
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              spacing={2}
+              justifyContent="center"
+            >
+              <Link href="/phasmotourney-series" passHref legacyBehavior>
+                <MotionButton
+                  variant="contained"
+                  size="large"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  sx={{ px: 4, py: 1.5, fontSize: "1rem" }}
+                >
+                  View Tournaments
+                </MotionButton>
+              </Link>
+              <Link href="/suggestions" passHref legacyBehavior>
+                <MotionButton
+                  variant="outlined"
+                  size="large"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  sx={{ px: 4, py: 1.5, fontSize: "1rem" }}
+                >
+                  Community Hub
+                </MotionButton>
+              </Link>
             </Stack>
           </MotionBox>
         </Stack>
