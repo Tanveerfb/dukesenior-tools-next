@@ -1,12 +1,12 @@
 "use client";
-import { createContext, useContext, useState, ReactNode, useEffect } from "react";
-import { Toast, ToastContainer } from "react-bootstrap";
+import { createContext, useContext, useState, ReactNode, useCallback } from "react";
+import { Snackbar, Alert, AlertTitle, Box } from "@mui/material";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface ToastMessage {
   id: string;
   message: string;
-  variant?: "success" | "danger" | "warning" | "info";
+  variant?: "success" | "error" | "warning" | "info";
   duration?: number;
 }
 
@@ -22,10 +22,12 @@ const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
 let toastCounter = 0;
 
+const MotionBox = motion(Box);
+
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
-  const showToast = (
+  const showToast = useCallback((
     message: string,
     variant: ToastMessage["variant"] = "info",
     duration = 3000
@@ -33,69 +35,68 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     const id = `toast-${++toastCounter}`;
     const newToast: ToastMessage = { id, message, variant, duration };
     setToasts((prev) => [...prev, newToast]);
-  };
+  }, []);
 
-  const removeToast = (id: string) => {
+  const removeToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
+  }, []);
+
+  const handleClose = useCallback((id: string) => (_event?: React.SyntheticEvent | Event, reason?: string) => {
+    if (reason === 'clickaway') return;
+    removeToast(id);
+  }, [removeToast]);
+
+  const variantTitles = {
+    success: "Success",
+    error: "Error",
+    warning: "Warning",
+    info: "Info",
   };
-
-  useEffect(() => {
-    if (toasts.length === 0) return;
-
-    const latestToast = toasts[toasts.length - 1];
-    const timeoutId = setTimeout(() => {
-      removeToast(latestToast.id);
-    }, latestToast.duration);
-
-    return () => clearTimeout(timeoutId);
-  }, [toasts]);
 
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      <ToastContainer
-        position="top-end"
-        className="p-3"
-        style={{ zIndex: 9999, position: "fixed" }}
+      <Box
+        sx={{
+          position: "fixed",
+          top: 16,
+          right: 16,
+          zIndex: 9999,
+          display: "flex",
+          flexDirection: "column",
+          gap: 1,
+        }}
       >
         <AnimatePresence>
           {toasts.map((toast) => (
-            <motion.div
+            <MotionBox
               key={toast.id}
               initial={{ opacity: 0, y: -20, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
               transition={{ duration: 0.3 }}
             >
-              <Toast
-                onClose={() => removeToast(toast.id)}
-                bg={toast.variant}
-                className="mb-2"
+              <Snackbar
+                open={true}
+                autoHideDuration={toast.duration}
+                onClose={handleClose(toast.id)}
+                anchorOrigin={{ vertical: "top", horizontal: "right" }}
+                sx={{ position: "relative", top: 0, right: 0 }}
               >
-                <Toast.Header>
-                  <strong className="me-auto">
-                    {toast.variant === "success" && "Success"}
-                    {toast.variant === "danger" && "Error"}
-                    {toast.variant === "warning" && "Warning"}
-                    {toast.variant === "info" && "Info"}
-                  </strong>
-                </Toast.Header>
-                <Toast.Body
-                  className={
-                    toast.variant === "success" ||
-                    toast.variant === "danger" ||
-                    toast.variant === "warning"
-                      ? "text-white"
-                      : ""
-                  }
+                <Alert
+                  onClose={handleClose(toast.id)}
+                  severity={toast.variant}
+                  variant="filled"
+                  sx={{ width: "100%", minWidth: 300 }}
                 >
+                  <AlertTitle>{variantTitles[toast.variant || "info"]}</AlertTitle>
                   {toast.message}
-                </Toast.Body>
-              </Toast>
-            </motion.div>
+                </Alert>
+              </Snackbar>
+            </MotionBox>
           ))}
         </AnimatePresence>
-      </ToastContainer>
+      </Box>
     </ToastContext.Provider>
   );
 }

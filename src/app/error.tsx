@@ -1,8 +1,21 @@
-import Link from "next/link";
-import { Box, Container, Typography, Button, Stack } from "@mui/material";
-import { Home as HomeIcon, Search as SearchIcon } from "@mui/icons-material";
+"use client";
 
-export default function NotFound() {
+import { useEffect } from "react";
+import { Box, Container, Typography, Button, Stack } from "@mui/material";
+import { Home as HomeIcon, Refresh as RefreshIcon } from "@mui/icons-material";
+
+export default function Error({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
+  useEffect(() => {
+    // Log the error to an error reporting service
+    console.error("Application error:", error);
+  }, [error]);
+
   return (
     <Container maxWidth="md">
       <Box
@@ -21,29 +34,50 @@ export default function NotFound() {
           sx={{
             fontSize: { xs: "4rem", md: "6rem" },
             fontWeight: 700,
-            background: "linear-gradient(45deg, #ab2fb1, #36453b)",
+            background: "linear-gradient(45deg, #a63a50, #ab2fb1)",
             backgroundClip: "text",
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
           }}
         >
-          404
+          Oops!
         </Typography>
         
         <Typography variant="h4" component="h2" gutterBottom>
-          Page Not Found
+          Something went wrong
         </Typography>
         
         <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 500 }}>
-          The page you are looking for doesn't exist or has been moved.
-          Let's get you back on track.
+          We encountered an unexpected error. Don't worry, our team has been notified
+          and is working on it.
         </Typography>
+        
+        {error.digest && (
+          <Typography variant="caption" color="text.disabled" sx={{ fontFamily: "monospace" }}>
+            Error ID: {error.digest}
+          </Typography>
+        )}
         
         <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ mt: 2 }}>
           <Button
-            component={Link}
-            href="/"
+            onClick={reset}
             variant="contained"
+            size="large"
+            startIcon={<RefreshIcon />}
+            sx={{
+              textTransform: "none",
+              px: 4,
+              transition: "transform 0.2s",
+              "&:hover": {
+                transform: "translateY(-2px)",
+              },
+            }}
+          >
+            Try Again
+          </Button>
+          <Button
+            href="/"
+            variant="outlined"
             size="large"
             startIcon={<HomeIcon />}
             sx={{
@@ -56,23 +90,6 @@ export default function NotFound() {
             }}
           >
             Return Home
-          </Button>
-          <Button
-            component={Link}
-            href="/phasmotourney-series"
-            variant="outlined"
-            size="large"
-            startIcon={<SearchIcon />}
-            sx={{
-              textTransform: "none",
-              px: 4,
-              transition: "transform 0.2s",
-              "&:hover": {
-                transform: "translateY(-2px)",
-              },
-            }}
-          >
-            Browse Tourneys
           </Button>
         </Stack>
       </Box>

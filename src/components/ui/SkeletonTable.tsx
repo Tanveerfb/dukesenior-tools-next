@@ -1,7 +1,8 @@
 "use client";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
-import { Table } from "react-bootstrap";
+import { Table, TableHead, TableBody, TableRow, TableCell, Paper } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 
 interface SkeletonTableProps {
   rows?: number;
@@ -14,33 +15,37 @@ export default function SkeletonTable({
   columns = 4,
   className = "",
 }: SkeletonTableProps) {
+  const theme = useTheme();
+
   return (
     <SkeletonTheme
-      baseColor="var(--bs-secondary-bg)"
-      highlightColor="var(--bs-tertiary-bg)"
+      baseColor={theme.palette.action.hover}
+      highlightColor={theme.palette.action.selected}
     >
-      <Table responsive className={className}>
-        <thead>
-          <tr>
-            {Array.from({ length: columns }).map((_, index) => (
-              <th key={index}>
-                <Skeleton height={20} />
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {Array.from({ length: rows }).map((_, rowIndex) => (
-            <tr key={rowIndex}>
-              {Array.from({ length: columns }).map((_, colIndex) => (
-                <td key={colIndex}>
-                  <Skeleton height={16} />
-                </td>
+      <Paper className={className} sx={{ width: "100%", overflow: "auto" }}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              {Array.from({ length: columns }).map((_, index) => (
+                <TableCell key={index}>
+                  <Skeleton height={20} />
+                </TableCell>
               ))}
-            </tr>
-          ))}
-        </tbody>
-      </Table>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {Array.from({ length: rows }).map((_, rowIndex) => (
+              <TableRow key={rowIndex}>
+                {Array.from({ length: columns }).map((_, colIndex) => (
+                  <TableCell key={colIndex}>
+                    <Skeleton height={16} />
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Paper>
     </SkeletonTheme>
   );
 }

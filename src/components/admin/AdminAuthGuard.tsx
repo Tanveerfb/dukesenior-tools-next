@@ -1,6 +1,6 @@
 "use client";
 import { ReactNode } from "react";
-import { Alert, Container } from "react-bootstrap";
+import { Alert, Container } from "@mui/material";
 import { useAuth } from "@/hooks/useAuth";
 
 interface AdminAuthGuardProps {
@@ -33,8 +33,8 @@ export default function AdminAuthGuard({
 
   if (!admin) {
     return (
-      <Container className="py-4">
-        <Alert variant="warning">{message}</Alert>
+      <Container maxWidth="xl" sx={{ py: 4 }}>
+        <Alert severity="warning">{message}</Alert>
       </Container>
     );
   }
