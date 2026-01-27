@@ -52,8 +52,6 @@ export default function D3Bracket({ data, width = 800, height = 600 }: D3Bracket
     
     // Layout calculations
     const roundWidth = innerWidth / (maxRound + 1);
-    const matchesPerRound = Array.from(rounds.values()).map((r) => r.length);
-    const maxMatchesInRound = d3.max(matchesPerRound) || 1;
 
     // Draw rounds
     rounds.forEach((matches, round) => {
@@ -98,7 +96,7 @@ export default function D3Bracket({ data, width = 800, height = 600 }: D3Bracket
           });
 
         // Match box
-        const boxWidth = roundWidth * 0.8;
+        const boxWidth = Math.max(roundWidth * 0.8, 120); // Minimum width of 120px
         const boxHeight = 60;
 
         matchGroup
