@@ -128,6 +128,17 @@ export const taggedManifest: TaggedRouteMeta[] = [
     title: "Tourney 5 Recorded Run Details",
     tags: ["PhasmoTourney5", "RecordedRuns", "Event", "Current"],
   },
+  // Tournament Archive
+  {
+    path: "/phasmotourney-series/archive",
+    title: "Tournament Archive",
+    tags: ["Archive", "Event", "Past"],
+  },
+  {
+    path: "/phasmotourney-series/archive/[tourneyId]",
+    title: "Tournament Details",
+    tags: ["Archive", "Details", "Event", "Past"],
+  },
 ];
 
 export function findByTag(tag: PageTag) {
