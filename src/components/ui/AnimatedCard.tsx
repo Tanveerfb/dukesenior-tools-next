@@ -1,14 +1,15 @@
 "use client";
 import { motion } from "framer-motion";
-import { Card } from "react-bootstrap";
+import { Card, CardProps } from "@mui/material";
 import { ReactNode } from "react";
 
-interface AnimatedCardProps {
+interface AnimatedCardProps extends CardProps {
   children: ReactNode;
   className?: string;
   delay?: number;
-  [key: string]: any;
 }
+
+const MotionCard = motion(Card);
 
 export default function AnimatedCard({
   children,
@@ -17,15 +18,16 @@ export default function AnimatedCard({
   ...props
 }: AnimatedCardProps) {
   return (
-    <motion.div
+    <MotionCard
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay }}
       whileHover={{ y: -4, transition: { duration: 0.2 } }}
+      elevation={2}
+      className={className}
+      {...props}
     >
-      <Card className={`shadow-sm ${className}`} {...props}>
-        {children}
-      </Card>
-    </motion.div>
+      {children}
+    </MotionCard>
   );
 }

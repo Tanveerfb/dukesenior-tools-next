@@ -1,15 +1,14 @@
 import React from "react";
-import { Button } from "react-bootstrap";
+import { IconButton as MuiIconButton, IconButtonProps } from "@mui/material";
 
-type Props = React.ButtonHTMLAttributes<HTMLButtonElement> & {
+type Props = IconButtonProps & {
   "aria-label": string;
-  as?: any;
 };
 
 export default function IconButton({ children, className, ...rest }: Props) {
   return (
-    <Button variant="link" className={className} {...rest}>
+    <MuiIconButton className={className} {...rest}>
       {children}
-    </Button>
+    </MuiIconButton>
   );
 }

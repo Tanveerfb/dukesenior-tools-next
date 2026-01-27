@@ -1,5 +1,20 @@
 "use client";
-import { Modal, Table, Badge } from "react-bootstrap";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  IconButton,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+  Chip,
+  Box,
+  Typography,
+  Stack,
+} from "@mui/material";
+import { Close as CloseIcon, HelpOutline as HelpIcon } from "@mui/icons-material";
 import { FiSearch, FiSun, FiMoon, FiHelpCircle } from "react-icons/fi";
 
 interface KeyboardShortcutsModalProps {
@@ -15,21 +30,21 @@ export default function KeyboardShortcutsModal({
     {
       key: "⌘K / Ctrl+K",
       description: "Open search",
-      icon: <FiSearch className="text-primary" />,
+      icon: <FiSearch style={{ color: "#ab2fb1" }} />,
     },
     {
       key: "⌘/ / Ctrl+/",
       description: "Toggle theme (light/dark)",
       icon: (
         <>
-          <FiSun className="text-warning" /> / <FiMoon className="text-info" />
+          <FiSun style={{ color: "#ffca3a" }} /> / <FiMoon style={{ color: "#89608e" }} />
         </>
       ),
     },
     {
       key: "⌘? / Ctrl+?",
       description: "Show keyboard shortcuts",
-      icon: <FiHelpCircle className="text-success" />,
+      icon: <FiHelpCircle style={{ color: "#0f8029" }} />,
     },
     {
       key: "Esc",
@@ -49,47 +64,62 @@ export default function KeyboardShortcutsModal({
   ];
 
   return (
-    <Modal show={show} onHide={onHide} size="lg" centered>
-      <Modal.Header closeButton>
-        <Modal.Title className="d-flex align-items-center gap-2">
-          <FiHelpCircle />
-          Keyboard Shortcuts
-        </Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        <Table hover responsive className="mb-0">
-          <thead>
-            <tr>
-              <th style={{ width: "30%" }}>Shortcut</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
+    <Dialog open={show} onClose={onHide} maxWidth="md" fullWidth>
+      <DialogTitle>
+        <Stack direction="row" alignItems="center" spacing={1}>
+          <HelpIcon />
+          <Typography variant="h6">Keyboard Shortcuts</Typography>
+          <Box sx={{ flexGrow: 1 }} />
+          <IconButton
+            aria-label="close"
+            onClick={onHide}
+            sx={{ color: "text.secondary" }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </Stack>
+      </DialogTitle>
+      <DialogContent>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell sx={{ width: "30%", fontWeight: 600 }}>Shortcut</TableCell>
+              <TableCell sx={{ fontWeight: 600 }}>Action</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
             {shortcuts.map((shortcut, index) => (
-              <tr key={index}>
-                <td>
-                  <Badge
-                    bg="secondary"
-                    className="font-monospace fs-6 fw-normal py-2 px-3"
-                  >
-                    {shortcut.key}
-                  </Badge>
-                </td>
-                <td className="d-flex align-items-center gap-2">
-                  {shortcut.icon}
-                  <span>{shortcut.description}</span>
-                </td>
-              </tr>
+              <TableRow key={index} hover>
+                <TableCell>
+                  <Chip
+                    label={shortcut.key}
+                    sx={{
+                      fontFamily: "monospace",
+                      fontSize: "0.875rem",
+                      fontWeight: 400,
+                      py: 2,
+                      px: 1.5,
+                      bgcolor: "action.hover",
+                    }}
+                  />
+                </TableCell>
+                <TableCell>
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    {shortcut.icon}
+                    <span>{shortcut.description}</span>
+                  </Stack>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
+          </TableBody>
         </Table>
-        <div className="mt-3 small text-muted">
-          <p className="mb-0">
+        <Box sx={{ mt: 3 }}>
+          <Typography variant="body2" color="text.secondary">
             <strong>Note:</strong> On Mac, use <kbd>⌘</kbd> (Command). On
             Windows/Linux, use <kbd>Ctrl</kbd>.
-          </p>
-        </div>
-      </Modal.Body>
-    </Modal>
+          </Typography>
+        </Box>
+      </DialogContent>
+    </Dialog>
   );
 }

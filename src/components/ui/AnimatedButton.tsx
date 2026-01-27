@@ -1,37 +1,37 @@
 "use client";
 import { motion } from "framer-motion";
-import { Button } from "react-bootstrap";
+import { Button, ButtonProps } from "@mui/material";
 import { ReactNode } from "react";
 
-interface AnimatedButtonProps {
+interface AnimatedButtonProps extends Omit<ButtonProps, 'variant'> {
   children: ReactNode;
-  variant?: string;
+  variant?: "text" | "outlined" | "contained";
   className?: string;
   onClick?: () => void;
-  [key: string]: any;
 }
+
+const MotionButton = motion(Button);
 
 export default function AnimatedButton({
   children,
-  variant = "primary",
+  variant = "contained",
+  color = "primary",
   className = "",
   onClick,
   ...props
 }: AnimatedButtonProps) {
   return (
-    <motion.div
+    <MotionButton
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
       transition={{ type: "spring", stiffness: 400, damping: 17 }}
+      variant={variant}
+      color={color}
+      className={className}
+      onClick={onClick}
+      {...props}
     >
-      <Button
-        variant={variant}
-        className={className}
-        onClick={onClick}
-        {...props}
-      >
-        {children}
-      </Button>
-    </motion.div>
+      {children}
+    </MotionButton>
   );
 }
