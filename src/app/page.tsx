@@ -1,52 +1,73 @@
 "use client";
-import { Col, Container, Row } from "react-bootstrap";
-import HomeHero from "@/components/home/HomeHero";
-import PostsFeed from "@/components/posts/PostsFeed";
-import HomeSidebar from "@/components/home/HomeSidebar";
-import FadeIn from "@/components/ui/FadeIn";
+import { Box, Container, Grid, Stack, Typography } from "@mui/material";
+import HeroSection from "@/components/home/HeroSection";
+import StatsOverview from "@/components/home/StatsOverview";
+import FeaturedPosts from "@/components/home/FeaturedPosts";
+import QuickActions from "@/components/home/QuickActions";
+import ActivityFeed from "@/components/home/ActivityFeed";
 
 export default function HomePage() {
   return (
-    <>
-      <HomeHero />
-      <Container as="main" className="py-5">
-        <Row className="g-4 align-items-start">
-          <Col lg={8}>
-            <FadeIn delay={0.1}>
-              <section aria-labelledby="home-updates-heading">
-                <header className="mb-4">
-                  <span className="badge text-bg-secondary text-uppercase small fw-semibold">
-                    Latest updates
-                  </span>
-                  <h2
-                    id="home-updates-heading"
-                    className="h4 fw-semibold mt-2 mb-0"
+    <Box component="main">
+      {/* Hero Section - Full Width */}
+      <HeroSection />
+
+      {/* Stats Overview - Full Width */}
+      <StatsOverview />
+
+      {/* Main Content - Two Column Layout */}
+      <Box sx={{ py: { xs: 4, md: 6 }, bgcolor: "background.default" }}>
+        <Container maxWidth="lg">
+          <Grid container spacing={4}>
+            {/* Left Column - Featured Posts */}
+            <Grid item xs={12} lg={8}>
+              <Stack spacing={3}>
+                <Box>
+                  <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 1 }}>
+                    <Box
+                      component="span"
+                      sx={{
+                        px: 1.5,
+                        py: 0.5,
+                        borderRadius: 1,
+                        bgcolor: "secondary.main",
+                        color: "secondary.contrastText",
+                        fontSize: "0.75rem",
+                        fontWeight: 600,
+                        textTransform: "uppercase",
+                        letterSpacing: 0.5,
+                      }}
+                    >
+                      Latest Updates
+                    </Box>
+                  </Stack>
+                  <Typography
+                    variant="h4"
+                    component="h2"
+                    gutterBottom
+                    sx={{ fontWeight: 600, fontSize: { xs: "1.75rem", md: "2rem" } }}
                   >
-                    Community posts & resource drops
-                  </h2>
-                  <p className="text-muted small mb-0">
-                    Stay current on announcements, guides, and match recaps from
-                    the DukeSenior team.
-                  </p>
-                </header>
-                <div className="bg-body border rounded-3 shadow-sm p-4">
-                  <PostsFeed
-                    maxFeatured={3}
-                    maxLatest={4}
-                    fetchCount={12}
-                    showSampleFallback={false}
-                  />
-                </div>
-              </section>
-            </FadeIn>
-          </Col>
-          <Col lg={4}>
-            <FadeIn delay={0.2}>
-              <HomeSidebar />
-            </FadeIn>
-          </Col>
-        </Row>
-      </Container>
-    </>
+                    Community Posts & Resource Drops
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                    Stay current on announcements, guides, and match recaps from the DukeSenior team.
+                  </Typography>
+                </Box>
+
+                <FeaturedPosts maxFeatured={6} showSampleFallback={false} />
+              </Stack>
+            </Grid>
+
+            {/* Right Column - Quick Actions & Activity Feed */}
+            <Grid item xs={12} lg={4}>
+              <Stack spacing={4}>
+                <QuickActions />
+                <ActivityFeed />
+              </Stack>
+            </Grid>
+          </Grid>
+        </Container>
+      </Box>
+    </Box>
   );
 }
