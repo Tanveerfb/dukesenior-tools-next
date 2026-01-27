@@ -109,8 +109,13 @@ export const taggedManifest: TaggedRouteMeta[] = [
     tags: ["PhasmoTourney5", "Rules", "Event", "Current"],
   },
   {
+    path: "/phasmotourney-series/phasmoTourney5/videos",
+    title: "Tourney 5 Videos",
+    tags: ["PhasmoTourney5", "Videos", "Event", "Current"],
+  },
+  {
     path: "/phasmotourney-series/phasmoTourney5/videos-and-stream-links",
-    title: "Tourney 5 Videos & Streams",
+    title: "Tourney 5 Videos & Streams (Legacy)",
     tags: ["PhasmoTourney5", "Videos", "Event", "Current"],
   },
   {
