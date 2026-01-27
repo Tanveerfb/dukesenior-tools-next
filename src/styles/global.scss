@@ -1,0 +1,208 @@
+// Bootstrap imports (temporarily kept for existing pages during migration)
+@use "sass:color";
+
+// Theme variable definitions (must precede bootstrap for customization)
+$primary: #ab2fb1;
+$secondary: #36453b;
+$tertiary: #515751;
+
+// Updated colors for better contrast
+$success: #0f8029;
+$warning: #ffca3a;
+$danger: #a63a50;
+
+$info: #89608e; // Starry Sky Blue
+$dark: #12130f; // Night
+$light: #dcfffd; // Soft Lavender Tint
+$text-color: #0c0909; // Neutral dark for text
+$background-color: #f7f7ff; // Subtle off-white for background
+
+$body-bg: $background-color;
+$body-color: $text-color;
+$link-color: $primary;
+$link-hover-color: color.scale($primary, $lightness: -12%);
+
+// Import Bootstrap (will be removed in future migration phases)
+@import "../../node_modules/bootstrap/scss/bootstrap";
+
+// Tailwind CSS directives
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-scale: 1; // default; ThemeProvider updates at runtime
+  
+  // Brand colors (matching MUI theme)
+  --primary: #ab2fb1;
+  --secondary: #36453b;
+  --tertiary: #515751;
+  
+  // Shadow RGB values for theme-aware shadows
+  --shadow-rgb: 0, 0, 0;
+  
+  // Spacing tokens
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  --space-3xl: 4rem;
+  
+  // Fluid typography
+  --fs-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+  --fs-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+  --fs-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  --fs-lg: clamp(1.125rem, 1rem + 0.5vw, 1.5rem);
+  --fs-xl: clamp(1.5rem, 1.25rem + 1vw, 2.5rem);
+  --fs-2xl: clamp(2rem, 1.5rem + 2vw, 4rem);
+}
+
+// Dark mode adjustments
+[data-bs-theme="dark"] {
+  --shadow-rgb: 0, 0, 0;
+}
+
+html {
+  font-size: calc(16px * var(--font-scale, 1));
+  transition: font-size 0.15s ease-in-out;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-size: 1rem; // keep base context; rem units scale via html font-size
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// Optionally scale headings slightly less aggressively (clamp effect)
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  line-height: 1.15;
+}
+
+// ============================================
+// Enhanced UI/UX Improvements
+// ============================================
+
+// Smooth transitions for interactive elements only
+button,
+a,
+input,
+select,
+textarea {
+  transition-property: background-color, border-color, box-shadow, transform,
+    opacity;
+  transition-duration: 0.2s;
+  transition-timing-function: ease-in-out;
+}
+
+// Improved link hover states
+a {
+  transition: color 0.2s ease-in-out, opacity 0.2s ease-in-out;
+
+  &:hover {
+    opacity: 0.85;
+  }
+}
+
+// Enhanced focus states for accessibility
+*:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+// Skeleton loader animation
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.06) 25%,
+    rgba(0, 0, 0, 0.12) 50%,
+    rgba(0, 0, 0, 0.06) 75%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+  border-radius: 4px;
+}
+
+[data-bs-theme="dark"] .skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.06) 25%,
+    rgba(255, 255, 255, 0.12) 50%,
+    rgba(255, 255, 255, 0.06) 75%
+  );
+  background-size: 1000px 100%;
+}
+
+// Smooth page transitions
+.page-transition-enter {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.page-transition-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+.page-transition-exit {
+  opacity: 1;
+}
+
+.page-transition-exit-active {
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+// Better empty state styling
+.empty-state {
+  padding: 3rem 1.5rem;
+  text-align: center;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+[data-bs-theme="dark"] .empty-state {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.empty-state-icon {
+  font-size: 3rem;
+  opacity: 0.5;
+  margin-bottom: 1rem;
+}
+
+// ============================================
+// Skip to Content Link (Accessibility)
+// ============================================
+
+.skip-to-content {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--primary);
+  color: white;
+  padding: 0.5rem 1rem;
+  z-index: 9999;
+  text-decoration: none;
+  
+  &:focus {
+    top: 0;
+  }
+}
