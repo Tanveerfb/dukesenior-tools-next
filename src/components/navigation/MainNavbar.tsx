@@ -142,7 +142,7 @@ export default function MainNavbar() {
 
     const buildSection = (
       keys: string[],
-      groups: Record<string, EffectiveMeta[]>
+      groups: Record<string, EffectiveMeta[]>,
     ) =>
       keys.map((key) => ({
         key,
@@ -182,7 +182,7 @@ export default function MainNavbar() {
       effective
         .filter((meta) => meta.effective.includes("Tool"))
         .sort((a, b) => (a.title || a.path).localeCompare(b.title || b.path)),
-    [effective]
+    [effective],
   );
 
   const navbarStyle: React.CSSProperties =
@@ -352,6 +352,14 @@ export default function MainNavbar() {
                   <div className="dropdown-header-custom">Phasmo Tourney 5</div>
                   <NavDropdown.Item
                     as={InlineLink}
+                    href="/admin/phasmoTourney5"
+                    onClick={handleNavItemClick}
+                  >
+                    <strong>Tourney 5 Admin Hub</strong>
+                  </NavDropdown.Item>
+                  <NavDropdown.Divider />
+                  <NavDropdown.Item
+                    as={InlineLink}
                     href="/admin/phasmoTourney5/manageplayers"
                     onClick={handleNavItemClick}
                   >
@@ -497,7 +505,7 @@ export default function MainNavbar() {
                                   </Badge>
                                 )}
                               </NavDropdown.Item>
-                            )
+                            ),
                           )}
                         </div>
                       )}
@@ -549,7 +557,7 @@ export default function MainNavbar() {
                                   </Badge>
                                 )}
                               </NavDropdown.Item>
-                            )
+                            ),
                           )}
                         </div>
                       )}

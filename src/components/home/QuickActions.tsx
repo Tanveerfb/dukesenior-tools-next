@@ -1,5 +1,14 @@
 "use client";
-import { Card, CardContent, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Typography } from "@mui/material";
+import {
+  Card,
+  CardContent,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Typography,
+} from "@mui/material";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import {
@@ -78,7 +87,12 @@ export default function QuickActions() {
       }}
     >
       <CardContent>
-        <Typography variant="h6" component="h2" gutterBottom sx={{ fontWeight: 600 }}>
+        <Typography
+          variant="h6"
+          component="h2"
+          gutterBottom
+          sx={{ fontWeight: 600 }}
+        >
           Quick Actions
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
@@ -88,7 +102,7 @@ export default function QuickActions() {
         <List sx={{ p: 0 }}>
           {quickActions.map((action, index) => (
             <MotionListItem
-              key={action.href}
+              key={`${action.href}-${index}`}
               disablePadding
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
@@ -101,11 +115,16 @@ export default function QuickActions() {
                   borderRadius: 1,
                   mb: 0.5,
                   "&:hover": {
-                    bgcolor: theme.palette.mode === "dark" ? "rgba(171, 47, 177, 0.1)" : "rgba(171, 47, 177, 0.05)",
+                    bgcolor:
+                      theme.palette.mode === "dark"
+                        ? "rgba(171, 47, 177, 0.1)"
+                        : "rgba(171, 47, 177, 0.05)",
                   },
                 }}
               >
-                <ListItemIcon sx={{ color: theme.palette.primary.main, minWidth: 40 }}>
+                <ListItemIcon
+                  sx={{ color: theme.palette.primary.main, minWidth: 40 }}
+                >
                   {action.icon}
                 </ListItemIcon>
                 <ListItemText

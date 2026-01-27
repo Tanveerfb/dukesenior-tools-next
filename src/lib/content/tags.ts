@@ -133,6 +133,57 @@ export const taggedManifest: TaggedRouteMeta[] = [
     title: "Tourney 5 Recorded Run Details",
     tags: ["PhasmoTourney5", "RecordedRuns", "Event", "Current"],
   },
+  // Tourney 5 Admin Pages
+  {
+    path: "/admin/phasmoTourney5",
+    title: "Tourney 5 Admin Hub",
+    tags: ["PhasmoTourney5", "Admin", "Current"],
+  },
+  {
+    path: "/admin/phasmoTourney5/manageplayers",
+    title: "Tourney 5 Manage Players",
+    tags: ["PhasmoTourney5", "Admin", "Management", "Current"],
+  },
+  {
+    path: "/admin/phasmoTourney5/managerounds",
+    title: "Tourney 5 Manage Rounds",
+    tags: ["PhasmoTourney5", "Admin", "Management", "Current"],
+  },
+  {
+    path: "/admin/phasmoTourney5/managevotesessions",
+    title: "Tourney 5 Manage Vote Sessions",
+    tags: ["PhasmoTourney5", "Admin", "Management", "Current"],
+  },
+  {
+    path: "/admin/phasmoTourney5/manageeliminator",
+    title: "Tourney 5 Manage Eliminator",
+    tags: ["PhasmoTourney5", "Admin", "Management", "Current"],
+  },
+  {
+    path: "/admin/phasmoTourney5/round1-manage-runs",
+    title: "Tourney 5 Manage Round 1 Runs",
+    tags: ["PhasmoTourney5", "Admin", "Management", "Current"],
+  },
+  {
+    path: "/admin/phasmoTourney5/manage-videos",
+    title: "Tourney 5 Manage Videos",
+    tags: ["PhasmoTourney5", "Admin", "Management", "Current"],
+  },
+  {
+    path: "/admin/phasmoTourney5/manage-content-links",
+    title: "Tourney 5 Manage Content Links",
+    tags: ["PhasmoTourney5", "Admin", "Management", "Current"],
+  },
+  {
+    path: "/admin/phasmoTourney5/manage-twitch-chat-round",
+    title: "Tourney 5 Manage Twitch Chat Round",
+    tags: ["PhasmoTourney5", "Admin", "Management", "Current"],
+  },
+  {
+    path: "/admin/phasmoTourney5/tourney-data-posters",
+    title: "Tourney 5 Data Posters",
+    tags: ["PhasmoTourney5", "Admin", "Management", "Current"],
+  },
   // Tournament Archive
   {
     path: "/phasmotourney-series/archive",

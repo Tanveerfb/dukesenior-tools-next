@@ -3,17 +3,26 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { ThemeProvider } from "./ThemeProvider";
 import { ToastProvider } from "./ui/ToastProvider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import dynamic from "next/dynamic";
 import { Toaster } from "react-hot-toast";
 import { useState, useMemo } from "react";
 import { ThemeProvider as MuiThemeProvider, CssBaseline } from "@mui/material";
 import { getTheme } from "@/theme/theme";
 import { useTheme as useCustomTheme } from "./ThemeProvider";
 
+// Dynamically import ReactQueryDevtools to avoid hydration issues
+const ReactQueryDevtools = dynamic(
+  () =>
+    import("@tanstack/react-query-devtools").then(
+      (mod) => mod.ReactQueryDevtools,
+    ),
+  { ssr: false },
+);
+
 // Inner component to access theme context
 function MuiThemeWrapper({ children }: { children: React.ReactNode }) {
   const { theme } = useCustomTheme();
-  const muiTheme = useMemo(() => getTheme(theme as 'light' | 'dark'), [theme]);
+  const muiTheme = useMemo(() => getTheme(theme as "light" | "dark"), [theme]);
 
   return (
     <MuiThemeProvider theme={muiTheme}>
@@ -36,7 +45,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
             retry: 1,
           },
         },
-      })
+      }),
   );
 
   return (

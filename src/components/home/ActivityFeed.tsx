@@ -133,7 +133,12 @@ export default function ActivityFeed() {
       }}
     >
       <CardContent>
-        <Typography variant="h6" component="h2" gutterBottom sx={{ fontWeight: 600 }}>
+        <Typography
+          variant="h6"
+          component="h2"
+          gutterBottom
+          sx={{ fontWeight: 600 }}
+        >
           Recent Activity
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
@@ -151,7 +156,10 @@ export default function ActivityFeed() {
               sx={{
                 px: 0,
                 py: 1.5,
-                borderBottom: index < sampleActivities.length - 1 ? `1px solid ${theme.palette.divider}` : "none",
+                borderBottom:
+                  index < sampleActivities.length - 1
+                    ? `1px solid ${theme.palette.divider}`
+                    : "none",
               }}
             >
               <ListItemAvatar>
@@ -168,17 +176,25 @@ export default function ActivityFeed() {
               </ListItemAvatar>
               <ListItemText
                 primary={
-                  <Box>
-                    <Typography component="span" variant="body2" fontWeight={600}>
+                  <Box component="span">
+                    <Typography
+                      component="span"
+                      variant="body2"
+                      fontWeight={600}
+                    >
                       {activity.user}
                     </Typography>{" "}
-                    <Typography component="span" variant="body2" color="text.secondary">
+                    <Typography
+                      component="span"
+                      variant="body2"
+                      color="text.secondary"
+                    >
                       {activity.action}
                     </Typography>
                   </Box>
                 }
                 secondary={
-                  <Box sx={{ mt: 0.5 }}>
+                  <Box component="span" sx={{ mt: 0.5 }}>
                     {activity.metadata && (
                       <Chip
                         label={activity.metadata}
@@ -190,11 +206,17 @@ export default function ActivityFeed() {
                         }}
                       />
                     )}
-                    <Typography variant="caption" color="text.secondary" display="block">
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      display="block"
+                    >
                       {activity.timestamp}
                     </Typography>
                   </Box>
                 }
+                primaryTypographyProps={{ component: "span" }}
+                secondaryTypographyProps={{ component: "div" }}
               />
             </MotionListItem>
           ))}
