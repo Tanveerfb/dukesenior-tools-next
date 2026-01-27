@@ -40,7 +40,6 @@ export default function HeroSection() {
           pointerEvents: "none",
         }}
       />
-
       <Container
         maxWidth="lg"
         sx={{ py: { xs: 6, md: 10 }, position: "relative", zIndex: 1 }}
@@ -112,7 +111,9 @@ export default function HeroSection() {
               spacing={2}
               justifyContent="center"
             >
-              <Link href="/phasmotourney-series" passHref legacyBehavior>
+              <Link href="/phasmotourney-series">
+                {/* @next-codemod-error This Link previously used the now removed `legacyBehavior` prop, and has a child that might not be an anchor. The codemod bailed out of lifting the child props to the Link. Check that the child component does not render an anchor, and potentially move the props manually to Link. */
+                }
                 <MotionButton
                   variant="contained"
                   size="large"
@@ -123,7 +124,9 @@ export default function HeroSection() {
                   View Tournaments
                 </MotionButton>
               </Link>
-              <Link href="/suggestions" passHref legacyBehavior>
+              <Link href="/suggestions">
+                {/* @next-codemod-error This Link previously used the now removed `legacyBehavior` prop, and has a child that might not be an anchor. The codemod bailed out of lifting the child props to the Link. Check that the child component does not render an anchor, and potentially move the props manually to Link. */
+                }
                 <MotionButton
                   variant="outlined"
                   size="large"
