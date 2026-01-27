@@ -13,6 +13,7 @@ import {
   Box,
   Typography,
   Stack,
+  useTheme,
 } from "@mui/material";
 import { Close as CloseIcon, HelpOutline as HelpIcon } from "@mui/icons-material";
 import { FiSearch, FiSun, FiMoon, FiHelpCircle } from "react-icons/fi";
@@ -26,25 +27,28 @@ export default function KeyboardShortcutsModal({
   show,
   onHide,
 }: KeyboardShortcutsModalProps) {
+  const theme = useTheme();
+
   const shortcuts = [
     {
       key: "⌘K / Ctrl+K",
       description: "Open search",
-      icon: <FiSearch style={{ color: "#ab2fb1" }} />,
+      icon: <FiSearch style={{ color: theme.palette.primary.main }} />,
     },
     {
       key: "⌘/ / Ctrl+/",
       description: "Toggle theme (light/dark)",
       icon: (
         <>
-          <FiSun style={{ color: "#ffca3a" }} /> / <FiMoon style={{ color: "#89608e" }} />
+          <FiSun style={{ color: theme.palette.warning.main }} /> /{" "}
+          <FiMoon style={{ color: theme.palette.info.main }} />
         </>
       ),
     },
     {
       key: "⌘? / Ctrl+?",
       description: "Show keyboard shortcuts",
-      icon: <FiHelpCircle style={{ color: "#0f8029" }} />,
+      icon: <FiHelpCircle style={{ color: theme.palette.success.main }} />,
     },
     {
       key: "Esc",

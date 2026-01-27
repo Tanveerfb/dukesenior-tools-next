@@ -3,11 +3,8 @@ import { motion } from "framer-motion";
 import { Button, ButtonProps } from "@mui/material";
 import { ReactNode } from "react";
 
-interface AnimatedButtonProps extends Omit<ButtonProps, 'variant'> {
+interface AnimatedButtonProps extends ButtonProps {
   children: ReactNode;
-  variant?: "text" | "outlined" | "contained";
-  className?: string;
-  onClick?: () => void;
 }
 
 const MotionButton = motion(Button);
@@ -16,8 +13,6 @@ export default function AnimatedButton({
   children,
   variant = "contained",
   color = "primary",
-  className = "",
-  onClick,
   ...props
 }: AnimatedButtonProps) {
   return (
@@ -27,8 +22,6 @@ export default function AnimatedButton({
       transition={{ type: "spring", stiffness: 400, damping: 17 }}
       variant={variant}
       color={color}
-      className={className}
-      onClick={onClick}
       {...props}
     >
       {children}

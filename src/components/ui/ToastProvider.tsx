@@ -1,5 +1,5 @@
 "use client";
-import { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import { createContext, useContext, useState, ReactNode, useCallback } from "react";
 import { Snackbar, Alert, AlertTitle, Box } from "@mui/material";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -27,7 +27,7 @@ const MotionBox = motion(Box);
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
-  const showToast = (
+  const showToast = useCallback((
     message: string,
     variant: ToastMessage["variant"] = "info",
     duration = 3000
@@ -35,11 +35,16 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     const id = `toast-${++toastCounter}`;
     const newToast: ToastMessage = { id, message, variant, duration };
     setToasts((prev) => [...prev, newToast]);
-  };
+  }, []);
 
-  const removeToast = (id: string) => {
+  const removeToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
-  };
+  }, []);
+
+  const handleClose = useCallback((id: string) => (_event?: React.SyntheticEvent | Event, reason?: string) => {
+    if (reason === 'clickaway') return;
+    removeToast(id);
+  }, [removeToast]);
 
   const variantTitles = {
     success: "Success",
@@ -74,12 +79,12 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               <Snackbar
                 open={true}
                 autoHideDuration={toast.duration}
-                onClose={() => removeToast(toast.id)}
+                onClose={handleClose(toast.id)}
                 anchorOrigin={{ vertical: "top", horizontal: "right" }}
                 sx={{ position: "relative", top: 0, right: 0 }}
               >
                 <Alert
-                  onClose={() => removeToast(toast.id)}
+                  onClose={handleClose(toast.id)}
                   severity={toast.variant}
                   variant="filled"
                   sx={{ width: "100%", minWidth: 300 }}
