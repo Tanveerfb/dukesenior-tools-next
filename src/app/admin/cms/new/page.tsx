@@ -214,6 +214,7 @@ export default function NewPostPage() {
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [content]);
 
   const toolbar = [
@@ -255,7 +256,7 @@ export default function NewPostPage() {
         (name, pct) => {
           setFileProgress((p) => ({ ...p, [name]: pct }));
         },
-        (name, err) => {
+        (name, _err) => {
           setToasts((t) => [
             {
               id: name + Date.now(),
