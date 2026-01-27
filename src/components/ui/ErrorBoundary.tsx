@@ -1,7 +1,7 @@
 "use client";
 import React, { Component, ReactNode } from "react";
-import { Card, Button, Alert } from "react-bootstrap";
-import { FiAlertTriangle, FiRefreshCw } from "react-icons/fi";
+import { Card, CardContent, Button, Alert, Box, Typography } from "@mui/material";
+import { Warning as WarningIcon, Refresh as RefreshIcon } from "@mui/icons-material";
 
 interface Props {
   children: ReactNode;
@@ -42,37 +42,47 @@ export default class ErrorBoundary extends Component<Props, State> {
       }
 
       return (
-        <Card className="border-danger my-4">
-          <Card.Body className="text-center py-5">
-            <FiAlertTriangle
-              className="text-danger mb-3"
-              size={48}
+        <Card sx={{ borderColor: "error.main", my: 4 }}>
+          <CardContent sx={{ textAlign: "center", py: 5 }}>
+            <WarningIcon
+              color="error"
+              sx={{ fontSize: 48, mb: 3 }}
               aria-hidden="true"
             />
-            <h3 className="h5 fw-semibold mb-2">Something went wrong</h3>
-            <p className="text-muted mb-4">
+            <Typography variant="h5" component="h3" fontWeight={600} gutterBottom>
+              Something went wrong
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
               An error occurred while rendering this component.
-            </p>
+            </Typography>
             {this.state.error && process.env.NODE_ENV === "development" && (
-              <Alert variant="danger" className="text-start mb-4">
+              <Alert severity="error" sx={{ textAlign: "left", mb: 4 }}>
                 <strong>Error:</strong> {this.state.error.message}
-                <details className="mt-2">
-                  <summary className="cursor-pointer">Stack trace</summary>
-                  <pre className="mt-2 mb-0 small">
+                <Box component="details" sx={{ mt: 2 }}>
+                  <summary style={{ cursor: "pointer" }}>Stack trace</summary>
+                  <Box
+                    component="pre"
+                    sx={{
+                      mt: 2,
+                      mb: 0,
+                      fontSize: "0.875rem",
+                      overflow: "auto",
+                    }}
+                  >
                     {this.state.error.stack}
-                  </pre>
-                </details>
+                  </Box>
+                </Box>
               </Alert>
             )}
             <Button
-              variant="primary"
+              variant="contained"
               onClick={this.handleReset}
-              className="d-inline-flex align-items-center gap-2"
+              startIcon={<RefreshIcon />}
+              sx={{ textTransform: "none" }}
             >
-              <FiRefreshCw size={16} />
               Try Again
             </Button>
-          </Card.Body>
+          </CardContent>
         </Card>
       );
     }
