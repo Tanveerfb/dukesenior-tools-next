@@ -13,6 +13,9 @@ export interface CMSPost {
   likeCount: number;
   dislikeCount: number;
   commentCount: number;
+  status: 'draft' | 'published' | 'scheduled';
+  scheduledFor?: number; // timestamp for scheduled posts
+  views: number;
 }
 
 export interface CMSComment {
@@ -31,8 +34,46 @@ export interface CMSComment {
 }
 
 export interface NewPostInput {
-  title: string; content: string; tags: string[]; bannerUrl?: string; pinned?: boolean;
+  title: string; content: string; tags: string[]; bannerUrl?: string; pinned?: boolean; status?: 'draft' | 'published' | 'scheduled'; scheduledFor?: number;
 }
 export interface UpdatePostInput extends Partial<NewPostInput> { id: string; }
 
 export interface NewCommentInput { postId: string; parentId?: string; content: string; mentions?: string[]; }
+
+// Media Library Types
+export interface MediaItem {
+  id: string;
+  url: string;
+  filename: string;
+  type: string; // mime type
+  size: number; // bytes
+  uploadedAt: number;
+  uploadedBy: string; // uid
+  tags?: string[];
+}
+
+// Analytics Types
+export interface PostAnalytics {
+  postId: string;
+  title: string;
+  views: number;
+  likes: number;
+  dislikes: number;
+  comments: number;
+  createdAt: number;
+}
+
+export interface TagAnalytics {
+  tag: string;
+  postCount: number;
+  totalViews: number;
+}
+
+export interface AnalyticsSummary {
+  totalPosts: number;
+  totalViews: number;
+  totalComments: number;
+  topPosts: PostAnalytics[];
+  tagUsage: TagAnalytics[];
+  viewsByDay: { date: string; views: number }[];
+}
