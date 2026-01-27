@@ -13,6 +13,7 @@ import {
 } from "react-bootstrap";
 import { FaYoutube, FaTwitch } from "react-icons/fa";
 import { listVideoLinks } from "@/lib/services/phasmoTourney5";
+import { formatRoundLabel } from "@/lib/utils";
 
 interface VideoLink {
   id: string;
@@ -65,9 +66,7 @@ function VideoCard({ video }: { video: VideoLink }) {
       ? getTwitchThumbnail(videoId)
       : null;
 
-  const roundLabel = video.roundId
-    ? video.roundId.replace(/round(\d+)/, "Round $1")
-    : "General";
+  const roundLabel = formatRoundLabel(video.roundId);
 
   return (
     <Card className="h-100 shadow-sm">
@@ -221,7 +220,7 @@ export default function Tourney5VideosPage() {
                       <option value="general">General</option>
                       {availableRounds.map((round) => (
                         <option key={round} value={round}>
-                          {round?.replace(/round(\d+)/, "Round $1")}
+                          {formatRoundLabel(round)}
                         </option>
                       ))}
                     </Form.Select>

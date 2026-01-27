@@ -19,6 +19,7 @@ import {
   listVideoLinks,
   deleteVideoLink,
 } from "@/lib/services/phasmoTourney5";
+import { formatRoundLabel } from "@/lib/utils";
 
 interface VideoLink {
   id: string;
@@ -183,12 +184,8 @@ export default function ManageVideosPage() {
                       })
                     }
                   >
-                    <option value="youtube">
-                      <FaYoutube /> YouTube
-                    </option>
-                    <option value="twitch">
-                      <FaTwitch /> Twitch
-                    </option>
+                    <option value="youtube">YouTube</option>
+                    <option value="twitch">Twitch</option>
                   </Form.Select>
                 </Form.Group>
               </Col>
@@ -320,9 +317,7 @@ export default function ManageVideosPage() {
                         </Badge>
                       </td>
                       <td>
-                        {video.roundId
-                          ? video.roundId.replace(/round(\d+)/, "Round $1")
-                          : "General"}
+                        {formatRoundLabel(video.roundId)}
                       </td>
                       <td className="text-muted small">{video.officer}</td>
                       <td className="text-muted small">
