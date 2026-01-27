@@ -18,6 +18,8 @@ import { auth } from "@/lib/firebase/client";
 import { db } from "@/lib/firebase/client";
 import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
 
+export const dynamic = "force-dynamic";
+
 export default function AdminSuggestionsPage() {
   const { admin, user } = useAuth();
   const [items, setItems] = useState<any[]>([]);
@@ -52,7 +54,7 @@ export default function AdminSuggestionsPage() {
       (err: any) => {
         console.error("suggestions realtime error", err);
         setLoading(false);
-      }
+      },
     );
     return () => unsub();
   }, [admin]);
@@ -88,7 +90,7 @@ export default function AdminSuggestionsPage() {
       const token = await user.getIdToken();
       const url = new URL(
         "/api/admin/suggestions/export",
-        window.location.origin
+        window.location.origin,
       );
       if (filterCategory) url.searchParams.set("category", filterCategory);
       if (filterResponded) url.searchParams.set("responded", filterResponded);
@@ -132,9 +134,9 @@ export default function AdminSuggestionsPage() {
       await Promise.all(
         ids.map((id) =>
           import("@/lib/services/suggestions").then((m) =>
-            m.archiveSuggestion(id, archived)
-          )
-        )
+            m.archiveSuggestion(id, archived),
+          ),
+        ),
       );
       clearSelection();
     } catch (err) {
@@ -149,9 +151,9 @@ export default function AdminSuggestionsPage() {
       await Promise.all(
         ids.map((id) =>
           import("@/lib/services/suggestions").then((m) =>
-            m.deleteSuggestion(id)
-          )
-        )
+            m.deleteSuggestion(id),
+          ),
+        ),
       );
       clearSelection();
     } catch (err) {
@@ -173,8 +175,8 @@ export default function AdminSuggestionsPage() {
       // update local state
       setItems(
         items.map((i) =>
-          i.id === active.id ? { ...i, response: response.trim() } : i
-        )
+          i.id === active.id ? { ...i, response: response.trim() } : i,
+        ),
       );
       setActive({ ...active, response: response.trim() });
     } catch (err) {
@@ -326,7 +328,7 @@ export default function AdminSuggestionsPage() {
                           }
                           onClick={() =>
                             import("@/lib/services/suggestions").then((m) =>
-                              m.archiveSuggestion(item.id, !item.archived)
+                              m.archiveSuggestion(item.id, !item.archived),
                             )
                           }
                         >
@@ -337,7 +339,7 @@ export default function AdminSuggestionsPage() {
                           variant="outline-danger"
                           onClick={() =>
                             import("@/lib/services/suggestions").then((m) =>
-                              m.deleteSuggestion(item.id)
+                              m.deleteSuggestion(item.id),
                             )
                           }
                         >
@@ -355,7 +357,7 @@ export default function AdminSuggestionsPage() {
               <Button
                 onClick={() =>
                   setVisibleCount((c) =>
-                    Math.min(filtered.length, c + chunkSize)
+                    Math.min(filtered.length, c + chunkSize),
                   )
                 }
               >

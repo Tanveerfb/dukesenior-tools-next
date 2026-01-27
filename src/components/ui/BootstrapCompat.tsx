@@ -1,6 +1,6 @@
 /**
  * Bootstrap to MUI Migration Components
- * 
+ *
  * These components provide drop-in replacements for common react-bootstrap components
  * using MUI equivalents. This allows for easier migration with minimal code changes.
  */
@@ -23,7 +23,15 @@ export function Alert({
   children,
   ...props
 }: {
-  variant?: "primary" | "secondary" | "success" | "danger" | "warning" | "info" | "light" | "dark";
+  variant?:
+    | "primary"
+    | "secondary"
+    | "success"
+    | "danger"
+    | "warning"
+    | "info"
+    | "light"
+    | "dark";
   children: ReactNode;
   className?: string;
 }) {
@@ -58,21 +66,46 @@ export function Card({
   );
 }
 
-Card.Body = function CardBody({ children, className }: { children: ReactNode; className?: string }) {
+Card.Body = function CardBody({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
   return <CardContent className={className}>{children}</CardContent>;
 };
 
-Card.Header = function CardHeader({ children, className }: { children: ReactNode; className?: string }) {
+Card.Header = function CardHeader({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
   return (
-    <Box sx={{ p: 2, borderBottom: 1, borderColor: "divider" }} className={className}>
+    <Box
+      sx={{ p: 2, borderBottom: 1, borderColor: "divider" }}
+      className={className}
+    >
       {children}
     </Box>
   );
 };
 
-Card.Title = function CardTitle({ children, className }: { children: ReactNode; className?: string }) {
+Card.Title = function CardTitle({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
   return (
-    <Box component="h5" sx={{ fontSize: "1.25rem", fontWeight: 500, mb: 1 }} className={className}>
+    <Box
+      component="h5"
+      sx={{ fontSize: "1.25rem", fontWeight: 500, mb: 1 }}
+      className={className}
+    >
       {children}
     </Box>
   );
@@ -84,8 +117,19 @@ export function Button({
   size,
   children,
   ...props
-}: ButtonProps & {
-  variant?: "primary" | "secondary" | "success" | "danger" | "warning" | "info" | "light" | "dark" | "link" | "outline-primary" | "outline-secondary";
+}: Omit<ButtonProps, "variant" | "size"> & {
+  variant?:
+    | "primary"
+    | "secondary"
+    | "success"
+    | "danger"
+    | "warning"
+    | "info"
+    | "light"
+    | "dark"
+    | "link"
+    | "outline-primary"
+    | "outline-secondary";
   size?: "sm" | "lg";
 }) {
   const colorMap: Record<string, ButtonProps["color"]> = {
@@ -107,7 +151,9 @@ export function Button({
   };
 
   const isOutline = variant.startsWith("outline-");
-  const muiVariant = isOutline ? "outlined" : variantMap[variant] || "contained";
+  const muiVariant = isOutline
+    ? "outlined"
+    : variantMap[variant] || "contained";
   const muiColor = colorMap[variant] || "primary";
   const muiSize = size === "sm" ? "small" : size === "lg" ? "large" : "medium";
 

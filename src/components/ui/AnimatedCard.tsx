@@ -9,8 +9,6 @@ interface AnimatedCardProps extends CardProps {
   delay?: number;
 }
 
-const MotionCard = motion(Card);
-
 export default function AnimatedCard({
   children,
   className = "",
@@ -18,16 +16,16 @@ export default function AnimatedCard({
   ...props
 }: AnimatedCardProps) {
   return (
-    <MotionCard
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay }}
       whileHover={{ y: -4, transition: { duration: 0.2 } }}
-      elevation={2}
-      className={className}
-      {...props}
+      style={{ display: "inline-block", width: "100%" }}
     >
-      {children}
-    </MotionCard>
+      <Card elevation={2} className={className} {...props}>
+        {children}
+      </Card>
+    </motion.div>
   );
 }

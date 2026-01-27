@@ -7,8 +7,6 @@ interface AnimatedButtonProps extends ButtonProps {
   children: ReactNode;
 }
 
-const MotionButton = motion(Button);
-
 export default function AnimatedButton({
   children,
   variant = "contained",
@@ -16,15 +14,15 @@ export default function AnimatedButton({
   ...props
 }: AnimatedButtonProps) {
   return (
-    <MotionButton
+    <motion.div
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
       transition={{ type: "spring", stiffness: 400, damping: 17 }}
-      variant={variant}
-      color={color}
-      {...props}
+      style={{ display: "inline-block" }}
     >
-      {children}
-    </MotionButton>
+      <Button variant={variant} color={color} {...props}>
+        {children}
+      </Button>
+    </motion.div>
   );
 }
