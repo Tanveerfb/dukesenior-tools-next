@@ -2,7 +2,7 @@
 
 import React from "react";
 import { usePathname, useSearchParams } from "next/navigation";
-import MainNavbar from "../navigation/MainNavbar";
+import AppNavbar from "../navigation/AppNavbar";
 import Footer from "../ui/Footer";
 import DynamicBreadcrumb from "../navigation/DynamicBreadcrumb";
 import SkipToContent from "../navigation/SkipToContent";
@@ -19,7 +19,7 @@ export default function AppChrome({ children }: { children: React.ReactNode }) {
   return (
     <>
       <SkipToContent />
-      <MainNavbar />
+      <AppNavbar />
       <DynamicBreadcrumb />
       <main id="main-content">
         <PageTransition>{children}</PageTransition>

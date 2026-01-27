@@ -5,7 +5,23 @@ import { ToastProvider } from "./ui/ToastProvider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Toaster } from "react-hot-toast";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { ThemeProvider as MuiThemeProvider, CssBaseline } from "@mui/material";
+import { getTheme } from "@/theme/theme";
+import { useTheme as useCustomTheme } from "./ThemeProvider";
+
+// Inner component to access theme context
+function MuiThemeWrapper({ children }: { children: React.ReactNode }) {
+  const { theme } = useCustomTheme();
+  const muiTheme = useMemo(() => getTheme(theme as 'light' | 'dark'), [theme]);
+
+  return (
+    <MuiThemeProvider theme={muiTheme}>
+      <CssBaseline />
+      {children}
+    </MuiThemeProvider>
+  );
+}
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   // Create QueryClient instance in state to avoid creating new instance on every render
@@ -26,22 +42,24 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <AuthProvider>
-          <ToastProvider>{children}</ToastProvider>
-          {/* react-hot-toast for alternative toast notifications */}
-          <Toaster
-            position="top-right"
-            reverseOrder={false}
-            gutter={8}
-            toastOptions={{
-              duration: 3000,
-              style: {
-                borderRadius: "8px",
-                fontSize: "14px",
-              },
-            }}
-          />
-        </AuthProvider>
+        <MuiThemeWrapper>
+          <AuthProvider>
+            <ToastProvider>{children}</ToastProvider>
+            {/* react-hot-toast for alternative toast notifications */}
+            <Toaster
+              position="top-right"
+              reverseOrder={false}
+              gutter={8}
+              toastOptions={{
+                duration: 3000,
+                style: {
+                  borderRadius: "8px",
+                  fontSize: "14px",
+                },
+              }}
+            />
+          </AuthProvider>
+        </MuiThemeWrapper>
       </ThemeProvider>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
