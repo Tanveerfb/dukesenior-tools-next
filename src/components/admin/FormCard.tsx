@@ -1,6 +1,6 @@
 "use client";
 import { ReactNode } from "react";
-import { Card, Button } from "react-bootstrap";
+import { Card, CardHeader, CardContent, CardActions, Button, Typography, Box } from "@mui/material";
 
 interface FormCardProps {
   children: ReactNode;
@@ -45,29 +45,40 @@ export default function FormCard({
 }: FormCardProps) {
   const content = (
     <>
-      <Card.Header>
-        <Card.Title as="h3" className="h5 fw-semibold mb-0">
-          {title}
-        </Card.Title>
-        {subtitle && <p className="text-muted small mb-0 mt-1">{subtitle}</p>}
-      </Card.Header>
-      <Card.Body>
+      <CardHeader
+        title={
+          <Typography variant="h6" component="h3" fontWeight={600}>
+            {title}
+          </Typography>
+        }
+        subheader={subtitle}
+      />
+      <CardContent>
         {onSubmit ? (
-          <form onSubmit={onSubmit}>
+          <Box component="form" onSubmit={onSubmit}>
             {children}
-            <div className="d-flex justify-content-end gap-2">
-              <Button type="submit" variant="primary" disabled={submitDisabled}>
+            <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 3 }}>
+              <Button
+                type="submit"
+                variant="contained"
+                disabled={submitDisabled}
+                sx={{ textTransform: "none" }}
+              >
                 {submitLabel}
               </Button>
-            </div>
-          </form>
+            </Box>
+          </Box>
         ) : (
           children
         )}
-      </Card.Body>
-      {footer && <Card.Footer>{footer}</Card.Footer>}
+      </CardContent>
+      {footer && <CardActions>{footer}</CardActions>}
     </>
   );
 
-  return <Card className="border-0 shadow-sm mb-4">{content}</Card>;
+  return (
+    <Card elevation={2} sx={{ mb: 4 }}>
+      {content}
+    </Card>
+  );
 }

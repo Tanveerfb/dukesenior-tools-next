@@ -1,7 +1,8 @@
 "use client";
 import { ReactNode } from "react";
-import { Container } from "react-bootstrap";
+import { Container, Typography, Box, Link as MuiLink } from "@mui/material";
 import Link from "next/link";
+import { ArrowBack as ArrowBackIcon } from "@mui/icons-material";
 
 interface AdminPageLayoutProps {
   children: ReactNode;
@@ -43,18 +44,40 @@ export default function AdminPageLayout({
   backLink,
 }: AdminPageLayoutProps) {
   return (
-    <Container className="py-4">
+    <Container maxWidth="xl" sx={{ py: 4 }}>
       {backLink && (
-        <div className="mb-3">
-          <Link href={backLink.href} className="text-decoration-none">
-            ← {backLink.label}
-          </Link>
-        </div>
+        <Box sx={{ mb: 3 }}>
+          <MuiLink
+            component={Link}
+            href={backLink.href}
+            underline="hover"
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 0.5,
+              color: "primary.main",
+              fontWeight: 500,
+              transition: "gap 0.2s",
+              "&:hover": {
+                gap: 1,
+              },
+            }}
+          >
+            <ArrowBackIcon fontSize="small" />
+            {backLink.label}
+          </MuiLink>
+        </Box>
       )}
-      <div className="mb-4">
-        <h1 className="h2 fw-bold">{title}</h1>
-        {subtitle && <p className="text-muted">{subtitle}</p>}
-      </div>
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h4" component="h1" fontWeight={700} gutterBottom>
+          {title}
+        </Typography>
+        {subtitle && (
+          <Typography variant="body1" color="text.secondary">
+            {subtitle}
+          </Typography>
+        )}
+      </Box>
       {children}
     </Container>
   );

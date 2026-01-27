@@ -1,5 +1,5 @@
 "use client";
-import { Form } from "react-bootstrap";
+import { FormControl, InputLabel, Select, MenuItem, SelectChangeEvent } from "@mui/material";
 
 interface Player {
   id: string;
@@ -45,23 +45,30 @@ export default function PlayerSelector({
   disabled = false,
   showStatus = false,
 }: PlayerSelectorProps) {
+  const handleChange = (event: SelectChangeEvent<string>) => {
+    onChange(event.target.value);
+  };
+
   return (
-    <Form.Group className="mb-3">
-      <Form.Label>{label}</Form.Label>
-      <Form.Select
+    <FormControl fullWidth margin="normal" required={required} disabled={disabled}>
+      <InputLabel id="player-selector-label">{label}</InputLabel>
+      <Select
+        labelId="player-selector-label"
         value={value}
-        onChange={(e) => onChange(e.target.value)}
-        required={required}
-        disabled={disabled}
+        onChange={handleChange}
+        label={label}
+        displayEmpty={false}
       >
-        <option value="">{placeholder}</option>
+        <MenuItem value="">
+          <em>{placeholder}</em>
+        </MenuItem>
         {players.map((player) => (
-          <option key={player.id} value={player.id}>
+          <MenuItem key={player.id} value={player.id}>
             {player.name}
             {showStatus && player.status ? ` (${player.status})` : ""}
-          </option>
+          </MenuItem>
         ))}
-      </Form.Select>
-    </Form.Group>
+      </Select>
+    </FormControl>
   );
 }
