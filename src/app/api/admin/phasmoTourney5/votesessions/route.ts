@@ -53,13 +53,18 @@ export async function POST(req: Request) {
   const sessions = await readSessions();
   const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   const pathOnly = `/phasmotourney-series/phasmoTourney5/vote/${id}`;
+  
+  // Prioritize x-forwarded-* headers for production (Vercel, etc.)
   const host =
     req.headers.get("x-forwarded-host") ||
     req.headers.get("host") ||
     "localhost:3000";
+  
+  // Use x-forwarded-proto if available, otherwise determine from host
   const proto =
     req.headers.get("x-forwarded-proto") ||
-    (host.startsWith("localhost") ? "http" : "https");
+    (host.includes("localhost") || host.includes("127.0.0.1") ? "http" : "https");
+  
   const link = `${proto}://${host}${pathOnly}`;
   const isAnonymous = body.type === "vote-out";
   const newSession = {
