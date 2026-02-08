@@ -2,17 +2,36 @@
 
 import { useEffect, useState, useMemo } from "react";
 import {
+  Box,
   Container,
-  Row,
-  Col,
-  Card,
+  Typography,
   Button,
-  Form,
-  Spinner,
-  Badge,
-  Modal,
+  TextField,
+  CircularProgress,
+  Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   Alert,
-} from "react-bootstrap";
+  Card,
+  CardContent,
+  CardActions,
+  Grid,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  Stack,
+} from "@mui/material";
+import {
+  Add as AddIcon,
+  Delete as DeleteIcon,
+  Visibility as VisibilityIcon,
+  Edit as EditIcon,
+  FileCopy as FileCopyIcon,
+  Description as DescriptionIcon,
+} from "@mui/icons-material";
 import { useAuth } from "@/hooks/useAuth";
 import {
   listChecklistsForUser,
@@ -21,7 +40,6 @@ import {
   duplicateChecklist,
 } from "@/lib/services/houseDuties";
 import { Checklist } from "@/types/houseDuties";
-import { FaPlus, FaTrash, FaEye, FaEdit, FaCopy, FaFileAlt } from "react-icons/fa";
 import EditChecklistModal from "@/components/houseDuties/EditChecklistModal";
 import ViewChecklistModal from "@/components/houseDuties/ViewChecklistModal";
 
@@ -183,8 +201,8 @@ export default function HouseDutiesPage() {
 
   if (!user) {
     return (
-      <Container className="py-5">
-        <Alert variant="warning">
+      <Container maxWidth="lg" sx={{ py: 5 }}>
+        <Alert severity="warning">
           Please log in to use the House Duties Checklist tool.
         </Alert>
       </Container>
@@ -192,80 +210,72 @@ export default function HouseDutiesPage() {
   }
 
   return (
-    <Container className="py-4">
+    <Container maxWidth="lg" sx={{ py: 4 }}>
       {/* Header */}
-      <Row className="mb-4">
-        <Col>
-          <h1 className="mb-2">House Duties Checklist</h1>
-          <p className="text-muted">
-            Create and manage 7-day checklists for house duties and responsibilities.
-          </p>
-        </Col>
-      </Row>
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h4" component="h1" gutterBottom>
+          House Duties Checklist
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          Create and manage 7-day checklists for house duties and responsibilities.
+        </Typography>
+      </Box>
 
       {/* Action Buttons */}
-      <Row className="mb-4">
-        <Col xs={12} md="auto" className="mb-2">
-          <Button
-            variant="primary"
-            onClick={() => handleCreateNew(false)}
-            className="w-100 w-md-auto"
-          >
-            <FaPlus className="me-2" />
-            New Checklist
-          </Button>
-        </Col>
-        <Col xs={12} md="auto" className="mb-2">
-          <Button
-            variant="outline-primary"
-            onClick={() => handleCreateNew(true)}
-            className="w-100 w-md-auto"
-          >
-            <FaFileAlt className="me-2" />
-            New Template
-          </Button>
-        </Col>
-      </Row>
+      <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ mb: 4 }}>
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => handleCreateNew(false)}
+        >
+          New Checklist
+        </Button>
+        <Button
+          variant="outlined"
+          startIcon={<DescriptionIcon />}
+          onClick={() => handleCreateNew(true)}
+        >
+          New Template
+        </Button>
+      </Stack>
 
       {/* Filter and Search */}
-      <Row className="mb-4">
-        <Col xs={12} md={6} className="mb-3 mb-md-0">
-          <Form.Group>
-            <Form.Label>View</Form.Label>
-            <Form.Select
+      <Grid container spacing={2} sx={{ mb: 4 }}>
+        <Grid item xs={12} md={6}>
+          <FormControl fullWidth>
+            <InputLabel>View</InputLabel>
+            <Select
               value={viewMode}
+              label="View"
               onChange={(e) => setViewMode(e.target.value as ViewMode)}
             >
-              <option value="all">All Items</option>
-              <option value="active">Active Checklists</option>
-              <option value="templates">Templates Only</option>
-            </Form.Select>
-          </Form.Group>
-        </Col>
-        <Col xs={12} md={6}>
-          <Form.Group>
-            <Form.Label>Search</Form.Label>
-            <Form.Control
-              type="text"
-              placeholder="Search by name or description..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </Form.Group>
-        </Col>
-      </Row>
+              <MenuItem value="all">All Items</MenuItem>
+              <MenuItem value="active">Active Checklists</MenuItem>
+              <MenuItem value="templates">Templates Only</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <TextField
+            fullWidth
+            label="Search"
+            placeholder="Search by name or description..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </Grid>
+      </Grid>
 
       {/* Loading State */}
       {loading && (
-        <div className="text-center py-5">
-          <Spinner animation="border" />
-          <p className="mt-3 text-muted">Loading...</p>
-        </div>
+        <Box sx={{ display: "flex", justifyContent: "center", py: 5 }}>
+          <CircularProgress />
+        </Box>
       )}
 
       {/* Checklists List */}
       {!loading && displayedChecklists.length === 0 && (
-        <Alert variant="info">
+        <Alert severity="info">
           {searchQuery
             ? "No checklists match your search."
             : "No checklists yet. Create your first one!"}
@@ -273,81 +283,77 @@ export default function HouseDutiesPage() {
       )}
 
       {!loading && displayedChecklists.length > 0 && (
-        <Row>
+        <Grid container spacing={3}>
           {displayedChecklists.map((checklist) => (
-            <Col key={checklist.id} xs={12} md={6} lg={4} className="mb-4">
-              <Card className="h-100 shadow-sm">
-                <Card.Body>
-                  <div className="d-flex justify-content-between align-items-start mb-2">
-                    <Card.Title className="mb-0">{checklist.name}</Card.Title>
+            <Grid item xs={12} md={6} lg={4} key={checklist.id}>
+              <Card sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
+                <CardContent sx={{ flexGrow: 1 }}>
+                  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "start", mb: 1 }}>
+                    <Typography variant="h6" component="h2">
+                      {checklist.name}
+                    </Typography>
                     {checklist.isTemplate && (
-                      <Badge bg="info" className="ms-2">
-                        Template
-                      </Badge>
+                      <Chip label="Template" color="info" size="small" />
                     )}
-                  </div>
+                  </Box>
                   
                   {checklist.description && (
-                    <Card.Text className="text-muted small">
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                       {checklist.description.length > 100
                         ? checklist.description.substring(0, 100) + "..."
                         : checklist.description}
-                    </Card.Text>
+                    </Typography>
                   )}
 
-                  <div className="mb-3">
-                    <small className="text-muted">
-                      {checklist.duties.length} duties • {checklist.people.length} people
-                    </small>
-                  </div>
+                  <Typography variant="caption" color="text.secondary">
+                    {checklist.duties.length} duties • {checklist.people.length} people
+                  </Typography>
 
-                  <div className="d-flex flex-wrap gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline-primary"
-                      onClick={() => handleView(checklist)}
-                    >
-                      <FaEye className="me-1" />
-                      View
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline-secondary"
-                      onClick={() => handleEdit(checklist)}
-                    >
-                      <FaEdit className="me-1" />
-                      Edit
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline-info"
-                      onClick={() =>
-                        handleDuplicateClick(checklist, !checklist.isTemplate)
-                      }
-                    >
-                      <FaCopy className="me-1" />
-                      Copy
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline-danger"
-                      onClick={() => handleDeleteClick(checklist)}
-                    >
-                      <FaTrash className="me-1" />
-                      Delete
-                    </Button>
-                  </div>
+                  <Typography variant="caption" display="block" color="text.secondary" sx={{ mt: 2 }}>
+                    Updated: {new Date(checklist.updatedAt).toLocaleDateString()}
+                  </Typography>
+                </CardContent>
 
-                  <div className="mt-3">
-                    <small className="text-muted">
-                      Updated: {new Date(checklist.updatedAt).toLocaleDateString()}
-                    </small>
-                  </div>
-                </Card.Body>
+                <CardActions sx={{ flexWrap: "wrap", gap: 1, p: 2, pt: 0 }}>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    startIcon={<VisibilityIcon />}
+                    onClick={() => handleView(checklist)}
+                  >
+                    View
+                  </Button>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    startIcon={<EditIcon />}
+                    onClick={() => handleEdit(checklist)}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    color="info"
+                    startIcon={<FileCopyIcon />}
+                    onClick={() => handleDuplicateClick(checklist, !checklist.isTemplate)}
+                  >
+                    Copy
+                  </Button>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    color="error"
+                    startIcon={<DeleteIcon />}
+                    onClick={() => handleDeleteClick(checklist)}
+                  >
+                    Delete
+                  </Button>
+                </CardActions>
               </Card>
-            </Col>
+            </Grid>
           ))}
-        </Row>
+        </Grid>
       )}
 
       {/* Edit/Create Modal */}
@@ -370,59 +376,53 @@ export default function HouseDutiesPage() {
         />
       )}
 
-      {/* Delete Confirmation Modal */}
-      <Modal show={showDeleteConfirm} onHide={() => setShowDeleteConfirm(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Confirm Delete</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteConfirm} onClose={() => setShowDeleteConfirm(false)}>
+        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogContent>
           Are you sure you want to delete "{checklistToDelete?.name}"? This action
           cannot be undone.
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowDeleteConfirm(false)}>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowDeleteConfirm(false)}>
             Cancel
           </Button>
-          <Button variant="danger" onClick={handleDeleteConfirm}>
+          <Button onClick={handleDeleteConfirm} color="error" variant="contained">
             Delete
           </Button>
-        </Modal.Footer>
-      </Modal>
+        </DialogActions>
+      </Dialog>
 
-      {/* Duplicate Modal */}
-      <Modal show={showDuplicateModal} onHide={() => setShowDuplicateModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>
-            Duplicate as {duplicateAsTemplate ? "Template" : "Checklist"}
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {duplicateError && <Alert variant="danger">{duplicateError}</Alert>}
-          <Form.Group>
-            <Form.Label>
-              Name for {duplicateAsTemplate ? "template" : "checklist"}
-            </Form.Label>
-            <Form.Control
-              type="text"
-              value={duplicateName}
-              onChange={(e) => setDuplicateName(e.target.value)}
-              placeholder="Enter name..."
-              autoFocus
-            />
-          </Form.Group>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button
-            variant="secondary"
-            onClick={() => setShowDuplicateModal(false)}
-          >
+      {/* Duplicate Dialog */}
+      <Dialog open={showDuplicateModal} onClose={() => setShowDuplicateModal(false)}>
+        <DialogTitle>
+          Duplicate as {duplicateAsTemplate ? "Template" : "Checklist"}
+        </DialogTitle>
+        <DialogContent>
+          {duplicateError && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {duplicateError}
+            </Alert>
+          )}
+          <TextField
+            autoFocus
+            margin="dense"
+            label={`Name for ${duplicateAsTemplate ? "template" : "checklist"}`}
+            fullWidth
+            value={duplicateName}
+            onChange={(e) => setDuplicateName(e.target.value)}
+            placeholder="Enter name..."
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowDuplicateModal(false)}>
             Cancel
           </Button>
-          <Button variant="primary" onClick={handleDuplicateConfirm}>
+          <Button onClick={handleDuplicateConfirm} variant="contained">
             Duplicate
           </Button>
-        </Modal.Footer>
-      </Modal>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 }

@@ -1,7 +1,36 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Modal, Button, Form, Row, Col, ListGroup, Alert } from "react-bootstrap";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  TextField,
+  List,
+  ListItem,
+  Alert,
+  Box,
+  Stack,
+  IconButton,
+  Typography,
+  Divider,
+  Select,
+  MenuItem,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+  FormControl,
+} from "@mui/material";
+import {
+  Add as AddIcon,
+  Delete as DeleteIcon,
+  ArrowUpward as ArrowUpwardIcon,
+  ArrowDownward as ArrowDownwardIcon,
+} from "@mui/icons-material";
 import { useAuth } from "@/hooks/useAuth";
 import { createChecklist, updateChecklist } from "@/lib/services/houseDuties";
 import {
@@ -11,7 +40,6 @@ import {
   DayAssignment,
   DAYS_OF_WEEK,
 } from "@/types/houseDuties";
-import { FaPlus, FaTrash, FaArrowUp, FaArrowDown } from "react-icons/fa";
 
 interface Props {
   show: boolean;
@@ -215,211 +243,236 @@ export default function EditChecklistModal({
   };
 
   return (
-    <Modal show={show} onHide={onHide} size="xl" scrollable>
-      <Modal.Header closeButton>
-        <Modal.Title>
-          {checklist ? "Edit" : "Create"} {isTemplate ? "Template" : "Checklist"}
-        </Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        {error && <Alert variant="danger">{error}</Alert>}
+    <Dialog open={show} onClose={onHide} maxWidth="xl" fullWidth>
+      <DialogTitle>
+        {checklist ? "Edit" : "Create"} {isTemplate ? "Template" : "Checklist"}
+      </DialogTitle>
+      <DialogContent>
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
 
         {/* Basic Info */}
-        <Form.Group className="mb-3">
-          <Form.Label>Name *</Form.Label>
-          <Form.Control
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="e.g., Weekly House Duties"
-          />
-        </Form.Group>
+        <TextField
+          fullWidth
+          label="Name *"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="e.g., Weekly House Duties"
+          sx={{ mb: 3 }}
+        />
 
-        <Form.Group className="mb-4">
-          <Form.Label>Description (optional)</Form.Label>
-          <Form.Control
-            as="textarea"
-            rows={2}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Add any notes or instructions..."
-          />
-        </Form.Group>
+        <TextField
+          fullWidth
+          label="Description (optional)"
+          multiline
+          rows={2}
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder="Add any notes or instructions..."
+          sx={{ mb: 3 }}
+        />
 
-        <hr />
+        <Divider sx={{ mb: 3 }} />
 
         {/* Duties Section */}
-        <h5 className="mb-3">Duties</h5>
-        <Row className="mb-3">
-          <Col>
-            <Form.Control
-              type="text"
-              value={newDutyName}
-              onChange={(e) => setNewDutyName(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addDuty())}
-              placeholder="Enter duty name"
-            />
-          </Col>
-          <Col xs="auto">
-            <Button onClick={addDuty} variant="primary">
-              <FaPlus /> Add Duty
-            </Button>
-          </Col>
-        </Row>
+        <Typography variant="h6" sx={{ mb: 2 }}>
+          Duties
+        </Typography>
+        <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
+          <TextField
+            fullWidth
+            value={newDutyName}
+            onChange={(e) => setNewDutyName(e.target.value)}
+            onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addDuty())}
+            placeholder="Enter duty name"
+          />
+          <Button
+            onClick={addDuty}
+            variant="contained"
+            startIcon={<AddIcon />}
+            sx={{ whiteSpace: "nowrap" }}
+          >
+            Add Duty
+          </Button>
+        </Stack>
 
         {duties.length > 0 && (
-          <ListGroup className="mb-4">
+          <List sx={{ mb: 3 }}>
             {duties.map((duty, index) => (
-              <ListGroup.Item
+              <ListItem
                 key={duty.id}
-                className="d-flex justify-content-between align-items-center"
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  border: "1px solid",
+                  borderColor: "divider",
+                  borderRadius: 1,
+                  mb: 1,
+                  bgcolor: "background.paper",
+                }}
               >
-                <span>{duty.name}</span>
-                <div className="d-flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline-secondary"
+                <Typography>{duty.name}</Typography>
+                <Stack direction="row" spacing={1}>
+                  <IconButton
+                    size="small"
                     onClick={() => moveDuty(index, "up")}
                     disabled={index === 0}
                   >
-                    <FaArrowUp />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline-secondary"
+                    <ArrowUpwardIcon />
+                  </IconButton>
+                  <IconButton
+                    size="small"
                     onClick={() => moveDuty(index, "down")}
                     disabled={index === duties.length - 1}
                   >
-                    <FaArrowDown />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline-danger"
+                    <ArrowDownwardIcon />
+                  </IconButton>
+                  <IconButton
+                    size="small"
+                    color="error"
                     onClick={() => removeDuty(duty.id)}
                   >
-                    <FaTrash />
-                  </Button>
-                </div>
-              </ListGroup.Item>
+                    <DeleteIcon />
+                  </IconButton>
+                </Stack>
+              </ListItem>
             ))}
-          </ListGroup>
+          </List>
         )}
 
-        <hr />
+        <Divider sx={{ mb: 3 }} />
 
         {/* People Section */}
-        <h5 className="mb-3">People</h5>
-        <Row className="mb-3">
-          <Col>
-            <Form.Control
-              type="text"
-              value={newPersonName}
-              onChange={(e) => setNewPersonName(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addPerson())}
-              placeholder="Enter person name"
-            />
-          </Col>
-          <Col xs="auto">
-            <Button onClick={addPerson} variant="primary">
-              <FaPlus /> Add Person
-            </Button>
-          </Col>
-        </Row>
+        <Typography variant="h6" sx={{ mb: 2 }}>
+          People
+        </Typography>
+        <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
+          <TextField
+            fullWidth
+            value={newPersonName}
+            onChange={(e) => setNewPersonName(e.target.value)}
+            onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addPerson())}
+            placeholder="Enter person name"
+          />
+          <Button
+            onClick={addPerson}
+            variant="contained"
+            startIcon={<AddIcon />}
+            sx={{ whiteSpace: "nowrap" }}
+          >
+            Add Person
+          </Button>
+        </Stack>
 
         {people.length > 0 && (
-          <ListGroup className="mb-4">
+          <List sx={{ mb: 3 }}>
             {people.map((person, index) => (
-              <ListGroup.Item
+              <ListItem
                 key={person.id}
-                className="d-flex justify-content-between align-items-center"
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  border: "1px solid",
+                  borderColor: "divider",
+                  borderRadius: 1,
+                  mb: 1,
+                  bgcolor: "background.paper",
+                }}
               >
-                <span>{person.name}</span>
-                <div className="d-flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline-secondary"
+                <Typography>{person.name}</Typography>
+                <Stack direction="row" spacing={1}>
+                  <IconButton
+                    size="small"
                     onClick={() => movePerson(index, "up")}
                     disabled={index === 0}
                   >
-                    <FaArrowUp />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline-secondary"
+                    <ArrowUpwardIcon />
+                  </IconButton>
+                  <IconButton
+                    size="small"
                     onClick={() => movePerson(index, "down")}
                     disabled={index === people.length - 1}
                   >
-                    <FaArrowDown />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline-danger"
+                    <ArrowDownwardIcon />
+                  </IconButton>
+                  <IconButton
+                    size="small"
+                    color="error"
                     onClick={() => removePerson(person.id)}
                   >
-                    <FaTrash />
-                  </Button>
-                </div>
-              </ListGroup.Item>
+                    <DeleteIcon />
+                  </IconButton>
+                </Stack>
+              </ListItem>
             ))}
-          </ListGroup>
+          </List>
         )}
 
-        <hr />
+        <Divider sx={{ mb: 3 }} />
 
         {/* Assignments Grid */}
         {duties.length > 0 && people.length > 0 && (
           <>
-            <h5 className="mb-3">Weekly Assignments</h5>
-            <div className="table-responsive">
-              <table className="table table-bordered">
-                <thead>
-                  <tr>
-                    <th>Duty</th>
+            <Typography variant="h6" sx={{ mb: 2 }}>
+              Weekly Assignments
+            </Typography>
+            <Box sx={{ overflowX: "auto" }}>
+              <Table size="small" sx={{ border: "1px solid", borderColor: "divider" }}>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Duty</TableCell>
                     {DAYS_OF_WEEK.map((day) => (
-                      <th key={day} className="text-center">
+                      <TableCell key={day} align="center">
                         {day.substring(0, 3)}
-                      </th>
+                      </TableCell>
                     ))}
-                  </tr>
-                </thead>
-                <tbody>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
                   {duties.map((duty) => (
-                    <tr key={duty.id}>
-                      <td>{duty.name}</td>
+                    <TableRow key={duty.id}>
+                      <TableCell>{duty.name}</TableCell>
                       {DAYS_OF_WEEK.map((day) => (
-                        <td key={day} className="p-1">
-                          <Form.Select
-                            size="sm"
-                            value={getAssignment(day, duty.id)}
-                            onChange={(e) =>
-                              handleAssignmentChange(day, duty.id, e.target.value)
-                            }
-                          >
-                            <option value="">-</option>
-                            {people.map((person) => (
-                              <option key={person.id} value={person.id}>
-                                {person.name}
-                              </option>
-                            ))}
-                          </Form.Select>
-                        </td>
+                        <TableCell key={day} sx={{ p: 0.5 }}>
+                          <FormControl size="small" fullWidth>
+                            <Select
+                              value={getAssignment(day, duty.id)}
+                              onChange={(e) =>
+                                handleAssignmentChange(day, duty.id, e.target.value)
+                              }
+                              displayEmpty
+                            >
+                              <MenuItem value="">-</MenuItem>
+                              {people.map((person) => (
+                                <MenuItem key={person.id} value={person.id}>
+                                  {person.name}
+                                </MenuItem>
+                              ))}
+                            </Select>
+                          </FormControl>
+                        </TableCell>
                       ))}
-                    </tr>
+                    </TableRow>
                   ))}
-                </tbody>
-              </table>
-            </div>
+                </TableBody>
+              </Table>
+            </Box>
           </>
         )}
-      </Modal.Body>
-      <Modal.Footer>
-        <Button variant="secondary" onClick={onHide} disabled={saving}>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onHide} disabled={saving}>
           Cancel
         </Button>
-        <Button variant="primary" onClick={handleSave} disabled={saving}>
+        <Button onClick={handleSave} variant="contained" disabled={saving}>
           {saving ? "Saving..." : "Save"}
         </Button>
-      </Modal.Footer>
-    </Modal>
+      </DialogActions>
+    </Dialog>
   );
 }
