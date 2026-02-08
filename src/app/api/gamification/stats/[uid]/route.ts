@@ -1,17 +1,17 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getUserGamification, getUserRank } from '@/lib/services/gamification';
+import { NextRequest, NextResponse } from "next/server";
+import { getUserGamification, getUserRank } from "@/lib/services/gamification";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { uid: string } }
+  { params }: { params: Promise<{ uid: string }> },
 ) {
   try {
-    const { uid } = params;
+    const { uid } = await params;
 
     if (!uid) {
       return NextResponse.json(
-        { error: 'User ID is required' },
-        { status: 400 }
+        { error: "User ID is required" },
+        { status: 400 },
       );
     }
 
@@ -22,8 +22,8 @@ export async function GET(
 
     if (!gamification) {
       return NextResponse.json(
-        { error: 'User gamification data not found' },
-        { status: 404 }
+        { error: "User gamification data not found" },
+        { status: 404 },
       );
     }
 
@@ -32,10 +32,10 @@ export async function GET(
       rank,
     });
   } catch (error) {
-    console.error('Error fetching user stats:', error);
+    console.error("Error fetching user stats:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch user stats' },
-      { status: 500 }
+      { error: "Failed to fetch user stats" },
+      { status: 500 },
     );
   }
 }

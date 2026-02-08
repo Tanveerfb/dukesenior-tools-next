@@ -3,7 +3,7 @@
  * Handles XP, levels, achievements, and user gamification data
  */
 
-import { db } from '@/lib/firebase/client';
+import { db } from "@/lib/firebase/client";
 import {
   collection,
   doc,
@@ -19,7 +19,7 @@ import {
   orderBy,
   limit,
   Timestamp,
-} from 'firebase/firestore';
+} from "firebase/firestore";
 import type {
   UserGamification,
   XPEvent,
@@ -27,24 +27,26 @@ import type {
   LeaderboardEntry,
   LeaderboardFilter,
   UserAchievement,
-} from '@/types/gamification';
+} from "@/types/gamification";
 import {
   calculateLevelFromXP,
   getLevelTitle,
   XP_REWARDS,
-} from '@/types/gamification';
-import { ACHIEVEMENTS, checkAchievementEligibility } from '@/data/achievements';
-import { getUserByUID } from './users';
+} from "@/types/gamification";
+import { ACHIEVEMENTS, checkAchievementEligibility } from "@/data/achievements";
+import { getUserByUID } from "./users";
 
 // Collection names
-const GAMIFICATION_COL = 'userGamification';
-const XP_EVENTS_COL = 'xpEvents';
-const ACHIEVEMENTS_COL = 'userAchievements';
+const GAMIFICATION_COL = "userGamification";
+const XP_EVENTS_COL = "xpEvents";
+const ACHIEVEMENTS_COL = "userAchievements";
 
 /**
  * Initialize gamification data for a new user
  */
-export async function initializeUserGamification(uid: string): Promise<UserGamification> {
+export async function initializeUserGamification(
+  uid: string,
+): Promise<UserGamification> {
   const now = Date.now();
   const data: UserGamification = {
     uid,
@@ -55,7 +57,6 @@ export async function initializeUserGamification(uid: string): Promise<UserGamif
     achievementsUnlocked: [],
     achievementCount: 0,
     achievementProgress: {},
-        achievementCount: 0,
     stats: {
       postsCreated: 0,
       commentsPosted: 0,
@@ -78,14 +79,19 @@ export async function initializeUserGamification(uid: string): Promise<UserGamif
 /**
  * Get user gamification data
  */
-export async function getUserGamification(uid: string): Promise<UserGamification | null> {
+export async function getUserGamification(
+  uid: string,
+): Promise<UserGamification | null> {
   try {
     // Try server-side first
-    if (typeof window === 'undefined') {
+    if (typeof window === "undefined") {
       try {
-        const { adminDb } = await import('@/lib/firebase/admin');
+        const { adminDb } = await import("@/lib/firebase/admin");
         if (adminDb) {
-          const snap = await adminDb.collection(GAMIFICATION_COL).doc(uid).get();
+          const snap = await adminDb
+            .collection(GAMIFICATION_COL)
+            .doc(uid)
+            .get();
           if (snap.exists) {
             return snap.data() as UserGamification;
           }
@@ -96,14 +102,14 @@ export async function getUserGamification(uid: string): Promise<UserGamification
     // Client-side fallback
     const ref = doc(db, GAMIFICATION_COL, uid);
     const snap = await getDoc(ref);
-    
+
     if (!snap.exists()) {
       return null;
     }
-    
+
     return snap.data() as UserGamification;
   } catch (error) {
-    console.error('Error getting user gamification:', error);
+    console.error("Error getting user gamification:", error);
     return null;
   }
 }
@@ -116,7 +122,7 @@ export async function awardXP(
   amount: number,
   reason: string,
   category: XPCategory,
-  metadata?: Record<string, any>
+  metadata?: Record<string, any>,
 ): Promise<{
   newXP: number;
   leveledUp: boolean;
@@ -124,14 +130,14 @@ export async function awardXP(
   achievementsUnlocked?: string[];
 }> {
   if (amount <= 0) {
-    throw new Error('XP amount must be positive');
+    throw new Error("XP amount must be positive");
   }
 
   const ref = doc(db, GAMIFICATION_COL, uid);
-  
+
   return await runTransaction(db, async (transaction) => {
     const snap = await transaction.get(ref);
-    
+
     let data: UserGamification;
     if (!snap.exists()) {
       // Initialize if doesn't exist
@@ -165,9 +171,9 @@ export async function awardXP(
     const oldLevel = data.currentLevel;
     const newTotalXP = data.totalXP + amount;
     const levelData = calculateLevelFromXP(newTotalXP);
-    
+
     const leveledUp = levelData.level > oldLevel;
-    
+
     // Update data
     data.totalXP = newTotalXP;
     data.currentLevel = levelData.level;
@@ -177,32 +183,36 @@ export async function awardXP(
     data.lastXPEarned = Date.now();
 
     // Check for new achievements
-    const statMapping: Record<string, keyof UserGamification['stats']> = {
-      posts_created: 'postsCreated',
-      comments_posted: 'commentsPosted',
-      messages_sent: 'messagesSent',
-      friends_added: 'friendsAdded',
-      tournaments_participated: 'tournamentsParticipated',
-      tournaments_won: 'tournamentsWon',
-      login_streak: 'loginStreak',
-      total_logins: 'totalLogins',
-      level_reached: 'postsCreated', // Dummy mapping, we check level separately
-      xp_earned: 'postsCreated', // Dummy mapping, we check XP separately
+    const statMapping: Record<string, keyof UserGamification["stats"]> = {
+      posts_created: "postsCreated",
+      comments_posted: "commentsPosted",
+      messages_sent: "messagesSent",
+      friends_added: "friendsAdded",
+      tournaments_participated: "tournamentsParticipated",
+      tournaments_won: "tournamentsWon",
+      login_streak: "loginStreak",
+      total_logins: "totalLogins",
+      level_reached: "postsCreated", // Dummy mapping, we check level separately
+      xp_earned: "postsCreated", // Dummy mapping, we check XP separately
     };
 
+    const { lastLoginDate, ...numericStats } = data.stats;
     const stats = {
-      ...data.stats,
+      ...numericStats,
       level_reached: data.currentLevel,
       xp_earned: data.totalXP,
     };
 
-    const newAchievements = checkAchievementEligibility(stats, data.achievementsUnlocked);
-    
+    const newAchievements = checkAchievementEligibility(
+      stats,
+      data.achievementsUnlocked,
+    );
+
     // Award achievements
     for (const achievement of newAchievements) {
       data.achievementsUnlocked.push(achievement.id);
       data.achievementCount = data.achievementsUnlocked.length;
-      
+
       // Record achievement unlock
       const achievementRef = doc(collection(db, ACHIEVEMENTS_COL));
       const achievementData: UserAchievement = {
@@ -212,7 +222,7 @@ export async function awardXP(
         notified: false,
       };
       transaction.set(achievementRef, achievementData);
-      
+
       // Award achievement XP (recursive but controlled)
       if (achievement.xpReward > 0) {
         data.totalXP += achievement.xpReward;
@@ -242,9 +252,10 @@ export async function awardXP(
       newXP: data.totalXP,
       leveledUp,
       newLevel: leveledUp ? data.currentLevel : undefined,
-      achievementsUnlocked: newAchievements.length > 0 
-        ? newAchievements.map(a => a.id)
-        : undefined,
+      achievementsUnlocked:
+        newAchievements.length > 0
+          ? newAchievements.map((a) => a.id)
+          : undefined,
     };
   });
 }
@@ -254,14 +265,14 @@ export async function awardXP(
  */
 export async function incrementStat(
   uid: string,
-  statName: keyof UserGamification['stats'],
-  amount: number = 1
+  statName: keyof UserGamification["stats"],
+  amount: number = 1,
 ): Promise<void> {
   const ref = doc(db, GAMIFICATION_COL, uid);
-  
+
   await runTransaction(db, async (transaction) => {
     const snap = await transaction.get(ref);
-    
+
     let data: UserGamification;
     if (!snap.exists()) {
       // Initialize if doesn't exist
@@ -290,24 +301,36 @@ export async function incrementStat(
     } else {
       data = snap.data() as UserGamification;
     }
-    
-    data.stats[statName] = (data.stats[statName] || 0) + amount;
+
+    // Type-safe stat update
+    type StatKey = keyof typeof data.stats;
+    if (
+      statName in data.stats &&
+      typeof data.stats[statName as StatKey] === "number"
+    ) {
+      (data.stats[statName as StatKey] as number) =
+        ((data.stats[statName as StatKey] as number) || 0) + amount;
+    }
     data.updatedAt = Date.now();
-    
+
     // Check for achievements
+    const { lastLoginDate, ...numericStats } = data.stats;
     const stats = {
-      ...data.stats,
+      ...numericStats,
       level_reached: data.currentLevel,
       xp_earned: data.totalXP,
     };
-    
-    const newAchievements = checkAchievementEligibility(stats, data.achievementsUnlocked);
-    
+
+    const newAchievements = checkAchievementEligibility(
+      stats,
+      data.achievementsUnlocked,
+    );
+
     // Award achievements
     for (const achievement of newAchievements) {
       data.achievementsUnlocked.push(achievement.id);
       data.achievementCount = data.achievementsUnlocked.length;
-      
+
       // Record achievement unlock
       const achievementRef = doc(collection(db, ACHIEVEMENTS_COL));
       const achievementData: UserAchievement = {
@@ -317,7 +340,7 @@ export async function incrementStat(
         notified: false,
       };
       transaction.set(achievementRef, achievementData);
-      
+
       // Award achievement XP
       if (achievement.xpReward > 0) {
         data.totalXP += achievement.xpReward;
@@ -327,7 +350,7 @@ export async function incrementStat(
         data.xpForNextLevel = updatedLevelData.xpForNextLevel;
       }
     }
-    
+
     transaction.set(ref, data);
   });
 }
@@ -341,31 +364,33 @@ export async function updateLoginStreak(uid: string): Promise<{
   xpAwarded: number;
 }> {
   const ref = doc(db, GAMIFICATION_COL, uid);
-  
+
   return await runTransaction(db, async (transaction) => {
     const snap = await transaction.get(ref);
-    
+
     if (!snap.exists()) {
       await initializeUserGamification(uid);
       return { streak: 1, isNewDay: true, xpAwarded: 0 };
     }
-    
+
     const data = snap.data() as UserGamification;
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toISOString().split("T")[0];
     const lastLogin = data.stats.lastLoginDate;
-    
+
     let isNewDay = false;
     let xpAwarded = 0;
-    
+
     if (!lastLogin || lastLogin !== today) {
       isNewDay = true;
-      
+
       // Check if streak continues
       if (lastLogin) {
         const lastDate = new Date(lastLogin);
         const todayDate = new Date(today);
-        const diffDays = Math.floor((todayDate.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24));
-        
+        const diffDays = Math.floor(
+          (todayDate.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24),
+        );
+
         if (diffDays === 1) {
           // Continue streak
           data.stats.loginStreak += 1;
@@ -377,34 +402,36 @@ export async function updateLoginStreak(uid: string): Promise<{
         // First login
         data.stats.loginStreak = 1;
       }
-      
+
       data.stats.lastLoginDate = today;
       data.stats.totalLogins += 1;
       data.updatedAt = Date.now();
-      
+
       // Award daily login XP
-      xpAwarded = XP_REWARDS.DAILY_LOGIN + (data.stats.loginStreak * XP_REWARDS.LOGIN_STREAK_BONUS);
+      xpAwarded =
+        XP_REWARDS.DAILY_LOGIN +
+        data.stats.loginStreak * XP_REWARDS.LOGIN_STREAK_BONUS;
       data.totalXP += xpAwarded;
-      
+
       const levelData = calculateLevelFromXP(data.totalXP);
       data.currentLevel = levelData.level;
       data.xpInCurrentLevel = levelData.xpInLevel;
       data.xpForNextLevel = levelData.xpForNextLevel;
-      
+
       // Log XP event
       const eventRef = doc(collection(db, XP_EVENTS_COL));
       const eventData: XPEvent = {
         uid,
         amount: xpAwarded,
         reason: `Daily login (${data.stats.loginStreak} day streak)`,
-        category: 'login',
+        category: "login",
         timestamp: Date.now(),
       };
       transaction.set(eventRef, eventData);
-      
+
       transaction.set(ref, data);
     }
-    
+
     return {
       streak: data.stats.loginStreak,
       isNewDay,
@@ -416,18 +443,20 @@ export async function updateLoginStreak(uid: string): Promise<{
 /**
  * Get user achievements
  */
-export async function getUserAchievements(uid: string): Promise<UserAchievement[]> {
+export async function getUserAchievements(
+  uid: string,
+): Promise<UserAchievement[]> {
   try {
     const q = query(
       collection(db, ACHIEVEMENTS_COL),
-      where('uid', '==', uid),
-      orderBy('unlockedAt', 'desc')
+      where("uid", "==", uid),
+      orderBy("unlockedAt", "desc"),
     );
-    
+
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => doc.data() as UserAchievement);
+    return snapshot.docs.map((doc) => doc.data() as UserAchievement);
   } catch (error) {
-    console.error('Error getting user achievements:', error);
+    console.error("Error getting user achievements:", error);
     return [];
   }
 }
@@ -438,35 +467,35 @@ export async function getUserAchievements(uid: string): Promise<UserAchievement[
 export async function awardAchievement(
   uid: string,
   achievementId: string,
-  awardedBy: string
+  awardedBy: string,
 ): Promise<boolean> {
-  const achievement = ACHIEVEMENTS.find(a => a.id === achievementId);
+  const achievement = ACHIEVEMENTS.find((a) => a.id === achievementId);
   if (!achievement) {
-    throw new Error('Achievement not found');
+    throw new Error("Achievement not found");
   }
 
   const ref = doc(db, GAMIFICATION_COL, uid);
-  
+
   return await runTransaction(db, async (transaction) => {
     const snap = await transaction.get(ref);
-    
+
     if (!snap.exists()) {
       await initializeUserGamification(uid);
       return false;
     }
-    
+
     const data = snap.data() as UserGamification;
-    
+
     // Check if already unlocked
     if (data.achievementsUnlocked.includes(achievementId)) {
       return false;
     }
-    
+
     // Award achievement
     data.achievementsUnlocked.push(achievementId);
     data.achievementCount = data.achievementsUnlocked.length;
     data.updatedAt = Date.now();
-    
+
     // Award XP
     if (achievement.xpReward > 0) {
       data.totalXP += achievement.xpReward;
@@ -475,9 +504,9 @@ export async function awardAchievement(
       data.xpInCurrentLevel = levelData.xpInLevel;
       data.xpForNextLevel = levelData.xpForNextLevel;
     }
-    
+
     transaction.set(ref, data);
-    
+
     // Record achievement unlock
     const achievementRef = doc(collection(db, ACHIEVEMENTS_COL));
     const achievementData: UserAchievement = {
@@ -487,19 +516,19 @@ export async function awardAchievement(
       notified: false,
     };
     transaction.set(achievementRef, achievementData);
-    
+
     // Log XP event
     const eventRef = doc(collection(db, XP_EVENTS_COL));
     const eventData: XPEvent = {
       uid,
       amount: achievement.xpReward,
       reason: `Achievement unlocked: ${achievement.name}`,
-      category: 'achievement',
+      category: "achievement",
       metadata: { achievementId, awardedBy, manual: true },
       timestamp: Date.now(),
     };
     transaction.set(eventRef, eventData);
-    
+
     return true;
   });
 }
@@ -508,41 +537,45 @@ export async function awardAchievement(
  * Get leaderboard
  */
 export async function getLeaderboard(
-  filter: LeaderboardFilter
+  filter: LeaderboardFilter,
 ): Promise<LeaderboardEntry[]> {
   try {
     let q = query(collection(db, GAMIFICATION_COL));
-    
+
     // Apply sorting
     switch (filter.sort) {
-      case 'xp':
-        q = query(q, orderBy('totalXP', 'desc'));
+      case "xp":
+        q = query(q, orderBy("totalXP", "desc"));
         break;
-      case 'level':
-        q = query(q, orderBy('currentLevel', 'desc'), orderBy('totalXP', 'desc'));
+      case "level":
+        q = query(
+          q,
+          orderBy("currentLevel", "desc"),
+          orderBy("totalXP", "desc"),
+        );
         break;
-      case 'achievements':
-        q = query(q, orderBy('achievementCount', 'desc'));
+      case "achievements":
+        q = query(q, orderBy("achievementCount", "desc"));
         break;
     }
-    
+
     // Apply limit
     if (filter.limit) {
       q = query(q, limit(filter.limit));
     } else {
       q = query(q, limit(100));
     }
-    
+
     const snapshot = await getDocs(q);
     const entries: LeaderboardEntry[] = [];
-    
+
     for (let i = 0; i < snapshot.docs.length; i++) {
       const doc = snapshot.docs[i];
       const data = doc.data() as UserGamification;
-      
+
       // Fetch user profile data
       const user = await getUserByUID(data.uid);
-      
+
       entries.push({
         uid: data.uid,
         displayName: user?.displayName,
@@ -555,10 +588,10 @@ export async function getLeaderboard(
         lastActive: data.updatedAt,
       });
     }
-    
+
     return entries;
   } catch (error) {
-    console.error('Error getting leaderboard:', error);
+    console.error("Error getting leaderboard:", error);
     return [];
   }
 }
@@ -570,17 +603,17 @@ export async function getUserRank(uid: string): Promise<number> {
   try {
     const userGamification = await getUserGamification(uid);
     if (!userGamification) return 0;
-    
+
     // Count users with more XP
     const q = query(
       collection(db, GAMIFICATION_COL),
-      where('totalXP', '>', userGamification.totalXP)
+      where("totalXP", ">", userGamification.totalXP),
     );
-    
+
     const snapshot = await getDocs(q);
     return snapshot.size + 1;
   } catch (error) {
-    console.error('Error getting user rank:', error);
+    console.error("Error getting user rank:", error);
     return 0;
   }
 }
@@ -590,20 +623,20 @@ export async function getUserRank(uid: string): Promise<number> {
  */
 export async function getRecentXPEvents(
   uid: string,
-  limitCount: number = 20
+  limitCount: number = 20,
 ): Promise<XPEvent[]> {
   try {
     const q = query(
       collection(db, XP_EVENTS_COL),
-      where('uid', '==', uid),
-      orderBy('timestamp', 'desc'),
-      limit(limitCount)
+      where("uid", "==", uid),
+      orderBy("timestamp", "desc"),
+      limit(limitCount),
     );
-    
+
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => doc.data() as XPEvent);
+    return snapshot.docs.map((doc) => doc.data() as XPEvent);
   } catch (error) {
-    console.error('Error getting recent XP events:', error);
+    console.error("Error getting recent XP events:", error);
     return [];
   }
 }
