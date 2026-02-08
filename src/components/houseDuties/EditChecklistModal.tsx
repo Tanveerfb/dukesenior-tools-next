@@ -257,7 +257,8 @@ export default function EditChecklistModal({
         {/* Basic Info */}
         <TextField
           fullWidth
-          label="Name *"
+          required
+          label="Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
           sx={{ mb: 3 }}
