@@ -63,7 +63,7 @@ export default function ProfileHeader({
   const memberSince = ms ? new Date(ms).toLocaleDateString() : null;
   const lastSeenMs = toMillis(lastSeen as any) || null;
 
-  const user: Partial<UserDoc> = {
+  const userProfile: Partial<UserDoc> = {
     uid,
     username,
     displayName,
@@ -93,7 +93,7 @@ export default function ProfileHeader({
         <div className="d-flex flex-column flex-md-row align-items-start">
           {/* Avatar overlapping banner */}
           <div className="me-3 mb-3 mb-md-0" style={{ marginTop: -48 }}>
-            <UserAvatar user={user} size="xlarge" showStatus />
+            <UserAvatar user={userProfile} size="xlarge" showStatus />
           </div>
 
           <div className="flex-grow-1 w-100">
