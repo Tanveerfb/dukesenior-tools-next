@@ -444,6 +444,7 @@ export default function EditChecklistModal({
                                 handleAssignmentChange(day, duty.id, e.target.value)
                               }
                               displayEmpty
+                              aria-label={`Assign person for ${duty.name} on ${day}`}
                             >
                               <MenuItem value="">-</MenuItem>
                               {people.map((person) => (
