@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Box, Typography, Paper, Fade } from '@mui/material';
 import { Celebration } from '@mui/icons-material';
 import confetti from 'canvas-confetti';
@@ -147,6 +147,3 @@ export function useLevelUpAnimation() {
     ) : null,
   };
 }
-
-// Need to import useState
-import { useState } from 'react';

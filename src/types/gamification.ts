@@ -16,6 +16,7 @@ export interface UserGamification {
   
   // Achievements
   achievementsUnlocked: string[]; // Array of achievement IDs
+  achievementCount: number; // Count for efficient querying
   achievementProgress: Record<string, number>; // Progress tracking for multi-step achievements
   
   // Stats tracking

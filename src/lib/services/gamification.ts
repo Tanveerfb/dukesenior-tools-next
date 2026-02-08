@@ -53,7 +53,9 @@ export async function initializeUserGamification(uid: string): Promise<UserGamif
     xpInCurrentLevel: 0,
     xpForNextLevel: 100,
     achievementsUnlocked: [],
+    achievementCount: 0,
     achievementProgress: {},
+        achievementCount: 0,
     stats: {
       postsCreated: 0,
       commentsPosted: 0,
@@ -141,6 +143,7 @@ export async function awardXP(
         xpForNextLevel: 100,
         achievementsUnlocked: [],
         achievementProgress: {},
+        achievementCount: 0,
         stats: {
           postsCreated: 0,
           commentsPosted: 0,
@@ -198,6 +201,7 @@ export async function awardXP(
     // Award achievements
     for (const achievement of newAchievements) {
       data.achievementsUnlocked.push(achievement.id);
+      data.achievementCount = data.achievementsUnlocked.length;
       
       // Record achievement unlock
       const achievementRef = doc(collection(db, ACHIEVEMENTS_COL));
@@ -258,13 +262,35 @@ export async function incrementStat(
   await runTransaction(db, async (transaction) => {
     const snap = await transaction.get(ref);
     
+    let data: UserGamification;
     if (!snap.exists()) {
       // Initialize if doesn't exist
-      await initializeUserGamification(uid);
-      return;
+      data = {
+        uid,
+        totalXP: 0,
+        currentLevel: 1,
+        xpInCurrentLevel: 0,
+        xpForNextLevel: 100,
+        achievementsUnlocked: [],
+        achievementProgress: {},
+        achievementCount: 0,
+        stats: {
+          postsCreated: 0,
+          commentsPosted: 0,
+          messagesSent: 0,
+          friendsAdded: 0,
+          tournamentsParticipated: 0,
+          tournamentsWon: 0,
+          loginStreak: 0,
+          totalLogins: 0,
+        },
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      };
+    } else {
+      data = snap.data() as UserGamification;
     }
     
-    const data = snap.data() as UserGamification;
     data.stats[statName] = (data.stats[statName] || 0) + amount;
     data.updatedAt = Date.now();
     
@@ -280,6 +306,7 @@ export async function incrementStat(
     // Award achievements
     for (const achievement of newAchievements) {
       data.achievementsUnlocked.push(achievement.id);
+      data.achievementCount = data.achievementsUnlocked.length;
       
       // Record achievement unlock
       const achievementRef = doc(collection(db, ACHIEVEMENTS_COL));
@@ -437,6 +464,7 @@ export async function awardAchievement(
     
     // Award achievement
     data.achievementsUnlocked.push(achievementId);
+    data.achievementCount = data.achievementsUnlocked.length;
     data.updatedAt = Date.now();
     
     // Award XP
@@ -494,7 +522,7 @@ export async function getLeaderboard(
         q = query(q, orderBy('currentLevel', 'desc'), orderBy('totalXP', 'desc'));
         break;
       case 'achievements':
-        q = query(q, orderBy('achievementsUnlocked', 'desc'));
+        q = query(q, orderBy('achievementCount', 'desc'));
         break;
     }
     

@@ -681,7 +681,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   },
   {
     id: 'milestone_50k_xp',
-    name: 'XP Millionaire',
+    name: 'XP Achiever',
     description: 'Earn 50,000 total XP',
     category: 'milestone',
     icon: '💸',
