@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Modal, Button, Form, Row, Col, ListGroup, Badge, Alert } from "react-bootstrap";
+import { Modal, Button, Form, Row, Col, ListGroup, Alert } from "react-bootstrap";
 import { useAuth } from "@/hooks/useAuth";
 import { createChecklist, updateChecklist } from "@/lib/services/houseDuties";
 import {

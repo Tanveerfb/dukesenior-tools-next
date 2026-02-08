@@ -11,7 +11,6 @@ import {
   Spinner,
   Badge,
   Modal,
-  ListGroup,
   Alert,
 } from "react-bootstrap";
 import { useAuth } from "@/hooks/useAuth";
@@ -22,14 +21,14 @@ import {
   duplicateChecklist,
 } from "@/lib/services/houseDuties";
 import { Checklist } from "@/types/houseDuties";
-import { FaPlus, FaTrash, FaEye, FaEdit, FaCopy, FaList, FaFileAlt } from "react-icons/fa";
+import { FaPlus, FaTrash, FaEye, FaEdit, FaCopy, FaFileAlt } from "react-icons/fa";
 import EditChecklistModal from "@/components/houseDuties/EditChecklistModal";
 import ViewChecklistModal from "@/components/houseDuties/ViewChecklistModal";
 
 type ViewMode = "all" | "active" | "templates";
 
 export default function HouseDutiesPage() {
-  const { user, admin } = useAuth();
+  const { user } = useAuth();
   const [checklists, setChecklists] = useState<Checklist[]>([]);
   const [templates, setTemplates] = useState<Checklist[]>([]);
   const [loading, setLoading] = useState(false);
@@ -40,7 +39,6 @@ export default function HouseDutiesPage() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedChecklist, setSelectedChecklist] = useState<Checklist | null>(null);
-  const [isCreatingNew, setIsCreatingNew] = useState(false);
   const [createAsTemplate, setCreateAsTemplate] = useState(false);
 
   // Confirmation modal
@@ -51,6 +49,7 @@ export default function HouseDutiesPage() {
     if (user?.uid) {
       loadData();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.uid]);
 
   const loadData = async () => {
@@ -72,14 +71,12 @@ export default function HouseDutiesPage() {
 
   const handleCreateNew = (asTemplate: boolean) => {
     setSelectedChecklist(null);
-    setIsCreatingNew(true);
     setCreateAsTemplate(asTemplate);
     setShowEditModal(true);
   };
 
   const handleEdit = (checklist: Checklist) => {
     setSelectedChecklist(checklist);
-    setIsCreatingNew(false);
     setShowEditModal(true);
   };
 
@@ -133,7 +130,6 @@ export default function HouseDutiesPage() {
     setShowEditModal(false);
     setShowViewModal(false);
     setSelectedChecklist(null);
-    setIsCreatingNew(false);
     setCreateAsTemplate(false);
   };
 
