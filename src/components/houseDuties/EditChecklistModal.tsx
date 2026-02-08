@@ -285,7 +285,7 @@ export default function EditChecklistModal({
             label="Duty name"
             value={newDutyName}
             onChange={(e) => setNewDutyName(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addDuty())}
+            onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addDuty())}
           />
           <Button
             onClick={addDuty}
@@ -354,7 +354,7 @@ export default function EditChecklistModal({
             label="Person name"
             value={newPersonName}
             onChange={(e) => setNewPersonName(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addPerson())}
+            onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addPerson())}
           />
           <Button
             onClick={addPerson}
