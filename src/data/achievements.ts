@@ -406,6 +406,99 @@ export const ACHIEVEMENTS: Achievement[] = [
     isSecret: true,
     order: 30,
   },
+  
+  // New content achievements for Phase 1
+  {
+    id: 'content_first_draft',
+    name: 'First Draft',
+    description: 'Create your first post draft',
+    category: 'content',
+    icon: '📝',
+    color: '#9E9E9E',
+    trigger: 'posts_created',
+    requirement: 1,
+    xpReward: 10,
+    rarity: 'common',
+    order: 31,
+  },
+  {
+    id: 'content_published_author',
+    name: 'Published Author',
+    description: 'Get your first post approved and published',
+    category: 'content',
+    icon: '🎨',
+    color: '#E91E63',
+    trigger: 'manual', // Triggered on first post approval
+    requirement: 1,
+    xpReward: 100,
+    rarity: 'uncommon',
+    order: 32,
+  },
+  {
+    id: 'content_trending_creator',
+    name: 'Trending Creator',
+    description: 'Create a post with 100+ likes',
+    category: 'content',
+    icon: '🔥',
+    color: '#FF5722',
+    trigger: 'manual', // Triggered when post reaches 100 likes
+    requirement: 1,
+    xpReward: 200,
+    rarity: 'rare',
+    order: 33,
+  },
+  {
+    id: 'content_discussion_starter',
+    name: 'Discussion Starter',
+    description: 'Create a post with 50+ comments',
+    category: 'content',
+    icon: '💬',
+    color: '#03A9F4',
+    trigger: 'manual', // Triggered when post reaches 50 comments
+    requirement: 1,
+    xpReward: 200,
+    rarity: 'rare',
+    order: 34,
+  },
+  {
+    id: 'content_viral_sensation',
+    name: 'Viral Sensation',
+    description: 'Create a post with 1000+ views',
+    category: 'content',
+    icon: '🌟',
+    color: '#FFD700',
+    trigger: 'manual', // Triggered when post reaches 1000 views
+    requirement: 1,
+    xpReward: 500,
+    rarity: 'epic',
+    order: 35,
+  },
+  {
+    id: 'content_rising_star_10',
+    name: 'Rising Star',
+    description: 'Publish 10 posts',
+    category: 'content',
+    icon: '⭐',
+    color: '#FFD700',
+    trigger: 'manual', // Triggered when user has 10 published posts
+    requirement: 10,
+    xpReward: 250,
+    rarity: 'rare',
+    order: 36,
+  },
+  {
+    id: 'content_prolific_writer_50',
+    name: 'Prolific Writer',
+    description: 'Publish 50 posts',
+    category: 'content',
+    icon: '📚',
+    color: '#4CAF50',
+    trigger: 'manual', // Triggered when user has 50 published posts
+    requirement: 50,
+    xpReward: 1000,
+    rarity: 'epic',
+    order: 37,
+  },
 
   // ============================================================================
   // TOURNAMENT ACHIEVEMENTS (12 achievements)
@@ -421,7 +514,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     requirement: 1,
     xpReward: 150,
     rarity: 'common',
-    order: 31,
+    order: 38,
   },
   {
     id: 'tournament_5_participations',
@@ -586,7 +679,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     requirement: 5,
     xpReward: 100,
     rarity: 'common',
-    order: 43,
+    order: 57,
   },
   {
     id: 'milestone_level_10',
@@ -599,7 +692,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     requirement: 10,
     xpReward: 250,
     rarity: 'uncommon',
-    order: 44,
+    order: 58,
   },
   {
     id: 'milestone_level_25',
@@ -612,7 +705,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     requirement: 25,
     xpReward: 750,
     rarity: 'rare',
-    order: 45,
+    order: 59,
   },
   {
     id: 'milestone_level_50',
@@ -625,7 +718,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     requirement: 50,
     xpReward: 2000,
     rarity: 'epic',
-    order: 46,
+    order: 60,
   },
   {
     id: 'milestone_level_75',
@@ -638,7 +731,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     requirement: 75,
     xpReward: 5000,
     rarity: 'legendary',
-    order: 47,
+    order: 61,
   },
   {
     id: 'milestone_level_100',
@@ -651,7 +744,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     requirement: 100,
     xpReward: 10000,
     rarity: 'legendary',
-    order: 48,
+    order: 55,
   },
   {
     id: 'milestone_1k_xp',
@@ -664,7 +757,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     requirement: 1000,
     xpReward: 100,
     rarity: 'common',
-    order: 49,
+    order: 56,
   },
   {
     id: 'milestone_10k_xp',
@@ -677,7 +770,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     requirement: 10000,
     xpReward: 500,
     rarity: 'uncommon',
-    order: 50,
+    order: 57,
   },
   {
     id: 'milestone_50k_xp',
@@ -690,7 +783,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     requirement: 50000,
     xpReward: 2500,
     rarity: 'rare',
-    order: 51,
+    order: 58,
   },
   {
     id: 'milestone_100k_xp',
@@ -703,7 +796,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     requirement: 100000,
     xpReward: 10000,
     rarity: 'epic',
-    order: 52,
+    order: 59,
   },
   {
     id: 'milestone_first_achievement',
@@ -716,7 +809,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     requirement: 1,
     xpReward: 50,
     rarity: 'common',
-    order: 53,
+    order: 60,
   },
   {
     id: 'milestone_25_achievements',
@@ -729,7 +822,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     requirement: 25,
     xpReward: 1000,
     rarity: 'epic',
-    order: 54,
+    order: 61,
   },
 ];
 
