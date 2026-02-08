@@ -18,6 +18,7 @@ import {
   increment,
 } from "firebase/firestore";
 import { createContext, useContext, useEffect, useState } from "react";
+import { updateLoginStreak } from "@/lib/services/gamification";
 
 interface AuthContextValue {
   user: any;
@@ -96,6 +97,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             };
             if (!snap.exists()) payload.createdAt = serverTimestamp();
             await setDoc(ref, payload, { merge: true });
+            
+            // Update login streak and award XP (non-blocking)
+            updateLoginStreak(signedInUser.uid).catch(err => {
+              console.error('Error updating login streak:', err);
+            });
           } catch (e) {
             console.error("updateUserRecord error", e);
           }

@@ -2,6 +2,8 @@ import { db } from '@/lib/firebase/client';
 import { collection, doc, getDoc, getDocs, orderBy, query, setDoc, deleteDoc, where, increment, updateDoc, limit, onSnapshot, runTransaction } from 'firebase/firestore';
 import { getAllSamplePosts } from '@/lib/content/samplePosts';
 import { CMSPost, NewPostInput, UpdatePostInput, CMSComment, NewCommentInput } from '@/types/cms';
+import { awardXP, incrementStat, getUserGamification } from './gamification';
+import { XP_REWARDS } from '@/types/gamification';
 
 const POSTS_COL = 'cms_posts_v1';
 const COMMENTS_COL = 'cms_comments_v1';
@@ -33,6 +35,28 @@ export async function createPost(uid: string, authorName: string, input: NewPost
     views: 0
   };
   await setDoc(ref, post);
+  
+  // Award XP for creating a post (only for published posts)
+  if (status === 'published') {
+    try {
+      const gamification = await getUserGamification(uid);
+      const isFirstPost = !gamification || gamification.stats.postsCreated === 0;
+      
+      // Award base XP
+      await awardXP(uid, XP_REWARDS.POST_CREATED, 'Created a post', 'post', { postId: id });
+      
+      // Award first post bonus
+      if (isFirstPost) {
+        await awardXP(uid, XP_REWARDS.FIRST_POST, 'Created first post', 'post', { postId: id, milestone: true });
+      }
+      
+      // Increment stat
+      await incrementStat(uid, 'postsCreated', 1);
+    } catch (err) {
+      console.error('Error awarding XP for post creation:', err);
+    }
+  }
+  
   return id;
 }
 
@@ -76,6 +100,18 @@ export async function addComment(uid: string, authorName: string, input: NewComm
   const comment: CMSComment = { id, postId: input.postId, parentId: input.parentId ?? null, authorUID: uid, authorName, content: input.content, createdAt: now, updatedAt: now, likeCount:0, dislikeCount:0, path, mentions: input.mentions || [] } as any;
   await setDoc(doc(db, COMMENTS_COL, id), comment);
   await updateDoc(doc(db, POSTS_COL, input.postId), { commentCount: increment(1) });
+  
+  // Award XP for commenting
+  try {
+    await awardXP(uid, XP_REWARDS.COMMENT_POSTED, 'Posted a comment', 'comment', { 
+      commentId: id, 
+      postId: input.postId 
+    });
+    await incrementStat(uid, 'commentsPosted', 1);
+  } catch (err) {
+    console.error('Error awarding XP for comment:', err);
+  }
+  
   return id;
 }
 

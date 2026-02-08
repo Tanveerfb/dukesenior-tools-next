@@ -27,6 +27,8 @@ import {
 import type { DMThread, DMMessage, TypingIndicator } from '@/types/messages';
 import { getUserByUID } from './users';
 import { areFriends, isBlocked } from './friends';
+import { awardXP, incrementStat } from './gamification';
+import { XP_REWARDS } from '@/types/gamification';
 
 // Collection names
 const THREADS_COL = 'directMessages/threads';
@@ -198,6 +200,18 @@ export async function sendMessage(
     });
 
     return messageRef.id;
+  }).then(async (messageId) => {
+    // Award XP for sending message (non-blocking)
+    try {
+      await awardXP(from, XP_REWARDS.MESSAGE_SENT, 'Sent a message', 'message', { 
+        threadId, 
+        messageId 
+      });
+      await incrementStat(from, 'messagesSent', 1);
+    } catch (err) {
+      console.error('Error awarding XP for message:', err);
+    }
+    return messageId;
   });
 }
 

@@ -21,6 +21,8 @@ import {
 } from 'firebase/firestore';
 import type { FriendRequest, Friend, BlockedUser } from '@/types/friends';
 import { getUserByUID } from './users';
+import { awardXP, incrementStat, getUserGamification } from './gamification';
+import { XP_REWARDS } from '@/types/gamification';
 
 // Collection names
 const FRIEND_REQUESTS_COL = 'friendRequests';
@@ -156,6 +158,50 @@ export async function acceptFriendRequest(requestId: string): Promise<void> {
       status: 'accepted',
       updatedAt: now,
     });
+  }).then(async () => {
+    // Award XP to both users for becoming friends (non-blocking)
+    try {
+      const requestRef = doc(db, FRIEND_REQUESTS_COL, requestId);
+      const requestSnap = await getDoc(requestRef);
+      const requestData = requestSnap.data() as FriendRequest;
+      
+      // Check if this is first friend for either user
+      const [gamification1, gamification2] = await Promise.all([
+        getUserGamification(requestData.from),
+        getUserGamification(requestData.to),
+      ]);
+      
+      const isFirstFriend1 = !gamification1 || gamification1.stats.friendsAdded === 0;
+      const isFirstFriend2 = !gamification2 || gamification2.stats.friendsAdded === 0;
+      
+      // Award XP to both users
+      await Promise.all([
+        awardXP(requestData.from, XP_REWARDS.FRIEND_ADDED, 'Made a new friend', 'friend', { 
+          friendUID: requestData.to 
+        }),
+        awardXP(requestData.to, XP_REWARDS.FRIEND_ADDED, 'Made a new friend', 'friend', { 
+          friendUID: requestData.from 
+        }),
+        incrementStat(requestData.from, 'friendsAdded', 1),
+        incrementStat(requestData.to, 'friendsAdded', 1),
+      ]);
+      
+      // Award first friend bonus
+      if (isFirstFriend1) {
+        await awardXP(requestData.from, XP_REWARDS.FIRST_FRIEND, 'Made first friend', 'friend', { 
+          friendUID: requestData.to,
+          milestone: true 
+        });
+      }
+      if (isFirstFriend2) {
+        await awardXP(requestData.to, XP_REWARDS.FIRST_FRIEND, 'Made first friend', 'friend', { 
+          friendUID: requestData.from,
+          milestone: true 
+        });
+      }
+    } catch (err) {
+      console.error('Error awarding XP for friendship:', err);
+    }
   });
 }
 
