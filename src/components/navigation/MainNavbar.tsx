@@ -23,6 +23,7 @@ import {
   FaShieldAlt,
   FaNewspaper,
   FaUserFriends,
+  FaCommentDots,
 } from "react-icons/fa";
 import { FiHelpCircle } from "react-icons/fi";
 import { HiOutlineSparkles } from "react-icons/hi";
@@ -36,6 +37,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { getUserByUID } from "@/lib/services/users";
 import { useTheme } from "@/components/ThemeProvider";
 import { getIncomingFriendRequests } from "@/lib/services/friends";
+import { listenToUnreadCount } from "@/lib/services/messages";
 
 // Simple classification using tags; later can fetch /api for dynamic updates
 type EffectiveMeta = EffectiveMetaType;
@@ -68,6 +70,7 @@ export default function MainNavbar() {
   const [navExpanded, setNavExpanded] = useState(false);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
   const [incomingRequestsCount, setIncomingRequestsCount] = useState(0);
+  const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
   const {
     theme,
     toggleTheme,
@@ -164,6 +167,17 @@ export default function MainNavbar() {
       cancelled = true;
       clearInterval(interval);
     };
+  }, [user?.uid]);
+
+  // Listen to unread messages count
+  useEffect(() => {
+    if (!user?.uid) return;
+
+    const unsubscribe = listenToUnreadCount(user.uid, (count) => {
+      setUnreadMessagesCount(count);
+    });
+
+    return () => unsubscribe();
   }, [user?.uid]);
 
   const eventSections = useMemo(() => {
@@ -598,6 +612,24 @@ export default function MainNavbar() {
                   {incomingRequestsCount > 0 && (
                     <Badge bg="danger" className="ms-2">
                       {incomingRequestsCount}
+                    </Badge>
+                  )}
+                </Nav.Link>
+              )}
+
+              {/* Messages Link - Only show when logged in */}
+              {user && (
+                <Nav.Link
+                  as={InlineLink}
+                  href="/messages"
+                  onClick={handleNavItemClick}
+                  className="nav-link-main"
+                >
+                  <FaCommentDots className="nav-icon" />
+                  <span>Messages</span>
+                  {unreadMessagesCount > 0 && (
+                    <Badge bg="danger" className="ms-2" style={{ background: '#ED4245' }}>
+                      {unreadMessagesCount}
                     </Badge>
                   )}
                 </Nav.Link>
