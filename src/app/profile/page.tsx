@@ -17,14 +17,14 @@ import { useRouter } from "next/navigation";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "@/lib/firebase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { getUserByUID, type UserDoc } from "@/lib/services/users";
+import { getUserByUID, updateUserProfile, type UserDoc } from "@/lib/services/users";
 
 type Feedback = {
   variant: "success" | "danger" | "info" | "warning";
   message: string;
 };
 
-type PendingAction = "display" | "password" | "avatar" | "logout" | null;
+type PendingAction = "display" | "password" | "avatar" | "banner" | "profile" | "logout" | null;
 
 export default function ProfilePage() {
   const {
@@ -40,6 +40,16 @@ export default function ProfilePage() {
   const [pending, setPending] = useState<PendingAction>(null);
   const displayNameRef = useRef<HTMLInputElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const bannerFileRef = useRef<HTMLInputElement>(null);
+  const bioRef = useRef<HTMLTextAreaElement>(null);
+  const pronounsRef = useRef<HTMLInputElement>(null);
+  const locationRef = useRef<HTMLInputElement>(null);
+  const timezoneRef = useRef<HTMLInputElement>(null);
+  const accentColorRef = useRef<HTMLInputElement>(null);
+  const discordRef = useRef<HTMLInputElement>(null);
+  const twitchRef = useRef<HTMLInputElement>(null);
+  const twitterRef = useRef<HTMLInputElement>(null);
+  const youtubeRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -157,6 +167,85 @@ export default function ProfilePage() {
     try {
       await logout();
       router.push("/");
+    } finally {
+      setPending(null);
+    }
+  };
+
+  const handleBannerUpload = async () => {
+    const file = bannerFileRef.current?.files?.[0];
+    if (!user || !file) {
+      setStatus({
+        variant: "warning",
+        message: "Choose a banner image to upload first.",
+      });
+      return;
+    }
+
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      setStatus({
+        variant: "danger",
+        message: "Banner image must be less than 5MB.",
+      });
+      return;
+    }
+
+    setPending("banner");
+    try {
+      const storagePath = `users/${user.uid}/banner`;
+      const storageRef = ref(storage, storagePath);
+      await uploadBytes(storageRef, file);
+      const url = await getDownloadURL(storageRef);
+      await updateUserProfile(user.uid, { bannerURL: url });
+      if (bannerFileRef.current) {
+        bannerFileRef.current.value = "";
+      }
+      setStatus({ variant: "success", message: "Banner image updated." });
+      // Reload profile doc
+      const doc = await getUserByUID(user.uid);
+      setProfileDoc(doc);
+      router.refresh();
+    } catch {
+      setStatus({
+        variant: "danger",
+        message: "Banner upload failed. Please try again.",
+      });
+    } finally {
+      setPending(null);
+    }
+  };
+
+  const handleProfileUpdate = async () => {
+    if (!user) return;
+
+    setPending("profile");
+    try {
+      const updates: Partial<UserDoc> = {
+        bio: bioRef.current?.value || "",
+        pronouns: pronounsRef.current?.value || "",
+        location: locationRef.current?.value || "",
+        timezone: timezoneRef.current?.value || "",
+        accentColor: accentColorRef.current?.value || "#5865F2",
+        socialLinks: {
+          discord: discordRef.current?.value || "",
+          twitch: twitchRef.current?.value || "",
+          twitter: twitterRef.current?.value || "",
+          youtube: youtubeRef.current?.value || "",
+        },
+      };
+
+      await updateUserProfile(user.uid, updates);
+      setStatus({ variant: "success", message: "Profile updated successfully." });
+      // Reload profile doc
+      const doc = await getUserByUID(user.uid);
+      setProfileDoc(doc);
+      router.refresh();
+    } catch {
+      setStatus({
+        variant: "danger",
+        message: "Failed to update profile. Please try again.",
+      });
     } finally {
       setPending(null);
     }
@@ -327,6 +416,176 @@ export default function ProfilePage() {
 
         <Col lg={7}>
           <Stack gap={3}>
+            {/* Banner Upload Card */}
+            <Card className="shadow-sm">
+              <Card.Body>
+                <Card.Title className="h6 mb-3">Profile Banner</Card.Title>
+                {profileDoc?.bannerURL && (
+                  <div className="mb-3" style={{ height: 120, overflow: "hidden", borderRadius: 8 }}>
+                    <Image
+                      src={profileDoc.bannerURL}
+                      alt="Current banner"
+                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    />
+                  </div>
+                )}
+                <Form.Group controlId="bannerUpload">
+                  <Form.Label>Upload Banner (1500x500px recommended)</Form.Label>
+                  <Stack direction="horizontal" gap={2} className="flex-wrap">
+                    <Form.Control
+                      type="file"
+                      accept="image/*"
+                      ref={bannerFileRef}
+                    />
+                    <Button
+                      variant="secondary"
+                      onClick={handleBannerUpload}
+                      disabled={pending === "banner"}
+                    >
+                      {pending === "banner" ? (
+                        <Spinner animation="border" size="sm" />
+                      ) : (
+                        "Upload Banner"
+                      )}
+                    </Button>
+                  </Stack>
+                  <Form.Text className="text-muted">
+                    JPG, PNG, or WebP (5&nbsp;MB max). Will use gradient fallback if not set.
+                  </Form.Text>
+                </Form.Group>
+              </Card.Body>
+            </Card>
+
+            {/* Profile Details Card */}
+            <Card className="shadow-sm">
+              <Card.Body>
+                <Card.Title className="h6 mb-3">Profile Details</Card.Title>
+                <Form>
+                  <Form.Group className="mb-3" controlId="bio">
+                    <Form.Label>Bio</Form.Label>
+                    <Form.Control
+                      as="textarea"
+                      rows={3}
+                      ref={bioRef}
+                      defaultValue={profileDoc?.bio || ""}
+                      placeholder="Tell us about yourself..."
+                      maxLength={500}
+                    />
+                  </Form.Group>
+
+                  <Form.Group className="mb-3" controlId="pronouns">
+                    <Form.Label>Pronouns</Form.Label>
+                    <Form.Control
+                      type="text"
+                      ref={pronounsRef}
+                      defaultValue={profileDoc?.pronouns || ""}
+                      placeholder="e.g., he/him, she/her, they/them"
+                      maxLength={50}
+                    />
+                  </Form.Group>
+
+                  <Row className="mb-3">
+                    <Col md={6}>
+                      <Form.Group controlId="location">
+                        <Form.Label>Location</Form.Label>
+                        <Form.Control
+                          type="text"
+                          ref={locationRef}
+                          defaultValue={profileDoc?.location || ""}
+                          placeholder="e.g., San Francisco, CA"
+                          maxLength={100}
+                        />
+                      </Form.Group>
+                    </Col>
+                    <Col md={6}>
+                      <Form.Group controlId="timezone">
+                        <Form.Label>Timezone</Form.Label>
+                        <Form.Control
+                          type="text"
+                          ref={timezoneRef}
+                          defaultValue={profileDoc?.timezone || ""}
+                          placeholder="e.g., America/Los_Angeles"
+                          maxLength={100}
+                        />
+                      </Form.Group>
+                    </Col>
+                  </Row>
+
+                  <Form.Group className="mb-3" controlId="accentColor">
+                    <Form.Label>Accent Color</Form.Label>
+                    <div className="d-flex gap-2 align-items-center">
+                      <Form.Control
+                        type="color"
+                        ref={accentColorRef}
+                        defaultValue={profileDoc?.accentColor || "#5865F2"}
+                        style={{ width: 60, height: 38 }}
+                      />
+                      <Form.Text className="text-muted">
+                        Choose a color for your profile borders and badges
+                      </Form.Text>
+                    </div>
+                  </Form.Group>
+
+                  <Card.Subtitle className="h6 mb-3 mt-4">Social Links</Card.Subtitle>
+
+                  <Form.Group className="mb-3" controlId="discord">
+                    <Form.Label>Discord</Form.Label>
+                    <Form.Control
+                      type="url"
+                      ref={discordRef}
+                      defaultValue={profileDoc?.socialLinks?.discord || ""}
+                      placeholder="https://discord.gg/..."
+                    />
+                  </Form.Group>
+
+                  <Form.Group className="mb-3" controlId="twitch">
+                    <Form.Label>Twitch</Form.Label>
+                    <Form.Control
+                      type="url"
+                      ref={twitchRef}
+                      defaultValue={profileDoc?.socialLinks?.twitch || ""}
+                      placeholder="https://twitch.tv/..."
+                    />
+                  </Form.Group>
+
+                  <Form.Group className="mb-3" controlId="twitter">
+                    <Form.Label>Twitter/X</Form.Label>
+                    <Form.Control
+                      type="url"
+                      ref={twitterRef}
+                      defaultValue={profileDoc?.socialLinks?.twitter || ""}
+                      placeholder="https://twitter.com/..."
+                    />
+                  </Form.Group>
+
+                  <Form.Group className="mb-3" controlId="youtube">
+                    <Form.Label>YouTube</Form.Label>
+                    <Form.Control
+                      type="url"
+                      ref={youtubeRef}
+                      defaultValue={profileDoc?.socialLinks?.youtube || ""}
+                      placeholder="https://youtube.com/@..."
+                    />
+                  </Form.Group>
+
+                  <div className="d-grid">
+                    <Button
+                      variant="primary"
+                      size="lg"
+                      onClick={handleProfileUpdate}
+                      disabled={pending === "profile"}
+                    >
+                      {pending === "profile" ? (
+                        <Spinner animation="border" size="sm" />
+                      ) : (
+                        "Save Profile Changes"
+                      )}
+                    </Button>
+                  </div>
+                </Form>
+              </Card.Body>
+            </Card>
+
             <Card className="shadow-sm">
               <Card.Body>
                 <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3">
