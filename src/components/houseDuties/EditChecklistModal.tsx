@@ -260,7 +260,6 @@ export default function EditChecklistModal({
           label="Name *"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="e.g., Weekly House Duties"
           sx={{ mb: 3 }}
         />
 
@@ -271,7 +270,6 @@ export default function EditChecklistModal({
           rows={2}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="Add any notes or instructions..."
           sx={{ mb: 3 }}
         />
 
@@ -284,10 +282,10 @@ export default function EditChecklistModal({
         <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
           <TextField
             fullWidth
+            label="Duty name"
             value={newDutyName}
             onChange={(e) => setNewDutyName(e.target.value)}
             onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addDuty())}
-            placeholder="Enter duty name"
           />
           <Button
             onClick={addDuty}
@@ -353,10 +351,10 @@ export default function EditChecklistModal({
         <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
           <TextField
             fullWidth
+            label="Person name"
             value={newPersonName}
             onChange={(e) => setNewPersonName(e.target.value)}
             onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addPerson())}
-            placeholder="Enter person name"
           />
           <Button
             onClick={addPerson}
