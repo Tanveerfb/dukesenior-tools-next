@@ -5,12 +5,12 @@ Practical, codebase-specific guidance so AI agents are productive immediately.
 ## Architecture & Tech Stack
 
 - **Framework**: Next.js 16 App Router (TypeScript) under `src/app/*` with React 19.
-- **UI Layer**: React-Bootstrap 2.10 loaded globally via `components/Providers.tsx`; SCSS variables defined in `src/styles/global.scss` (custom `$primary`, `$secondary`, theme colors). **Never** import Bootstrap CSS elsewhere.
-- **State/Context**: Provider hierarchy: `ThemeProvider` → `AuthProvider` → `ToastProvider`. Theme provider (`components/ui/ThemeProvider.tsx`) manages light/dark mode via `data-bs-theme` attribute and font scaling via CSS var `--font-scale` (0.8–1.6). Auth via `hooks/useAuth.tsx` (Firebase client SDK; admin gating by email/UID allowlist).
+- **UI Layer**: Material-UI (MUI) v6 as primary component library. Legacy React-Bootstrap 2.10 loaded globally via `components/Providers.tsx` for transitional pages; SCSS variables defined in `src/styles/global.scss` (custom `$primary`, `$secondary`, theme colors). Avoid importing Bootstrap CSS elsewhere.
+- **State/Context**: Provider hierarchy: `ThemeProvider` → `AuthProvider` → `ToastProvider`. Theme provider (`components/ThemeProvider.tsx`) manages light/dark mode via `data-bs-theme` attribute and font scaling via CSS var `--font-scale` (0.8–1.6). Auth via `hooks/useAuth.tsx` (Firebase client SDK; admin gating by email/UID allowlist).
 - **Data Layer**: Firestore accessed exclusively through service modules in `src/lib/services/*` (never direct imports in components). Examples: `phasmoTourney4.ts`, `users.ts`, `tags.ts`, `cms.ts`. Services encapsulate CRUD, listeners, and data transformations.
 - **Server Auth**: `src/lib/firebase/admin.ts` initializes firebase-admin with Application Default Credentials. `src/lib/server/auth.ts` provides `verifyIdToken()` and `verifyAdminFromRequest()` for API route authorization.
 - **Tags System**: Static manifest in `src/lib/content/tags.ts` (array of `TaggedRouteMeta`) merged with Firestore overrides (`contentMeta` collection) via `src/lib/services/tags.ts`. API `/api/tags/effective` returns computed `EffectiveMeta[]` for navigation. Tag registry (`tagRegistry` collection) stores metadata like `color` for badge styling.
-- **Navigation & Search**: `components/navigation/MainNavbar.tsx` fetches `/api/tags/effective`, classifies routes via `lib/navigation/classify.ts`, and renders Events/Tools dropdowns. `components/navigation/SearchModal.tsx` performs local substring search on effective tags.
+- **Navigation & Search**: `components/navigation/AppNavbar.tsx` (MUI-based) fetches `/api/tags/effective`, classifies routes via `lib/navigation/classify.ts`, and renders Events/Tools dropdowns. `components/navigation/SearchModal.tsx` performs local substring search on effective tags.
 
 ## Core Conventions
 
@@ -18,7 +18,7 @@ Practical, codebase-specific guidance so AI agents are productive immediately.
 - **Tournament grouping**: Extract `PhasmoTourney\d+` tags to label as `Tourney N`. Classify via `Current`/`Past` tags; fallback to path regex (`/tourney4/i`) if missing. Helper: `lib/navigation/classify.ts::tournamentKey()`.
 - **Placeholder routing**: Map dynamic segments (`[id]` → `sample`) in navbar/search links using `mapHref()` to prevent 404s in global navigation.
 - **Admin gating**: Client-side: `useAuth().admin` checks email/UID allowlist. Server-side: API routes call `verifyIdToken()` or `verifyAdminFromRequest()` from `lib/server/auth.ts` and validate admin status before mutations.
-- **Styling discipline**: Prefer Bootstrap utilities (`text-primary`, `mt-3`) and SCSS variables. Font-relative sizing: multiply by `var(--font-scale, 1)` for accessibility. Never add custom navbar/mobile CSS outside global styles.
+- **Styling discipline**: Prefer MUI components and theme utilities for new features. Legacy Bootstrap utilities (`text-primary`, `mt-3`) and SCSS variables remain for transitional pages. Font-relative sizing: multiply by `var(--font-scale, 1)` for accessibility. Avoid adding custom navbar/mobile CSS outside global styles.
 - **Stats placement**: Compute derived metrics (averages, best streaks, rankings) in services before returning to components. Example: `phasmoTourney4.stats.ts::computeTopAveragePlayers()` calculates `avgScore` before slicing top N.
 
 ## Tag Management (`/admin/tags`)
@@ -64,8 +64,8 @@ Practical, codebase-specific guidance so AI agents are productive immediately.
 
 - Manifest: `src/lib/content/tags.ts`
 - Auth: `src/hooks/useAuth.tsx`
-- Theme: `src/components/ui/ThemeProvider.tsx`
-- Navbar: `src/components/navigation/MainNavbar.tsx`
+- Theme: `src/components/ThemeProvider.tsx`
+- Navbar: `src/components/navigation/AppNavbar.tsx`
 - Search: `src/components/navigation/SearchModal.tsx`
 - Admin Tags: `src/app/admin/tags/page.tsx`
 - Services: `src/lib/services/phasmoTourney4.ts`

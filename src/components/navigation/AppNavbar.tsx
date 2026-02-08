@@ -79,9 +79,13 @@ export default function AppNavbar() {
   const router = useRouter();
 
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [eventsAnchorEl, setEventsAnchorEl] = useState<null | HTMLElement>(null);
+  const [eventsAnchorEl, setEventsAnchorEl] = useState<null | HTMLElement>(
+    null,
+  );
   const [toolsAnchorEl, setToolsAnchorEl] = useState<null | HTMLElement>(null);
   const [adminAnchorEl, setAdminAnchorEl] = useState<null | HTMLElement>(null);
+  const [tourneyAdminsAnchorEl, setTourneyAdminsAnchorEl] =
+    useState<null | HTMLElement>(null);
   const [userAnchorEl, setUserAnchorEl] = useState<null | HTMLElement>(null);
   const [showSearch, setShowSearch] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
@@ -156,7 +160,7 @@ export default function AppNavbar() {
 
     const buildSection = (
       keys: string[],
-      groups: Record<string, EffectiveMeta[]>
+      groups: Record<string, EffectiveMeta[]>,
     ) =>
       keys.map((key) => ({
         key,
@@ -181,7 +185,7 @@ export default function AppNavbar() {
       effective
         .filter((meta) => meta.effective.includes("Tool"))
         .sort((a, b) => (a.title || a.path).localeCompare(b.title || b.path)),
-    [effective]
+    [effective],
   );
 
   const handleDrawerToggle = () => {
@@ -230,11 +234,61 @@ export default function AppNavbar() {
             </ListItem>
             <Collapse in={openSections.admin} timeout="auto" unmountOnExit>
               <List component="div" disablePadding>
-                <ListItemButton sx={{ pl: 4 }} component={Link} href="/admin/cms">
+                <ListItemButton
+                  sx={{ pl: 4 }}
+                  component={Link}
+                  href="/admin/cms"
+                >
                   <ListItemText primary="CMS Admin" />
                 </ListItemButton>
-                <ListItemButton sx={{ pl: 4 }} component={Link} href="/admin/suggestions">
+                <ListItemButton
+                  sx={{ pl: 4 }}
+                  component={Link}
+                  href="/admin/suggestions"
+                >
                   <ListItemText primary="Suggestions" />
+                </ListItemButton>
+                <ListItemButton
+                  sx={{ pl: 4 }}
+                  component={Link}
+                  href="/admin/tags"
+                >
+                  <ListItemText primary="Tags Management" />
+                </ListItemButton>
+              </List>
+            </Collapse>
+            <Divider />
+          </>
+        )}
+
+        {/* Tourney Admins Section */}
+        {admin && (
+          <>
+            <ListItem disablePadding>
+              <ListItemButton onClick={() => toggleSection("tourneyAdmins")}>
+                <ListItemIcon>
+                  <EventIcon />
+                </ListItemIcon>
+                <ListItemText primary="Tourney Admins" />
+                {openSections.tourneyAdmins ? (
+                  <ExpandLessIcon />
+                ) : (
+                  <ExpandMoreIcon />
+                )}
+              </ListItemButton>
+            </ListItem>
+            <Collapse
+              in={openSections.tourneyAdmins}
+              timeout="auto"
+              unmountOnExit
+            >
+              <List component="div" disablePadding>
+                <ListItemButton
+                  sx={{ pl: 4 }}
+                  component={Link}
+                  href="/admin/phasmoTourney5"
+                >
+                  <ListItemText primary="Phasmo Tourney 5" />
                 </ListItemButton>
               </List>
             </Collapse>
@@ -256,13 +310,29 @@ export default function AppNavbar() {
           <List component="div" disablePadding>
             {eventSections.current.map((section) => (
               <Box key={section.key}>
-                <ListItemButton sx={{ pl: 4 }} onClick={() => toggleSection(`current-${section.key}`)}>
+                <ListItemButton
+                  sx={{ pl: 4 }}
+                  onClick={() => toggleSection(`current-${section.key}`)}
+                >
                   <ListItemText primary={section.key} />
-                  {openSections[`current-${section.key}`] ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                  {openSections[`current-${section.key}`] ? (
+                    <ExpandLessIcon />
+                  ) : (
+                    <ExpandMoreIcon />
+                  )}
                 </ListItemButton>
-                <Collapse in={openSections[`current-${section.key}`]} timeout="auto" unmountOnExit>
+                <Collapse
+                  in={openSections[`current-${section.key}`]}
+                  timeout="auto"
+                  unmountOnExit
+                >
                   {section.routes.map(({ meta, label, href }) => (
-                    <ListItemButton key={meta.path} sx={{ pl: 6 }} component={Link} href={href}>
+                    <ListItemButton
+                      key={meta.path}
+                      sx={{ pl: 6 }}
+                      component={Link}
+                      href={href}
+                    >
                       <ListItemText primary={label} />
                     </ListItemButton>
                   ))}
@@ -284,11 +354,20 @@ export default function AppNavbar() {
         </ListItem>
         <Collapse in={openSections.tools} timeout="auto" unmountOnExit>
           <List component="div" disablePadding>
-            <ListItemButton sx={{ pl: 4 }} component={Link} href="/notifications">
+            <ListItemButton
+              sx={{ pl: 4 }}
+              component={Link}
+              href="/notifications"
+            >
               <ListItemText primary="To-Do List" />
             </ListItemButton>
             {tools.map((meta) => (
-              <ListItemButton key={meta.path} sx={{ pl: 4 }} component={Link} href={mapHref(meta.path)}>
+              <ListItemButton
+                key={meta.path}
+                sx={{ pl: 4 }}
+                component={Link}
+                href={mapHref(meta.path)}
+              >
                 <ListItemText primary={meta.title || meta.path} />
               </ListItemButton>
             ))}
@@ -329,7 +408,12 @@ export default function AppNavbar() {
             >
               Profile
             </Button>
-            <Button fullWidth variant="outlined" color="error" onClick={handleLogout}>
+            <Button
+              fullWidth
+              variant="outlined"
+              color="error"
+              onClick={handleLogout}
+            >
               Logout
             </Button>
           </>
@@ -344,7 +428,11 @@ export default function AppNavbar() {
 
   return (
     <>
-      <AppBar position="sticky" elevation={0} sx={{ borderBottom: 1, borderColor: "divider" }}>
+      <AppBar
+        position="sticky"
+        elevation={0}
+        sx={{ borderBottom: 1, borderColor: "divider" }}
+      >
         <Container maxWidth="xl">
           <Toolbar disableGutters>
             {/* Mobile Menu Icon */}
@@ -408,11 +496,52 @@ export default function AppNavbar() {
                       open={Boolean(adminAnchorEl)}
                       onClose={() => setAdminAnchorEl(null)}
                     >
-                      <MenuItem component={Link} href="/admin/cms" onClick={() => setAdminAnchorEl(null)}>
+                      <MenuItem
+                        component={Link}
+                        href="/admin/cms"
+                        onClick={() => setAdminAnchorEl(null)}
+                      >
                         CMS Admin
                       </MenuItem>
-                      <MenuItem component={Link} href="/admin/suggestions" onClick={() => setAdminAnchorEl(null)}>
+                      <MenuItem
+                        component={Link}
+                        href="/admin/suggestions"
+                        onClick={() => setAdminAnchorEl(null)}
+                      >
                         Suggestions
+                      </MenuItem>
+                      <MenuItem
+                        component={Link}
+                        href="/admin/tags"
+                        onClick={() => setAdminAnchorEl(null)}
+                      >
+                        Tags Management
+                      </MenuItem>
+                    </Menu>
+                  </>
+                )}
+
+                {/* Tourney Admins Dropdown */}
+                {admin && (
+                  <>
+                    <Button
+                      color="inherit"
+                      startIcon={<EventIcon />}
+                      onClick={(e) => setTourneyAdminsAnchorEl(e.currentTarget)}
+                    >
+                      Tourney Admins
+                    </Button>
+                    <Menu
+                      anchorEl={tourneyAdminsAnchorEl}
+                      open={Boolean(tourneyAdminsAnchorEl)}
+                      onClose={() => setTourneyAdminsAnchorEl(null)}
+                    >
+                      <MenuItem
+                        component={Link}
+                        href="/admin/phasmoTourney5"
+                        onClick={() => setTourneyAdminsAnchorEl(null)}
+                      >
+                        Phasmo Tourney 5
                       </MenuItem>
                     </Menu>
                   </>
@@ -446,7 +575,13 @@ export default function AppNavbar() {
                           href={href}
                           onClick={() => setEventsAnchorEl(null)}
                         >
-                          <Box sx={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              width: "100%",
+                            }}
+                          >
                             <span>{label}</span>
                             {tourTag && (
                               <Chip
@@ -475,7 +610,11 @@ export default function AppNavbar() {
                   open={Boolean(toolsAnchorEl)}
                   onClose={() => setToolsAnchorEl(null)}
                 >
-                  <MenuItem component={Link} href="/notifications" onClick={() => setToolsAnchorEl(null)}>
+                  <MenuItem
+                    component={Link}
+                    href="/notifications"
+                    onClick={() => setToolsAnchorEl(null)}
+                  >
                     To-Do List
                   </MenuItem>
                   {tools.map((meta) => (
@@ -491,7 +630,12 @@ export default function AppNavbar() {
                 </Menu>
 
                 {/* Community Updates */}
-                <Button color="inherit" startIcon={<NewspaperIcon />} component={Link} href="/posts">
+                <Button
+                  color="inherit"
+                  startIcon={<NewspaperIcon />}
+                  component={Link}
+                  href="/posts"
+                >
                   Community Updates
                 </Button>
               </Box>
@@ -499,15 +643,27 @@ export default function AppNavbar() {
 
             {/* Right Side Actions */}
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <IconButton color="inherit" onClick={() => setShowSearch(true)} aria-label="Search">
+              <IconButton
+                color="inherit"
+                onClick={() => setShowSearch(true)}
+                aria-label="Search"
+              >
                 <SearchIcon />
               </IconButton>
 
-              <IconButton color="inherit" onClick={toggleTheme} aria-label="Toggle theme">
+              <IconButton
+                color="inherit"
+                onClick={toggleTheme}
+                aria-label="Toggle theme"
+              >
                 {theme === "dark" ? <LightModeIcon /> : <DarkModeIcon />}
               </IconButton>
 
-              <IconButton color="inherit" onClick={() => setShowShortcuts(true)} aria-label="Keyboard shortcuts">
+              <IconButton
+                color="inherit"
+                onClick={() => setShowShortcuts(true)}
+                aria-label="Keyboard shortcuts"
+              >
                 <HelpIcon />
               </IconButton>
 
@@ -520,7 +676,13 @@ export default function AppNavbar() {
                         onClick={(e) => setUserAnchorEl(e.currentTarget)}
                         aria-label="User menu"
                       >
-                        <Avatar sx={{ width: 32, height: 32, bgcolor: "primary.main" }}>
+                        <Avatar
+                          sx={{
+                            width: 32,
+                            height: 32,
+                            bgcolor: "primary.main",
+                          }}
+                        >
                           <AccountCircleIcon />
                         </Avatar>
                       </IconButton>
@@ -538,7 +700,11 @@ export default function AppNavbar() {
                           </Typography>
                         </Box>
                         <Divider />
-                        <MenuItem component={Link} href={profileHref} onClick={() => setUserAnchorEl(null)}>
+                        <MenuItem
+                          component={Link}
+                          href={profileHref}
+                          onClick={() => setUserAnchorEl(null)}
+                        >
                           Profile
                         </MenuItem>
                         <MenuItem onClick={handleLogout}>Logout</MenuItem>
@@ -563,7 +729,10 @@ export default function AppNavbar() {
 
       {/* Modals */}
       <SearchModal show={showSearch} onHide={() => setShowSearch(false)} />
-      <KeyboardShortcutsModal show={showShortcuts} onHide={() => setShowShortcuts(false)} />
+      <KeyboardShortcutsModal
+        show={showShortcuts}
+        onHide={() => setShowShortcuts(false)}
+      />
     </>
   );
 }

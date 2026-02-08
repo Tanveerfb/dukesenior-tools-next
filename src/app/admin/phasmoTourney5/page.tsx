@@ -11,6 +11,9 @@ import {
   FaComments,
   FaChartBar,
   FaRunning,
+  FaDollarSign,
+  FaUserFriends,
+  FaTrophy,
 } from "react-icons/fa";
 
 interface AdminTool {
@@ -28,13 +31,6 @@ const adminTools: AdminTool[] = [
     href: "/admin/phasmoTourney5/manageplayers",
     icon: <FaUsers />,
     color: "#0d6efd",
-  },
-  {
-    title: "Manage Rounds",
-    description: "Configure round settings and parameters",
-    href: "/admin/phasmoTourney5/managerounds",
-    icon: <FaListOl />,
-    color: "#6610f2",
   },
   {
     title: "Manage Vote Sessions",
@@ -58,11 +54,60 @@ const adminTools: AdminTool[] = [
     color: "#fd7e14",
   },
   {
+    title: "Round 1: Standard",
+    description: "Configure Round 1 settings and parameters",
+    href: "/admin/phasmoTourney5/managerounds/round1",
+    icon: <FaListOl />,
+    color: "#6610f2",
+  },
+  {
+    title: "Round 2: Money Round",
+    description: "Configure Round 2 money round settings",
+    href: "/admin/phasmoTourney5/managerounds/round2",
+    icon: <FaDollarSign />,
+    color: "#198754",
+  },
+  {
+    title: "Round 3: Teams & Eliminator",
+    description: "Configure Round 3 team and eliminator settings",
+    href: "/admin/phasmoTourney5/managerounds/round3",
+    icon: <FaUserFriends />,
+    color: "#0dcaf0",
+  },
+  {
+    title: "Round 4: Twitch Chat Round",
+    description: "Configure Twitch chat voting rounds",
+    href: "/admin/phasmoTourney5/manage-twitch-chat-round",
+    icon: <FaComments />,
+    color: "#17a2b8",
+  },
+  {
+    title: "Round 5: Tourney 5 Special",
+    description: "Configure Round 5 special settings",
+    href: "/admin/phasmoTourney5/managerounds/round5",
+    icon: <FaListOl />,
+    color: "#e83e8c",
+  },
+  {
+    title: "Round 6: Pick Your Friend",
+    description: "Configure Round 6 friend selection settings",
+    href: "/admin/phasmoTourney5/managerounds/round6",
+    icon: <FaUserFriends />,
+    color: "#fd7e14",
+  },
+  {
+    title: "Round 7: Finale",
+    description: "Configure finale round settings",
+    href: "/admin/phasmoTourney5/managerounds/round7",
+    icon: <FaTrophy />,
+    color: "#ffc107",
+  },
+  {
     title: "Manage Videos",
     description: "Add and organize tournament videos",
     href: "/admin/phasmoTourney5/manage-videos",
     icon: <FaVideo />,
-    color: "#ffc107",
+    color: "#6f42c1",
   },
   {
     title: "Manage Content Links",
@@ -72,18 +117,11 @@ const adminTools: AdminTool[] = [
     color: "#20c997",
   },
   {
-    title: "Manage Twitch Chat Round",
-    description: "Configure Twitch chat voting rounds",
-    href: "/admin/phasmoTourney5/manage-twitch-chat-round",
-    icon: <FaComments />,
-    color: "#0dcaf0",
-  },
-  {
     title: "Data Posters",
     description: "Generate and manage data visualizations",
     href: "/admin/phasmoTourney5/tourney-data-posters",
     icon: <FaChartBar />,
-    color: "#198754",
+    color: "#28a745",
   },
 ];
 

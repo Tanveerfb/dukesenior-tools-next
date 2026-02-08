@@ -333,7 +333,6 @@ export default function MainNavbar() {
                   }
                   className="main-dropdown"
                 >
-                  <div className="dropdown-header-custom">General</div>
                   <NavDropdown.Item
                     as={InlineLink}
                     href="/admin/cms"
@@ -348,104 +347,35 @@ export default function MainNavbar() {
                   >
                     Suggestions
                   </NavDropdown.Item>
-                  <NavDropdown.Divider />
-                  <div className="dropdown-header-custom">Phasmo Tourney 5</div>
+                  <NavDropdown.Item
+                    as={InlineLink}
+                    href="/admin/tags"
+                    onClick={handleNavItemClick}
+                  >
+                    Tags Management
+                  </NavDropdown.Item>
+                </NavDropdown>
+              )}
+
+              {/* Tourney Admins Dropdown - Only show if admin */}
+              {admin && (
+                <NavDropdown
+                  id="nav-tourney-admins"
+                  title={
+                    <>
+                      <FaCalendarAlt className="nav-icon" />
+                      <span>Tourney Admins</span>
+                    </>
+                  }
+                  className="main-dropdown"
+                >
                   <NavDropdown.Item
                     as={InlineLink}
                     href="/admin/phasmoTourney5"
                     onClick={handleNavItemClick}
                   >
-                    <strong>Tourney 5 Admin Hub</strong>
+                    <strong>Phasmo Tourney 5</strong>
                   </NavDropdown.Item>
-                  <NavDropdown.Divider />
-                  <NavDropdown.Item
-                    as={InlineLink}
-                    href="/admin/phasmoTourney5/manageplayers"
-                    onClick={handleNavItemClick}
-                  >
-                    Manage players
-                  </NavDropdown.Item>
-                  <NavDropdown.Item
-                    as={InlineLink}
-                    href="/admin/phasmoTourney5/managevotesessions"
-                    onClick={handleNavItemClick}
-                  >
-                    Manage vote sessions
-                  </NavDropdown.Item>
-                  <NavDropdown.Divider />
-
-                  {/* Collapsible Rounds Section */}
-                  <div className="nested-section">
-                    <button
-                      type="button"
-                      className="section-toggle"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setOpenSections((prev) => ({
-                          ...prev,
-                          adminManageRounds: !(prev.adminManageRounds ?? true),
-                        }));
-                      }}
-                      aria-expanded={openSections.adminManageRounds ?? true}
-                    >
-                      <span>Manage Rounds</span>
-                      <FaChevronRight className="section-icon" />
-                    </button>
-                    {(openSections.adminManageRounds ?? true) && (
-                      <div className="nested-items">
-                        <NavDropdown.Item
-                          as={InlineLink}
-                          href="/admin/phasmoTourney5/managerounds/round1"
-                          onClick={handleNavItemClick}
-                        >
-                          Round 1: Standard
-                        </NavDropdown.Item>
-                        <NavDropdown.Item
-                          as={InlineLink}
-                          href="/admin/phasmoTourney5/managerounds/round2"
-                          onClick={handleNavItemClick}
-                        >
-                          Round 2: Money round
-                        </NavDropdown.Item>
-                        <NavDropdown.Item
-                          as={InlineLink}
-                          href="/admin/phasmoTourney5/managerounds/round3"
-                          onClick={handleNavItemClick}
-                        >
-                          Round 3: Teams & Eliminator
-                        </NavDropdown.Item>
-                        <NavDropdown.Item
-                          as={InlineLink}
-                          href="/admin/phasmoTourney5/manage-twitch-chat-round"
-                          onClick={handleNavItemClick}
-                        >
-                          Round 4: Twitch Chat Round
-                        </NavDropdown.Item>
-                        <NavDropdown.Item
-                          as={InlineLink}
-                          href="/admin/phasmoTourney5/managerounds/round5"
-                          onClick={handleNavItemClick}
-                        >
-                          Round 5: Tourney 5 Special
-                        </NavDropdown.Item>
-                        <NavDropdown.Item
-                          as={InlineLink}
-                          href="/admin/phasmoTourney5/managerounds/round6"
-                          onClick={handleNavItemClick}
-                        >
-                          Round 6: Pick Your Friend
-                        </NavDropdown.Item>
-                        <NavDropdown.Item
-                          as={InlineLink}
-                          href="/admin/phasmoTourney5/managerounds/round7"
-                          onClick={handleNavItemClick}
-                        >
-                          Round 7: Finale
-                        </NavDropdown.Item>
-                      </div>
-                    )}
-                  </div>
                 </NavDropdown>
               )}
 
