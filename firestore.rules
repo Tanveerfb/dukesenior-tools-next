@@ -1,0 +1,60 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      allow read: if true; // Public profiles
+      allow write: if isOwner(userId);
+    }
+    
+    // Usernames collection (for username uniqueness)
+    match /usernames/{username} {
+      allow read: if true;
+      allow write: if isSignedIn();
+    }
+    
+    // Friend Requests
+    match /friendRequests/{requestId} {
+      allow read: if isSignedIn() && 
+        (resource.data.from == request.auth.uid || resource.data.to == request.auth.uid);
+      allow create: if isSignedIn() && 
+        request.resource.data.from == request.auth.uid;
+      allow update: if isSignedIn() && 
+        (resource.data.from == request.auth.uid || resource.data.to == request.auth.uid);
+      allow delete: if isSignedIn() && 
+        (resource.data.from == request.auth.uid || resource.data.to == request.auth.uid);
+    }
+    
+    // Friends collection
+    match /friends/{friendshipId} {
+      allow read: if isSignedIn() && 
+        (resource.data.uid1 == request.auth.uid || resource.data.uid2 == request.auth.uid);
+      // Write operations should be done server-side or via transactions in the app
+      // Users can create/delete their own friendships through the client
+      allow create: if isSignedIn() && 
+        (request.resource.data.uid1 == request.auth.uid || request.resource.data.uid2 == request.auth.uid);
+      allow delete: if isSignedIn() && 
+        (resource.data.uid1 == request.auth.uid || resource.data.uid2 == request.auth.uid);
+    }
+    
+    // Blocked Users subcollection
+    match /blockedUsers/{uid}/blocked/{blockedUID} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+    
+    // Default deny all other collections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
