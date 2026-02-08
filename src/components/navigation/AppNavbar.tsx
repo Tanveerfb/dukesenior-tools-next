@@ -259,6 +259,13 @@ export default function AppNavbar() {
                 >
                   <ListItemText primary="Tags Management" />
                 </ListItemButton>
+                <ListItemButton
+                  sx={{ pl: 4 }}
+                  component={Link}
+                  href="/admin/notifications"
+                >
+                  <ListItemText primary="Send Notifications" />
+                </ListItemButton>
               </List>
             </Collapse>
             <Divider />
@@ -544,6 +551,13 @@ export default function AppNavbar() {
                         onClick={() => setAdminAnchorEl(null)}
                       >
                         Tags Management
+                      </MenuItem>
+                      <MenuItem
+                        component={Link}
+                        href="/admin/notifications"
+                        onClick={() => setAdminAnchorEl(null)}
+                      >
+                        Send Notifications
                       </MenuItem>
                     </Menu>
                   </>
