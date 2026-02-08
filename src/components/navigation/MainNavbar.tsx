@@ -22,6 +22,7 @@ import {
   FaUserCircle,
   FaShieldAlt,
   FaNewspaper,
+  FaUserFriends,
 } from "react-icons/fa";
 import { FiHelpCircle } from "react-icons/fi";
 import { HiOutlineSparkles } from "react-icons/hi";
@@ -34,6 +35,7 @@ import { classifyEvents } from "@/lib/navigation/classify";
 import { useAuth } from "@/hooks/useAuth";
 import { getUserByUID } from "@/lib/services/users";
 import { useTheme } from "@/components/ThemeProvider";
+import { getIncomingFriendRequests } from "@/lib/services/friends";
 
 // Simple classification using tags; later can fetch /api for dynamic updates
 type EffectiveMeta = EffectiveMetaType;
@@ -65,6 +67,7 @@ export default function MainNavbar() {
   const [loading, setLoading] = useState(true);
   const [navExpanded, setNavExpanded] = useState(false);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
+  const [incomingRequestsCount, setIncomingRequestsCount] = useState(0);
   const {
     theme,
     toggleTheme,
@@ -135,6 +138,33 @@ export default function MainNavbar() {
   useEffect(() => {
     setNavExpanded(false);
   }, [pathname]);
+
+  // Load incoming friend requests count
+  useEffect(() => {
+    if (!user?.uid) return;
+    
+    let cancelled = false;
+    const loadRequests = async () => {
+      try {
+        const requests = await getIncomingFriendRequests(user.uid);
+        if (!cancelled) {
+          setIncomingRequestsCount(requests.length);
+        }
+      } catch (error) {
+        console.error('Error loading friend requests:', error);
+      }
+    };
+
+    loadRequests();
+    
+    // Poll every 30 seconds for updates
+    const interval = setInterval(loadRequests, 30000);
+    
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [user?.uid]);
 
   const eventSections = useMemo(() => {
     const { currentGroups, pastGroups, currentKeys, pastKeys } =
@@ -554,6 +584,24 @@ export default function MainNavbar() {
                 <FaNewspaper className="nav-icon" />
                 <span>Community Updates</span>
               </Nav.Link>
+
+              {/* Friends Link - Only show when logged in */}
+              {user && (
+                <Nav.Link
+                  as={InlineLink}
+                  href="/friends"
+                  onClick={handleNavItemClick}
+                  className="nav-link-main"
+                >
+                  <FaUserFriends className="nav-icon" />
+                  <span>Friends</span>
+                  {incomingRequestsCount > 0 && (
+                    <Badge bg="danger" className="ms-2">
+                      {incomingRequestsCount}
+                    </Badge>
+                  )}
+                </Nav.Link>
+              )}
             </Nav>
 
             {/* Mobile-only Section */}
