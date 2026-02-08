@@ -22,9 +22,7 @@ export interface Notification {
   updatedAt?: number;
 }
 
-export interface NotificationDoc extends Notification {
-  // Additional fields for Firestore document
-}
+export type NotificationDoc = Notification;
 
 export interface CreateNotificationInput {
   userId: string;
