@@ -202,6 +202,26 @@ export const taggedManifest: TaggedRouteMeta[] = [
     tags: ["Tool", "Productivity", "Current"],
     description: "Create and manage 7-day checklists for house duties and responsibilities",
   },
+
+  // Gamification Pages
+  {
+    path: "/leaderboard",
+    title: "Leaderboard",
+    tags: ["Gamification", "Leaderboard", "Tool"],
+    description: "View the global leaderboard and compete with other members",
+  },
+  {
+    path: "/stats",
+    title: "My Stats",
+    tags: ["Gamification", "Stats", "Tool"],
+    description: "View your personal gamification stats and achievements",
+  },
+  {
+    path: "/admin/gamification",
+    title: "Admin - Gamification",
+    tags: ["Admin", "Gamification"],
+    description: "Admin tools for managing gamification system",
+  },
 ];
 
 export function findByTag(tag: PageTag) {
