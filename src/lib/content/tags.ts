@@ -195,6 +195,13 @@ export const taggedManifest: TaggedRouteMeta[] = [
     title: "Tournament Details",
     tags: ["Archive", "Details", "Event", "Past"],
   },
+  // Tools
+  {
+    path: "/house-duties",
+    title: "House Duties Checklist",
+    tags: ["Tool", "Productivity", "Current"],
+    description: "Create and manage 7-day checklists for house duties and responsibilities",
+  },
 ];
 
 export function findByTag(tag: PageTag) {
