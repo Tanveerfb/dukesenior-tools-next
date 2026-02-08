@@ -2,6 +2,7 @@
 import { AuthProvider } from "@/hooks/useAuth";
 import { ThemeProvider } from "./ThemeProvider";
 import { ToastProvider } from "./ui/ToastProvider";
+import { NotificationProvider } from "@/hooks/useNotifications";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
 import { Toaster } from "react-hot-toast";
@@ -53,7 +54,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       <ThemeProvider>
         <MuiThemeWrapper>
           <AuthProvider>
-            <ToastProvider>{children}</ToastProvider>
+            <NotificationProvider>
+              <ToastProvider>{children}</ToastProvider>
+            </NotificationProvider>
             {/* react-hot-toast for alternative toast notifications */}
             <Toaster
               position="top-right"
