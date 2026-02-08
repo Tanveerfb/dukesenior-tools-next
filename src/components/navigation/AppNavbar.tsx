@@ -24,6 +24,7 @@ import {
   Typography,
   Avatar,
   Chip,
+  Badge,
 } from "@mui/material";
 import {
   Menu as MenuIcon,
@@ -39,9 +40,11 @@ import {
   Newspaper as NewspaperIcon,
   AutoAwesome as SparklesIcon,
   HelpOutline as HelpIcon,
+  Notifications as NotificationsIcon,
 } from "@mui/icons-material";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
+import { useNotifications } from "@/hooks/useNotifications";
 import { useTheme as useCustomTheme } from "@/components/ThemeProvider";
 import { getUserByUID } from "@/lib/services/users";
 import type { EffectiveMeta as EffectiveMetaType } from "@/types/tags";
@@ -74,6 +77,7 @@ export default function AppNavbar() {
   const muiTheme = useTheme();
   const isMobile = useMediaQuery(muiTheme.breakpoints.down("md"));
   const { user, logout, admin } = useAuth();
+  const { unreadCount } = useNotifications();
   const { theme, toggleTheme } = useCustomTheme();
   const pathname = usePathname();
   const router = useRouter();
@@ -254,6 +258,13 @@ export default function AppNavbar() {
                   href="/admin/tags"
                 >
                   <ListItemText primary="Tags Management" />
+                </ListItemButton>
+                <ListItemButton
+                  sx={{ pl: 4 }}
+                  component={Link}
+                  href="/admin/notifications"
+                >
+                  <ListItemText primary="Send Notifications" />
                 </ListItemButton>
               </List>
             </Collapse>
@@ -541,6 +552,13 @@ export default function AppNavbar() {
                       >
                         Tags Management
                       </MenuItem>
+                      <MenuItem
+                        component={Link}
+                        href="/admin/notifications"
+                        onClick={() => setAdminAnchorEl(null)}
+                      >
+                        Send Notifications
+                      </MenuItem>
                     </Menu>
                   </>
                 )}
@@ -674,6 +692,19 @@ export default function AppNavbar() {
               >
                 <SearchIcon />
               </IconButton>
+
+              {user && (
+                <IconButton
+                  color="inherit"
+                  component={Link}
+                  href="/notifications"
+                  aria-label="Notifications"
+                >
+                  <Badge badgeContent={unreadCount} color="error">
+                    <NotificationsIcon />
+                  </Badge>
+                </IconButton>
+              )}
 
               <IconButton
                 color="inherit"
