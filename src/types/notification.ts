@@ -8,7 +8,12 @@ export type NotificationType =
   | 'mention'
   | 'system'
   | 'tournament'
-  | 'general';
+  | 'general'
+  | 'post-approved'
+  | 'post-rejected'
+  | 'post-milestone'
+  | 'new-follower'
+  | 'followed-user-post';
 
 export interface Notification {
   id: string;

@@ -59,9 +59,12 @@ export async function initializeUserGamification(
     achievementProgress: {},
     stats: {
       postsCreated: 0,
+      postsPublished: 0,
+      postsDrafted: 0,
       commentsPosted: 0,
       messagesSent: 0,
       friendsAdded: 0,
+      usersFollowed: 0,
       tournamentsParticipated: 0,
       tournamentsWon: 0,
       loginStreak: 0,
