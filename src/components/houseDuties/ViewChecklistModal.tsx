@@ -1,8 +1,22 @@
 "use client";
 
-import { Modal, Button, Badge, OverlayTrigger, Tooltip } from "react-bootstrap";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Chip,
+  Tooltip,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+  IconButton,
+} from "@mui/material";
+import { Print, Download, Info } from "@mui/icons-material";
 import { Checklist, DAYS_OF_WEEK } from "@/types/houseDuties";
-import { FaPrint, FaDownload, FaInfoCircle } from "react-icons/fa";
 import { useRef } from "react";
 
 interface Props {
@@ -37,11 +51,9 @@ export default function ViewChecklistModal({ show, onHide, checklist }: Props) {
 
   return (
     <>
-      <Modal show={show} onHide={onHide} size="xl" scrollable>
-        <Modal.Header closeButton className="no-print">
-          <Modal.Title>{checklist.name}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
+      <Dialog open={show} onClose={onHide} maxWidth="xl" fullWidth>
+        <DialogTitle className="no-print">{checklist.name}</DialogTitle>
+        <DialogContent>
           <div ref={printRef} className="checklist-view">
             {/* Print Header */}
             <div className="print-only text-center mb-4">
@@ -55,9 +67,7 @@ export default function ViewChecklistModal({ show, onHide, checklist }: Props) {
             {/* Screen Header */}
             <div className="no-print mb-3">
               {checklist.isTemplate && (
-                <Badge bg="info" className="mb-2">
-                  Template
-                </Badge>
+                <Chip label="Template" color="info" size="small" sx={{ mb: 2 }} />
               )}
               {checklist.description && (
                 <p className="text-muted">{checklist.description}</p>
@@ -72,33 +82,33 @@ export default function ViewChecklistModal({ show, onHide, checklist }: Props) {
 
             {/* Weekly Schedule Table */}
             <div className="table-responsive">
-              <table className="table table-bordered checklist-table">
-                <thead>
-                  <tr>
-                    <th style={{ width: "200px" }}>Duty</th>
+              <Table className="checklist-table" sx={{ borderCollapse: "collapse" }}>
+                <TableHead>
+                  <TableRow>
+                    <TableCell style={{ width: "200px" }}>Duty</TableCell>
                     {DAYS_OF_WEEK.map((day) => (
-                      <th key={day} className="text-center">
+                      <TableCell key={day} align="center">
                         {day}
-                      </th>
+                      </TableCell>
                     ))}
-                  </tr>
-                </thead>
-                <tbody>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
                   {checklist.duties.map((duty) => (
-                    <tr key={duty.id}>
-                      <td className="fw-bold">{duty.name}</td>
+                    <TableRow key={duty.id}>
+                      <TableCell sx={{ fontWeight: "bold" }}>{duty.name}</TableCell>
                       {DAYS_OF_WEEK.map((day) => (
-                        <td key={day} className="text-center">
+                        <TableCell key={day} align="center">
                           <div className="assignment-cell">
                             {getAssignment(day, duty.id)}
                             <div className="checkbox-cell print-only">☐</div>
                           </div>
-                        </td>
+                        </TableCell>
                       ))}
-                    </tr>
+                    </TableRow>
                   ))}
-                </tbody>
-              </table>
+                </TableBody>
+              </Table>
             </div>
 
             {/* People List */}
@@ -116,31 +126,27 @@ export default function ViewChecklistModal({ show, onHide, checklist }: Props) {
               </small>
             </div>
           </div>
-        </Modal.Body>
-        <Modal.Footer className="no-print">
-          <Button variant="secondary" onClick={onHide}>
+        </DialogContent>
+        <DialogActions className="no-print">
+          <Button variant="outlined" onClick={onHide}>
             Close
           </Button>
-          <Button variant="primary" onClick={handlePrint}>
-            <FaPrint className="me-2" />
+          <Button variant="contained" onClick={handlePrint} startIcon={<Print />}>
             Print Preview
           </Button>
-          <OverlayTrigger
-            placement="top"
-            overlay={
-              <Tooltip>
-                Opens print dialog. Select "Save as PDF" as the printer to export.
-              </Tooltip>
-            }
-          >
-            <Button variant="success" onClick={handleExportPDF}>
-              <FaDownload className="me-2" />
+          <Tooltip title="Opens print dialog. Select 'Save as PDF' as the printer to export.">
+            <Button
+              variant="contained"
+              color="success"
+              onClick={handleExportPDF}
+              startIcon={<Download />}
+              endIcon={<Info sx={{ fontSize: 16 }} />}
+            >
               Export PDF
-              <FaInfoCircle className="ms-1" size={12} />
             </Button>
-          </OverlayTrigger>
-        </Modal.Footer>
-      </Modal>
+          </Tooltip>
+        </DialogActions>
+      </Dialog>
 
       {/* Print Styles */}
       <style jsx global>{`
@@ -218,13 +224,18 @@ export default function ViewChecklistModal({ show, onHide, checklist }: Props) {
         }
         
         .checklist-table th {
-          background-color: var(--bs-primary);
+          background-color: #1976d2;
           color: white;
           font-weight: 600;
         }
         
         .checklist-table td {
           vertical-align: middle;
+        }
+        
+        .checklist-table th,
+        .checklist-table td {
+          border: 1px solid rgba(224, 224, 224, 1);
         }
       `}</style>
     </>
