@@ -2,7 +2,7 @@ import { db } from '@/lib/firebase/client';
 import { collection, doc, getDoc, getDocs, orderBy, query, setDoc, deleteDoc, where, increment, updateDoc, limit, onSnapshot, runTransaction } from 'firebase/firestore';
 import { getAllSamplePosts } from '@/lib/content/samplePosts';
 import { CMSPost, NewPostInput, UpdatePostInput, CMSComment, NewCommentInput } from '@/types/cms';
-import { awardXP, incrementStat, getUserGamification } from './gamification';
+import { awardXP, incrementStat, getUserGamification } from '@/lib/services/gamification';
 import { XP_REWARDS } from '@/types/gamification';
 
 const POSTS_COL = 'cms_posts_v1';
