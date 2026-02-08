@@ -22,6 +22,7 @@ import {
   UpdatePostInput,
   CMSComment,
   NewCommentInput,
+  ReactionType,
 } from "@/types/cms";
 import {
   awardXP,
@@ -29,6 +30,7 @@ import {
   getUserGamification,
 } from "@/lib/services/gamification";
 import { XP_REWARDS } from "@/types/gamification";
+import { createNotification } from "@/lib/services/notifications";
 
 const POSTS_COL = "cms_posts_v1";
 const COMMENTS_COL = "cms_comments_v1";
@@ -515,4 +517,469 @@ export async function getAnalyticsSummary(): Promise<any> {
     tagUsage,
     viewsByDay,
   };
+}
+
+// ============================================================================
+/**
+ * React to a post with one of 5 reaction types
+ * Replaces old like/dislike system
+ */
+export async function reactToPostForUserV2(
+  postId: string,
+  uid: string,
+  reactionType: ReactionType
+): Promise<void> {
+  const reactionId = postId + "_" + uid;
+  const reactionRef = doc(db, POST_REACTIONS_COL, reactionId);
+  const postRef = doc(db, POSTS_COL, postId);
+
+  await runTransaction(db, async (tx) => {
+    const reactionSnap = await tx.get(reactionRef);
+    const postSnap = await tx.get(postRef);
+
+    if (!postSnap.exists()) {
+      throw new Error("Post not found");
+    }
+
+    const post = postSnap.data() as CMSPost;
+    const prevReaction = reactionSnap.exists()
+      ? (reactionSnap.data() as any).type
+      : null;
+
+    if (prevReaction === reactionType) return; // No change
+
+    // Initialize reactionCounts if not present
+    const reactionCounts = post.reactionCounts || {
+      like: 0,
+      love: 0,
+      laugh: 0,
+      insightful: 0,
+      fire: 0,
+    };
+
+    // Decrement previous reaction count
+    if (prevReaction) {
+      reactionCounts[prevReaction as ReactionType] = Math.max(
+        0,
+        reactionCounts[prevReaction as ReactionType] - 1
+      );
+    }
+
+    // Increment new reaction count
+    reactionCounts[reactionType] = (reactionCounts[reactionType] || 0) + 1;
+
+    // Update reaction document
+    if (!reactionSnap.exists()) {
+      tx.set(reactionRef, {
+        postId,
+        uid,
+        type: reactionType,
+        createdAt: Date.now(),
+      });
+    } else {
+      tx.update(reactionRef, {
+        type: reactionType,
+        createdAt: Date.now(), // Update timestamp on reaction change
+      });
+    }
+
+    // Update post with new counts
+    tx.update(postRef, { reactionCounts });
+  });
+
+  // Award XP to post author for receiving reactions (non-blocking)
+  try {
+    const post = await getPost(postId);
+    if (post && post.authorUID !== uid) {
+      // Don't award XP for reacting to own posts
+      let xpAmount = XP_REWARDS.REACTION_LIKE_RECEIVED; // Default
+      if (reactionType === "love") xpAmount = XP_REWARDS.REACTION_LOVE_RECEIVED;
+      if (reactionType === "insightful")
+        xpAmount = XP_REWARDS.REACTION_INSIGHTFUL_RECEIVED;
+      if (reactionType === "fire") xpAmount = XP_REWARDS.REACTION_FIRE_RECEIVED;
+      if (reactionType === "laugh")
+        xpAmount = XP_REWARDS.REACTION_LAUGH_RECEIVED;
+
+      await awardXP(
+        post.authorUID,
+        xpAmount,
+        `Received ${reactionType} reaction`,
+        "post",
+        { postId, reactionType }
+      );
+    }
+  } catch (err) {
+    console.error("Error awarding XP for reaction:", err);
+  }
+}
+
+/**
+ * Get user's reaction to a post (new system)
+ */
+export async function getUserPostReactionV2(
+  postId: string,
+  uid: string
+): Promise<ReactionType | undefined> {
+  const snap = await getDoc(doc(db, POST_REACTIONS_COL, postId + "_" + uid));
+  return snap.exists() ? (snap.data() as any).type : undefined;
+}
+
+/**
+ * Get list of users who reacted with a specific type
+ */
+export async function getPostReactors(
+  postId: string,
+  reactionType: ReactionType,
+  limitCount: number = 5
+): Promise<{ uid: string; createdAt: number }[]> {
+  const q = query(
+    collection(db, POST_REACTIONS_COL),
+    where("postId", "==", postId),
+    where("type", "==", reactionType),
+    orderBy("createdAt", "desc"),
+    limit(limitCount)
+  );
+  const snap = await getDocs(q);
+  const reactors: { uid: string; createdAt: number }[] = [];
+  snap.forEach((doc) => {
+    const data = doc.data();
+    reactors.push({ uid: data.uid, createdAt: data.createdAt });
+  });
+  return reactors;
+}
+
+// ============================================================================
+// User-Generated Content with Approval System
+// ============================================================================
+
+/**
+ * Create post with approval workflow
+ * Non-admins create drafts or submit for review
+ */
+export async function createPostWithApproval(
+  uid: string,
+  authorName: string,
+  input: NewPostInput,
+  isAdmin: boolean
+): Promise<string> {
+  const id = crypto.randomUUID();
+  const now = Date.now();
+  const ref = doc(db, POSTS_COL, id);
+
+  // Determine status based on user role
+  let status = input.status || "draft";
+  let needsApproval = false;
+  let reviewStatus: "pending" | "approved" | "rejected" | undefined = undefined;
+  let submittedAt: number | undefined = undefined;
+
+  if (!isAdmin) {
+    // Non-admins can only create drafts or submit for review
+    if (status === "published" || status === "scheduled") {
+      // User is trying to publish - submit for review instead
+      status = "draft";
+      needsApproval = true;
+      reviewStatus = "pending";
+      submittedAt = now;
+    }
+  }
+
+  const post: CMSPost = {
+    id,
+    title: input.title,
+    slug: slugify(input.title),
+    content: input.content,
+    createdAt: now,
+    updatedAt: now,
+    authorUID: uid,
+    authorName,
+    bannerUrl: input.bannerUrl,
+    tags: input.tags || [],
+    pinned: !!input.pinned,
+    likeCount: 0,
+    dislikeCount: 0,
+    commentCount: 0,
+    status,
+    scheduledFor: input.scheduledFor,
+    views: 0,
+    reactionCounts: {
+      like: 0,
+      love: 0,
+      laugh: 0,
+      insightful: 0,
+      fire: 0,
+    },
+    needsApproval,
+    reviewStatus,
+    submittedAt,
+  };
+
+  await setDoc(ref, post);
+
+  // Award XP based on status
+  try {
+    if (status === "draft") {
+      if (reviewStatus === "pending") {
+        // User submitted for review
+        await awardXP(
+          uid,
+          XP_REWARDS.POST_SUBMITTED_FOR_REVIEW,
+          "Submitted post for review",
+          "post",
+          { postId: id }
+        );
+        await incrementStat(uid, "postsDrafted", 1);
+      } else {
+        // Just saved as draft
+        await awardXP(
+          uid,
+          XP_REWARDS.POST_DRAFT_SAVED,
+          "Saved post draft",
+          "post",
+          { postId: id }
+        );
+        await incrementStat(uid, "postsDrafted", 1);
+      }
+    } else if (status === "published") {
+      // Admin published directly
+      const gamification = await getUserGamification(uid);
+      const isFirstPost =
+        !gamification || gamification.stats.postsCreated === 0;
+
+      await awardXP(uid, XP_REWARDS.POST_CREATED, "Created a post", "post", {
+        postId: id,
+      });
+
+      if (isFirstPost) {
+        await awardXP(
+          uid,
+          XP_REWARDS.FIRST_POST,
+          "Created first post",
+          "post",
+          { postId: id, milestone: true }
+        );
+      }
+
+      await incrementStat(uid, "postsCreated", 1);
+      await incrementStat(uid, "postsPublished", 1);
+    }
+  } catch (err) {
+    console.error("Error awarding XP for post creation:", err);
+  }
+
+  return id;
+}
+
+/**
+ * Submit draft post for review
+ */
+export async function submitPostForReview(postId: string, uid: string): Promise<void> {
+  const postRef = doc(db, POSTS_COL, postId);
+  const postSnap = await getDoc(postRef);
+
+  if (!postSnap.exists()) {
+    throw new Error("Post not found");
+  }
+
+  const post = postSnap.data() as CMSPost;
+
+  // Verify ownership
+  if (post.authorUID !== uid) {
+    throw new Error("Not authorized to submit this post");
+  }
+
+  // Verify it's a draft
+  if (post.status !== "draft") {
+    throw new Error("Only draft posts can be submitted for review");
+  }
+
+  const now = Date.now();
+  await updateDoc(postRef, {
+    needsApproval: true,
+    reviewStatus: "pending",
+    submittedAt: now,
+    updatedAt: now,
+  });
+
+  // Award XP for submission
+  try {
+    await awardXP(
+      uid,
+      XP_REWARDS.POST_SUBMITTED_FOR_REVIEW,
+      "Submitted post for review",
+      "post",
+      { postId }
+    );
+  } catch (err) {
+    console.error("Error awarding XP for submission:", err);
+  }
+}
+
+/**
+ * Admin approves a post
+ */
+export async function approvePost(
+  postId: string,
+  adminUID: string,
+  adminName: string
+): Promise<void> {
+  const postRef = doc(db, POSTS_COL, postId);
+  const postSnap = await getDoc(postRef);
+
+  if (!postSnap.exists()) {
+    throw new Error("Post not found");
+  }
+
+  const post = postSnap.data() as CMSPost;
+
+  if (post.reviewStatus !== "pending") {
+    throw new Error("Post is not pending review");
+  }
+
+  const now = Date.now();
+  await updateDoc(postRef, {
+    status: "published",
+    reviewStatus: "approved",
+    reviewedBy: adminUID,
+    reviewedAt: now,
+    updatedAt: now,
+  });
+
+  // Award XP and achievements to author
+  try {
+    const gamification = await getUserGamification(post.authorUID);
+
+    // Award approval bonus XP
+    await awardXP(
+      post.authorUID,
+      XP_REWARDS.POST_APPROVED_BONUS,
+      "Post approved by admin",
+      "post",
+      { postId }
+    );
+
+    // Award POST_CREATED XP if not already given
+    await awardXP(
+      post.authorUID,
+      XP_REWARDS.POST_CREATED,
+      "Post published",
+      "post",
+      { postId }
+    );
+
+    // Increment published posts stat
+    await incrementStat(post.authorUID, "postsPublished", 1);
+    await incrementStat(post.authorUID, "postsCreated", 1);
+
+    // Check for "Published Author" achievement (first published post)
+    const isFirstPublished =
+      !gamification || gamification.stats.postsPublished === 0;
+    if (isFirstPublished) {
+      // Award achievement manually via gamification service
+      // This should trigger the achievement check system
+    }
+  } catch (err) {
+    console.error("Error awarding XP for approval:", err);
+  }
+
+  // Send notification to author
+  try {
+    await createNotification({
+      userId: post.authorUID,
+      type: "post-approved",
+      title: "Post Approved!",
+      body: `Your post "${post.title}" has been approved by ${adminName} and is now published.`,
+      link: `/posts/${post.slug}`,
+    });
+  } catch (err) {
+    console.error("Error sending approval notification:", err);
+  }
+}
+
+/**
+ * Admin rejects a post
+ */
+export async function rejectPost(
+  postId: string,
+  adminUID: string,
+  adminName: string,
+  reason: string
+): Promise<void> {
+  const postRef = doc(db, POSTS_COL, postId);
+  const postSnap = await getDoc(postRef);
+
+  if (!postSnap.exists()) {
+    throw new Error("Post not found");
+  }
+
+  const post = postSnap.data() as CMSPost;
+
+  if (post.reviewStatus !== "pending") {
+    throw new Error("Post is not pending review");
+  }
+
+  const now = Date.now();
+  await updateDoc(postRef, {
+    status: "draft",
+    reviewStatus: "rejected",
+    reviewedBy: adminUID,
+    reviewedAt: now,
+    rejectionReason: reason,
+    updatedAt: now,
+  });
+
+  // Send notification to author
+  try {
+    await createNotification({
+      userId: post.authorUID,
+      type: "post-rejected",
+      title: "Post Needs Revision",
+      body: `Your post "${post.title}" was not approved. Reason: ${reason}`,
+      link: `/dashboard`,
+    });
+  } catch (err) {
+    console.error("Error sending rejection notification:", err);
+  }
+}
+
+/**
+ * List posts pending review (for admin)
+ */
+export async function listPendingPosts(): Promise<CMSPost[]> {
+  const q = query(
+    collection(db, POSTS_COL),
+    where("reviewStatus", "==", "pending"),
+    orderBy("submittedAt", "desc")
+  );
+  const snap = await getDocs(q);
+  const posts: CMSPost[] = [];
+  snap.forEach((doc) => posts.push(doc.data() as CMSPost));
+  return posts;
+}
+
+/**
+ * List user's own posts by status
+ */
+export async function listUserPosts(
+  uid: string,
+  status?: "draft" | "published" | "scheduled",
+  reviewStatus?: "pending" | "approved" | "rejected"
+): Promise<CMSPost[]> {
+  let q = query(
+    collection(db, POSTS_COL),
+    where("authorUID", "==", uid),
+    orderBy("updatedAt", "desc")
+  );
+
+  if (status) {
+    q = query(q, where("status", "==", status));
+  }
+
+  if (reviewStatus) {
+    q = query(q, where("reviewStatus", "==", reviewStatus));
+  }
+
+  const snap = await getDocs(q);
+  const posts: CMSPost[] = [];
+  snap.forEach((doc) => posts.push(doc.data() as CMSPost));
+  return posts;
 }

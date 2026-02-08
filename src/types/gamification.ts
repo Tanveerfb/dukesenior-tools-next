@@ -22,9 +22,12 @@ export interface UserGamification {
   // Stats tracking
   stats: {
     postsCreated: number;
+    postsPublished: number; // Posts approved by admin
+    postsDrafted: number; // Draft posts saved
     commentsPosted: number;
     messagesSent: number;
     friendsAdded: number;
+    usersFollowed: number; // Users this person follows
     tournamentsParticipated: number;
     tournamentsWon: number;
     loginStreak: number;
@@ -229,12 +232,23 @@ export function getLevelTitle(level: number): string {
 export const XP_REWARDS = {
   // Content creation
   POST_CREATED: 50,
+  POST_DRAFT_SAVED: 5,
+  POST_SUBMITTED_FOR_REVIEW: 25,
+  POST_APPROVED_BONUS: 100, // on top of POST_CREATED (50)
   COMMENT_POSTED: 10,
   POST_LIKED: 2,
   COMMENT_LIKED: 1,
   
+  // Enhanced reactions
+  REACTION_LOVE_RECEIVED: 5,
+  REACTION_INSIGHTFUL_RECEIVED: 10,
+  REACTION_FIRE_RECEIVED: 2,
+  REACTION_LAUGH_RECEIVED: 2,
+  REACTION_LIKE_RECEIVED: 2,
+  
   // Social
   FRIEND_ADDED: 25,
+  USER_FOLLOWED: 10,
   MESSAGE_SENT: 5,
   PROFILE_UPDATED: 15,
   

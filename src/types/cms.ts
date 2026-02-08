@@ -1,3 +1,5 @@
+export type ReactionType = 'like' | 'love' | 'laugh' | 'insightful' | 'fire';
+
 export interface CMSPost {
   id: string;
   title: string;
@@ -10,12 +12,37 @@ export interface CMSPost {
   bannerUrl?: string;
   tags: string[];
   pinned?: boolean;
-  likeCount: number;
-  dislikeCount: number;
+  likeCount: number; // kept for backward compatibility
+  dislikeCount: number; // kept for backward compatibility
   commentCount: number;
   status: 'draft' | 'published' | 'scheduled';
   scheduledFor?: number; // timestamp for scheduled posts
   views: number;
+  
+  // User-generated content approval system
+  needsApproval?: boolean; // true if submitted by non-admin
+  submittedAt?: number; // when user submitted for review
+  reviewedBy?: string; // admin UID who approved/rejected
+  reviewedAt?: number;
+  reviewStatus?: 'pending' | 'approved' | 'rejected';
+  rejectionReason?: string;
+  
+  // Enhanced reactions system (5 types)
+  reactionCounts?: {
+    like: number;
+    love: number;
+    laugh: number;
+    insightful: number;
+    fire: number;
+  };
+}
+
+export interface PostReaction {
+  id: string;
+  postId: string;
+  uid: string;
+  type: ReactionType;
+  createdAt: number;
 }
 
 export interface CMSComment {
