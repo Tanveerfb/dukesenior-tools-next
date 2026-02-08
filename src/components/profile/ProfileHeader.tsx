@@ -4,6 +4,10 @@ import Image from "next/image";
 import { Button } from "react-bootstrap";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
+import UserAvatar from "@/components/user/UserAvatar";
+import RoleBadge from "@/components/user/RoleBadge";
+import SocialLinks from "@/components/user/SocialLinks";
+import type { UserDoc } from "@/lib/services/users";
 
 interface Props {
   uid?: string;
@@ -14,6 +18,13 @@ interface Props {
   createdAt?: number;
   lastSeen?: number;
   signInCount?: number;
+  bannerURL?: string;
+  accentColor?: string;
+  pronouns?: string;
+  location?: string;
+  timezone?: string;
+  socialLinks?: UserDoc["socialLinks"];
+  roles?: string[];
 }
 
 export default function ProfileHeader({
@@ -25,6 +36,13 @@ export default function ProfileHeader({
   createdAt,
   lastSeen,
   signInCount: _signInCount,
+  bannerURL,
+  accentColor = "#5865F2",
+  pronouns,
+  location,
+  timezone,
+  socialLinks,
+  roles = [],
 }: Props) {
   const { user } = useAuth();
   const isOwner = !!(user?.uid && uid && user.uid === uid);
@@ -45,91 +63,120 @@ export default function ProfileHeader({
   const memberSince = ms ? new Date(ms).toLocaleDateString() : null;
   const lastSeenMs = toMillis(lastSeen as any) || null;
 
-  return (
-    <div className="card mb-4">
-      <div className="card-body d-flex flex-column flex-md-row align-items-start">
-        <div
-          className="me-3"
-          style={{
-            width: 96,
-            height: 96,
-            borderRadius: 12,
-            overflow: "hidden",
-            background: "#e9ecef",
-            position: "relative",
-          }}
-        >
-          {photoURL ? (
-            <Image
-              src={photoURL}
-              alt="avatar"
-              fill
-              style={{ objectFit: "cover" }}
-              sizes="96px"
-            />
-          ) : (
-            <div style={{ width: "100%", height: "100%" }} />
-          )}
-        </div>
+  const user: Partial<UserDoc> = {
+    uid,
+    username,
+    displayName,
+    photoURL,
+    accentColor,
+  };
 
-        <div className="flex-grow-1 w-100">
-          <div className="d-flex align-items-center justify-content-between">
-            <div>
-              <h2 className="mb-0">{displayName || username}</h2>
-              <div className="text-muted">@{username}</div>
-            </div>
-            <div className="d-flex gap-2">
-              {isOwner ? (
-                <>
-                  <Button
-                    variant="outline-primary"
-                    size="sm"
-                    onClick={() => router.push("/account")}
-                  >
-                    Edit Profile
-                  </Button>
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    onClick={() => router.push("/account")}
-                  >
-                    Change Username
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button variant="outline-primary" size="sm">
-                    Add Friend
-                  </Button>
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    disabled
-                    title="DMs are friends-only"
-                  >
-                    Message
-                  </Button>
-                </>
-              )}
-            </div>
+  // Fallback gradient for banner
+  const bannerStyle = bannerURL
+    ? { backgroundImage: `url(${bannerURL})`, backgroundSize: "cover", backgroundPosition: "center" }
+    : { background: `linear-gradient(135deg, ${accentColor}99, ${accentColor}33)` };
+
+  return (
+    <div className="card mb-4" style={{ overflow: "hidden" }}>
+      {/* Banner Section */}
+      <div
+        style={{
+          height: 200,
+          width: "100%",
+          position: "relative",
+          borderBottom: `4px solid ${accentColor}`,
+          ...bannerStyle,
+        }}
+      />
+
+      <div className="card-body" style={{ marginTop: -48 }}>
+        <div className="d-flex flex-column flex-md-row align-items-start">
+          {/* Avatar overlapping banner */}
+          <div className="me-3 mb-3 mb-md-0" style={{ marginTop: -48 }}>
+            <UserAvatar user={user} size="xlarge" showStatus />
           </div>
 
-          {bio ? <p className="mt-3 mb-1">{bio}</p> : null}
+          <div className="flex-grow-1 w-100">
+            <div className="d-flex align-items-start justify-content-between flex-wrap">
+              <div className="mb-2">
+                <div className="d-flex align-items-center gap-2 flex-wrap">
+                  <h2 className="mb-0">{displayName || username}</h2>
+                  {roles && roles.length > 0 && (
+                    <div className="d-flex gap-1">
+                      {roles.map((role) => (
+                        <RoleBadge key={role} role={role} />
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div className="text-muted">
+                  @{username}
+                  {pronouns && <span className="ms-2 small">({pronouns})</span>}
+                </div>
+                {socialLinks && (
+                  <div className="mt-2">
+                    <SocialLinks socialLinks={socialLinks} />
+                  </div>
+                )}
+              </div>
+              <div className="d-flex gap-2">
+                {isOwner ? (
+                  <>
+                    <Button
+                      variant="outline-primary"
+                      size="sm"
+                      onClick={() => router.push("/profile")}
+                      style={{ borderColor: accentColor, color: accentColor }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = accentColor;
+                        e.currentTarget.style.color = "white";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = "transparent";
+                        e.currentTarget.style.color = accentColor;
+                      }}
+                    >
+                      Edit Profile
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button variant="outline-primary" size="sm">
+                      Add Friend
+                    </Button>
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      disabled
+                      title="DMs are friends-only"
+                      style={{ background: accentColor, borderColor: accentColor }}
+                    >
+                      Message
+                    </Button>
+                  </>
+                )}
+              </div>
+            </div>
 
-          <div className="d-flex gap-3 text-muted mt-2 small">
-            <div>
-              <strong>0</strong> posts
+            {bio ? <p className="mt-3 mb-1">{bio}</p> : null}
+
+            <div className="d-flex gap-3 text-muted mt-2 small flex-wrap">
+              <div>
+                <strong>0</strong> posts
+              </div>
+              <div>
+                <strong>0</strong> followers
+              </div>
+              <div>
+                <strong>0</strong> following
+              </div>
+              {location && <div>📍 {location}</div>}
+              {timezone && <div>🕐 {timezone}</div>}
+              {memberSince && <div>Member since {memberSince}</div>}
+              {lastSeenMs && (
+                <div>Last seen {new Date(lastSeenMs).toLocaleString()}</div>
+              )}
             </div>
-            <div>
-              <strong>0</strong> followers
-            </div>
-            <div>
-              <strong>0</strong> following
-            </div>
-            {memberSince && <div>Member since {memberSince}</div>}
-            {lastSeenMs && (
-              <div>Last seen {new Date(lastSeenMs).toLocaleString()}</div>
-            )}
           </div>
         </div>
       </div>

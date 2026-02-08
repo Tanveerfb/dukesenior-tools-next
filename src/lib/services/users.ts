@@ -11,6 +11,18 @@ export interface UserDoc {
   updatedAt?: number;
   lastSeen?: number;
   signInCount?: number;
+  bannerURL?: string;
+  accentColor?: string; // hex color, e.g., "#5865F2"
+  pronouns?: string; // "he/him", "she/her", "they/them", etc.
+  location?: string;
+  timezone?: string;
+  socialLinks?: {
+    discord?: string;
+    twitch?: string;
+    twitter?: string;
+    youtube?: string;
+  };
+  roles?: string[]; // ['admin', 'moderator', 'verified', etc.]
 }
 
 const USERS_COL = 'users';
@@ -217,4 +229,29 @@ export async function setUsername(uid: string, username: string, displayName?: s
   });
 
   return { uid, username: uname };
+}
+
+// Update user profile fields (merge operation to preserve existing data)
+export async function updateUserProfile(uid: string, updates: Partial<UserDoc>) {
+  if (!uid) throw new Error('uid is required');
+  
+  const now = Date.now();
+  const data = { ...updates, updatedAt: now };
+  
+  if (typeof window === 'undefined') {
+    try {
+      const { adminDb } = await import('@/lib/firebase/admin');
+      if (adminDb) {
+        await adminDb.collection(USERS_COL).doc(uid).set(data, { merge: true });
+        return;
+      }
+    } catch {
+      // fall through to client path
+    }
+  }
+  
+  // Client-side update
+  const { setDoc } = await import('firebase/firestore');
+  const userRef = doc(db, USERS_COL, uid);
+  await setDoc(userRef, data, { merge: true });
 }
