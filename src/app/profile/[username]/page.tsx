@@ -27,9 +27,15 @@ export default async function ProfilePage({
         photoURL={user.photoURL}
         bio={typeof user.bio === "string" ? user.bio : user.bio || ""}
         createdAt={user.createdAt}
-        // additional fields (used by header)
         lastSeen={user.lastSeen}
         signInCount={user.signInCount}
+        bannerURL={user.bannerURL}
+        accentColor={user.accentColor}
+        pronouns={user.pronouns}
+        location={user.location}
+        timezone={user.timezone}
+        socialLinks={user.socialLinks}
+        roles={user.roles}
       />
 
       <div className="row">
@@ -54,6 +60,68 @@ export default async function ProfilePage({
             <div className="card-body">
               <h6>About</h6>
               <p className="text-muted">{user.bio || "No bio provided."}</p>
+              
+              {/* Location and timezone */}
+              {(user.location || user.timezone) && (
+                <div className="small text-muted mt-3">
+                  {user.location && <div>📍 {user.location}</div>}
+                  {user.timezone && <div>🕐 {user.timezone}</div>}
+                </div>
+              )}
+
+              {/* Social links */}
+              {user.socialLinks && Object.values(user.socialLinks).some(v => v) && (
+                <div className="mt-3">
+                  <h6 className="small text-muted mb-2">SOCIAL LINKS</h6>
+                  <div className="d-flex gap-2">
+                    {user.socialLinks.discord && (
+                      <a
+                        href={user.socialLinks.discord}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-decoration-none"
+                        title="Discord"
+                      >
+                        Discord
+                      </a>
+                    )}
+                    {user.socialLinks.twitch && (
+                      <a
+                        href={user.socialLinks.twitch}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-decoration-none"
+                        title="Twitch"
+                      >
+                        Twitch
+                      </a>
+                    )}
+                    {user.socialLinks.twitter && (
+                      <a
+                        href={user.socialLinks.twitter}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-decoration-none"
+                        title="Twitter"
+                      >
+                        Twitter
+                      </a>
+                    )}
+                    {user.socialLinks.youtube && (
+                      <a
+                        href={user.socialLinks.youtube}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-decoration-none"
+                        title="YouTube"
+                      >
+                        YouTube
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* owner-only inline editor placed here */}
               {/* AboutEditor is a client component */}
               <div className="mt-2">
