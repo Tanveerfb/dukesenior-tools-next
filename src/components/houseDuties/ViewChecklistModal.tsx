@@ -13,9 +13,8 @@ import {
   TableBody,
   TableRow,
   TableCell,
-  IconButton,
 } from "@mui/material";
-import { Print, Download, Info } from "@mui/icons-material";
+import { Print, Download } from "@mui/icons-material";
 import { Checklist, DAYS_OF_WEEK } from "@/types/houseDuties";
 import { useRef } from "react";
 
@@ -140,7 +139,6 @@ export default function ViewChecklistModal({ show, onHide, checklist }: Props) {
               color="success"
               onClick={handleExportPDF}
               startIcon={<Download />}
-              endIcon={<Info sx={{ fontSize: 16 }} />}
             >
               Export PDF
             </Button>
