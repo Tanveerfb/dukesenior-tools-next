@@ -53,10 +53,10 @@ export default function AdminNotificationsPage() {
         type,
         title,
         body,
-        link: link || undefined,
+        ...(link.trim() && { link: link.trim() }),
       });
       showToast("Notification sent successfully", "success");
-      
+
       // Clear form
       setUserId("");
       setTitle("");

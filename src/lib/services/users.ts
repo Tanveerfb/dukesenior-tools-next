@@ -1,5 +1,13 @@
-import { db } from '@/lib/firebase/client';
-import { doc, getDoc, runTransaction, collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from "@/lib/firebase/client";
+import {
+  doc,
+  getDoc,
+  runTransaction,
+  collection,
+  query,
+  where,
+  getDocs,
+} from "firebase/firestore";
 
 export interface UserDoc {
   uid: string;
@@ -25,11 +33,11 @@ export interface UserDoc {
   roles?: string[]; // ['admin', 'moderator', 'verified', etc.]
 }
 
-const USERS_COL = 'users';
-const USERNAME_COL = 'usernames';
+const USERS_COL = "users";
+const USERNAME_COL = "usernames";
 
 export function normalizeUsername(s: string) {
-  return (s || '').trim().toLowerCase();
+  return (s || "").trim().toLowerCase();
 }
 
 export function validateUsername(s: string) {
@@ -38,9 +46,9 @@ export function validateUsername(s: string) {
 
 function toMillisIfTimestamp(v: any): number | undefined {
   if (!v) return undefined;
-  if (typeof v === 'number') return v;
-  if (v && typeof v.toMillis === 'function') return v.toMillis();
-  if (typeof v === 'string') {
+  if (typeof v === "number") return v;
+  if (v && typeof v.toMillis === "function") return v.toMillis();
+  if (typeof v === "string") {
     const p = Date.parse(v);
     if (!Number.isNaN(p)) return p;
   }
@@ -51,16 +59,24 @@ function normalizeDoc(raw: any): UserDoc | null {
   if (!raw) return null;
   const out: any = { ...raw };
   try {
-    out.createdAt = toMillisIfTimestamp(raw.createdAt || raw.CreatedAt || raw.createAt);
+    out.createdAt = toMillisIfTimestamp(
+      raw.createdAt || raw.CreatedAt || raw.createAt,
+    );
   } catch {}
   try {
-    out.updatedAt = toMillisIfTimestamp(raw.updatedAt || raw.updated || raw.updated_at);
+    out.updatedAt = toMillisIfTimestamp(
+      raw.updatedAt || raw.updated || raw.updated_at,
+    );
   } catch {}
   try {
-    out.lastSeen = toMillisIfTimestamp(raw.lastSeen || raw.last_seen || raw.lastSignInAt || raw.lastSignIn);
+    out.lastSeen = toMillisIfTimestamp(
+      raw.lastSeen || raw.last_seen || raw.lastSignInAt || raw.lastSignIn,
+    );
   } catch {}
   try {
-    out.lastSignInAt = toMillisIfTimestamp(raw.lastSignInAt || raw.lastSignIn || raw.last_sign_in_at);
+    out.lastSignInAt = toMillisIfTimestamp(
+      raw.lastSignInAt || raw.lastSignIn || raw.last_sign_in_at,
+    );
   } catch {}
   return out as UserDoc;
 }
@@ -69,9 +85,9 @@ export async function getUserByUID(uid: string): Promise<UserDoc | null> {
   if (!uid) return null;
 
   // Prefer admin SDK on server to avoid mixing SDK refs
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     try {
-      const { adminDb } = await import('@/lib/firebase/admin');
+      const { adminDb } = await import("@/lib/firebase/admin");
       if (adminDb) {
         try {
           const snap = await adminDb.collection(USERS_COL).doc(uid).get();
@@ -80,19 +96,31 @@ export async function getUserByUID(uid: string): Promise<UserDoc | null> {
 
         // try alternate field queries for legacy docs
         try {
-          const snaps = await adminDb.collection(USERS_COL).where('uid', '==', uid).get();
+          const snaps = await adminDb
+            .collection(USERS_COL)
+            .where("uid", "==", uid)
+            .get();
           if (!snaps.empty) return normalizeDoc(snaps.docs[0].data());
         } catch {}
         try {
-          const snapsUID = await adminDb.collection(USERS_COL).where('UID', '==', uid).get();
+          const snapsUID = await adminDb
+            .collection(USERS_COL)
+            .where("UID", "==", uid)
+            .get();
           if (!snapsUID.empty) return normalizeDoc(snapsUID.docs[0].data());
         } catch {}
         try {
-          const snaps2 = await adminDb.collection(USERS_COL).where('Email', '==', uid).get();
+          const snaps2 = await adminDb
+            .collection(USERS_COL)
+            .where("Email", "==", uid)
+            .get();
           if (!snaps2.empty) return normalizeDoc(snaps2.docs[0].data());
         } catch {}
         try {
-          const snaps3 = await adminDb.collection(USERS_COL).where('email', '==', uid).get();
+          const snaps3 = await adminDb
+            .collection(USERS_COL)
+            .where("email", "==", uid)
+            .get();
           if (!snaps3.empty) return normalizeDoc(snaps3.docs[0].data());
         } catch {}
       }
@@ -109,25 +137,25 @@ export async function getUserByUID(uid: string): Promise<UserDoc | null> {
   } catch {}
 
   try {
-    const q = query(collection(db, USERS_COL), where('uid', '==', uid));
+    const q = query(collection(db, USERS_COL), where("uid", "==", uid));
     const snaps = await getDocs(q);
     if (!snaps.empty) return normalizeDoc(snaps.docs[0].data());
   } catch {}
 
   try {
-    const qUID = query(collection(db, USERS_COL), where('UID', '==', uid));
+    const qUID = query(collection(db, USERS_COL), where("UID", "==", uid));
     const snapsUID = await getDocs(qUID);
     if (!snapsUID.empty) return normalizeDoc(snapsUID.docs[0].data());
   } catch {}
 
   try {
-    const q2 = query(collection(db, USERS_COL), where('Email', '==', uid));
+    const q2 = query(collection(db, USERS_COL), where("Email", "==", uid));
     const snaps2 = await getDocs(q2);
     if (!snaps2.empty) return normalizeDoc(snaps2.docs[0].data());
   } catch {}
 
   try {
-    const q3 = query(collection(db, USERS_COL), where('email', '==', uid));
+    const q3 = query(collection(db, USERS_COL), where("email", "==", uid));
     const snaps3 = await getDocs(q3);
     if (!snaps3.empty) return normalizeDoc(snaps3.docs[0].data());
   } catch {}
@@ -135,16 +163,21 @@ export async function getUserByUID(uid: string): Promise<UserDoc | null> {
   return null;
 }
 
-export async function getUserByUsername(username: string): Promise<UserDoc | null> {
+export async function getUserByUsername(
+  username: string,
+): Promise<UserDoc | null> {
   const uname = normalizeUsername(username);
   if (!uname) return null;
 
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     try {
-      const { adminDb } = await import('@/lib/firebase/admin');
+      const { adminDb } = await import("@/lib/firebase/admin");
       if (adminDb) {
         try {
-          const mapSnap = await adminDb.collection(USERNAME_COL).doc(uname).get();
+          const mapSnap = await adminDb
+            .collection(USERNAME_COL)
+            .doc(uname)
+            .get();
           if (!mapSnap.exists) return null;
           const data = mapSnap.data() as any;
           const uid = data?.uid as string | undefined;
@@ -170,13 +203,17 @@ export async function getUserByUsername(username: string): Promise<UserDoc | nul
 
 // Transactionally claim a username and update the user's doc.
 // Throws Error('invalid_username') or Error('username_taken') on failure.
-export async function setUsername(uid: string, username: string, displayName?: string) {
+export async function setUsername(
+  uid: string,
+  username: string,
+  displayName?: string,
+) {
   const uname = normalizeUsername(username);
-  if (!validateUsername(uname)) throw new Error('invalid_username');
+  if (!validateUsername(uname)) throw new Error("invalid_username");
 
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     try {
-      const { adminDb } = await import('@/lib/firebase/admin');
+      const { adminDb } = await import("@/lib/firebase/admin");
       if (adminDb) {
         try {
           await adminDb.runTransaction(async (tx: any) => {
@@ -184,22 +221,44 @@ export async function setUsername(uid: string, username: string, displayName?: s
             const userRef = adminDb.collection(USERS_COL).doc(uid);
             const unameSnap = await tx.get(unameRef);
             if (unameSnap.exists && (unameSnap.data() as any).uid !== uid) {
-              throw new Error('username_taken');
+              throw new Error("username_taken");
             }
 
             const now = Date.now();
             const userSnap = await tx.get(userRef);
             if (!userSnap.exists) {
-              tx.set(userRef, { uid, username: uname, displayName: displayName || '', createdAt: now, updatedAt: now });
+              tx.set(userRef, {
+                uid,
+                username: uname,
+                displayName: displayName || "",
+                createdAt: now,
+                updatedAt: now,
+              });
             } else {
-              tx.update(userRef, { username: uname, displayName: displayName ?? (userSnap.data() as any).displayName, updatedAt: now } as any);
+              tx.update(userRef, {
+                username: uname,
+                displayName:
+                  displayName ?? (userSnap.data() as any).displayName,
+                updatedAt: now,
+              } as any);
             }
 
-            tx.set(unameRef, { uid, username: uname, createdAt: (unameSnap.exists ? (unameSnap.data() as any).createdAt : now), updatedAt: now }, { merge: true } as any);
+            tx.set(
+              unameRef,
+              {
+                uid,
+                username: uname,
+                createdAt: unameSnap.exists
+                  ? (unameSnap.data() as any).createdAt
+                  : now,
+                updatedAt: now,
+              },
+              { merge: true } as any,
+            );
           });
           return { uid, username: uname };
         } catch (err: any) {
-          if (err?.message === 'username_taken') throw err;
+          if (err?.message === "username_taken") throw err;
           // fall through to client path if admin transaction failed for unexpected reason
         }
       }
@@ -214,33 +273,64 @@ export async function setUsername(uid: string, username: string, displayName?: s
     const unameSnap = await tx.get(unameRef);
     if (unameSnap.exists()) {
       const existing = unameSnap.data() as any;
-      if (existing.uid !== uid) throw new Error('username_taken');
+      if (existing.uid !== uid) throw new Error("username_taken");
     }
 
     const now = Date.now();
     const userSnap = await tx.get(userRef);
     if (!userSnap.exists()) {
-      tx.set(userRef, { uid, username: uname, displayName: displayName || '', createdAt: now, updatedAt: now });
+      tx.set(userRef, {
+        uid,
+        username: uname,
+        displayName: displayName || "",
+        createdAt: now,
+        updatedAt: now,
+      });
     } else {
-      tx.update(userRef, { username: uname, displayName: displayName ?? (userSnap.data() as any).displayName, updatedAt: now } as any);
+      tx.update(userRef, {
+        username: uname,
+        displayName: displayName ?? (userSnap.data() as any).displayName,
+        updatedAt: now,
+      } as any);
     }
 
-    tx.set(unameRef, { uid, username: uname, createdAt: (unameSnap.exists() ? (unameSnap.data() as any).createdAt : now), updatedAt: now }, { merge: true } as any);
+    tx.set(
+      unameRef,
+      {
+        uid,
+        username: uname,
+        createdAt: unameSnap.exists()
+          ? (unameSnap.data() as any).createdAt
+          : now,
+        updatedAt: now,
+      },
+      { merge: true } as any,
+    );
   });
 
   return { uid, username: uname };
 }
 
 // Update user profile fields (merge operation to preserve existing data)
-export async function updateUserProfile(uid: string, updates: Partial<UserDoc>) {
-  if (!uid) throw new Error('uid is required');
-  
+export async function updateUserProfile(
+  uid: string,
+  updates: Partial<UserDoc>,
+) {
+  if (!uid) throw new Error("uid is required");
+
   const now = Date.now();
-  const data = { ...updates, updatedAt: now };
-  
-  if (typeof window === 'undefined') {
+  // Filter out undefined values to avoid Firestore errors
+  const cleanedUpdates: Record<string, any> = {};
+  Object.entries(updates).forEach(([key, value]) => {
+    if (value !== undefined) {
+      cleanedUpdates[key] = value;
+    }
+  });
+  const data = { ...cleanedUpdates, updatedAt: now };
+
+  if (typeof window === "undefined") {
     try {
-      const { adminDb } = await import('@/lib/firebase/admin');
+      const { adminDb } = await import("@/lib/firebase/admin");
       if (adminDb) {
         await adminDb.collection(USERS_COL).doc(uid).set(data, { merge: true });
         return;
@@ -249,9 +339,9 @@ export async function updateUserProfile(uid: string, updates: Partial<UserDoc>) 
       // fall through to client path
     }
   }
-  
+
   // Client-side update
-  const { setDoc } = await import('firebase/firestore');
+  const { setDoc } = await import("firebase/firestore");
   const userRef = doc(db, USERS_COL, uid);
   await setDoc(userRef, data, { merge: true });
 }

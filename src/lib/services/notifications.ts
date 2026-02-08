@@ -3,7 +3,7 @@
  * Handles creating, reading, updating, and listening to user notifications
  */
 
-import { db } from '@/lib/firebase/client';
+import { db } from "@/lib/firebase/client";
 import {
   collection,
   doc,
@@ -22,22 +22,22 @@ import {
   startAfter,
   QueryDocumentSnapshot,
   DocumentData,
-} from 'firebase/firestore';
+} from "firebase/firestore";
 import type {
   Notification,
   NotificationDoc,
   CreateNotificationInput,
   UpdateNotificationInput,
-} from '@/types/notification';
+} from "@/types/notification";
 
 // Collection name
-const NOTIFICATIONS_COL = 'notifications';
+const NOTIFICATIONS_COL = "notifications";
 
 /**
  * Create a new notification
  */
 export async function createNotification(
-  input: CreateNotificationInput
+  input: CreateNotificationInput,
 ): Promise<Notification> {
   const notificationRef = doc(collection(db, NOTIFICATIONS_COL));
   const now = Date.now();
@@ -48,7 +48,7 @@ export async function createNotification(
     type: input.type,
     title: input.title,
     body: input.body,
-    link: input.link,
+    ...(input.link && { link: input.link }),
     read: false,
     createdAt: now,
   };
@@ -61,7 +61,7 @@ export async function createNotification(
  * Get a single notification by ID
  */
 export async function getNotificationById(
-  notificationId: string
+  notificationId: string,
 ): Promise<Notification | null> {
   const notificationRef = doc(db, NOTIFICATIONS_COL, notificationId);
   const notificationSnap = await getDoc(notificationRef);
@@ -79,7 +79,7 @@ export async function getNotificationById(
 export async function getUserNotifications(
   userId: string,
   limitCount: number = 50,
-  lastDoc?: QueryDocumentSnapshot<DocumentData>
+  lastDoc?: QueryDocumentSnapshot<DocumentData>,
 ): Promise<{
   notifications: Notification[];
   lastDoc: QueryDocumentSnapshot<DocumentData> | null;
@@ -87,9 +87,9 @@ export async function getUserNotifications(
   const notificationsRef = collection(db, NOTIFICATIONS_COL);
   let q = query(
     notificationsRef,
-    where('userId', '==', userId),
-    orderBy('createdAt', 'desc'),
-    limit(limitCount)
+    where("userId", "==", userId),
+    orderBy("createdAt", "desc"),
+    limit(limitCount),
   );
 
   if (lastDoc) {
@@ -110,8 +110,8 @@ export async function getUnreadCount(userId: string): Promise<number> {
   const notificationsRef = collection(db, NOTIFICATIONS_COL);
   const q = query(
     notificationsRef,
-    where('userId', '==', userId),
-    where('read', '==', false)
+    where("userId", "==", userId),
+    where("read", "==", false),
   );
 
   const snapshot = await getDocs(q);
@@ -122,7 +122,7 @@ export async function getUnreadCount(userId: string): Promise<number> {
  * Mark a notification as read
  */
 export async function markNotificationAsRead(
-  notificationId: string
+  notificationId: string,
 ): Promise<void> {
   const notificationRef = doc(db, NOTIFICATIONS_COL, notificationId);
   await updateDoc(notificationRef, {
@@ -134,12 +134,14 @@ export async function markNotificationAsRead(
 /**
  * Mark all notifications as read for a user
  */
-export async function markAllNotificationsAsRead(userId: string): Promise<void> {
+export async function markAllNotificationsAsRead(
+  userId: string,
+): Promise<void> {
   const notificationsRef = collection(db, NOTIFICATIONS_COL);
   const q = query(
     notificationsRef,
-    where('userId', '==', userId),
-    where('read', '==', false)
+    where("userId", "==", userId),
+    where("read", "==", false),
   );
 
   const snapshot = await getDocs(q);
@@ -158,7 +160,9 @@ export async function markAllNotificationsAsRead(userId: string): Promise<void> 
 /**
  * Delete a notification
  */
-export async function deleteNotification(notificationId: string): Promise<void> {
+export async function deleteNotification(
+  notificationId: string,
+): Promise<void> {
   const notificationRef = doc(db, NOTIFICATIONS_COL, notificationId);
   await deleteDoc(notificationRef);
 }
@@ -168,7 +172,7 @@ export async function deleteNotification(notificationId: string): Promise<void> 
  */
 export async function deleteAllNotifications(userId: string): Promise<void> {
   const notificationsRef = collection(db, NOTIFICATIONS_COL);
-  const q = query(notificationsRef, where('userId', '==', userId));
+  const q = query(notificationsRef, where("userId", "==", userId));
 
   const snapshot = await getDocs(q);
   const batch = writeBatch(db);
@@ -185,13 +189,13 @@ export async function deleteAllNotifications(userId: string): Promise<void> {
  */
 export function listenToUnreadCount(
   userId: string,
-  callback: (count: number) => void
+  callback: (count: number) => void,
 ): () => void {
   const notificationsRef = collection(db, NOTIFICATIONS_COL);
   const q = query(
     notificationsRef,
-    where('userId', '==', userId),
-    where('read', '==', false)
+    where("userId", "==", userId),
+    where("read", "==", false),
   );
 
   const unsubscribe = onSnapshot(
@@ -200,9 +204,9 @@ export function listenToUnreadCount(
       callback(snapshot.size);
     },
     (error) => {
-      console.error('Error listening to unread count:', error);
+      console.error("Error listening to unread count:", error);
       callback(0);
-    }
+    },
   );
 
   return unsubscribe;
@@ -214,26 +218,28 @@ export function listenToUnreadCount(
 export function listenToNotifications(
   userId: string,
   callback: (notifications: Notification[]) => void,
-  limitCount: number = 50
+  limitCount: number = 50,
 ): () => void {
   const notificationsRef = collection(db, NOTIFICATIONS_COL);
   const q = query(
     notificationsRef,
-    where('userId', '==', userId),
-    orderBy('createdAt', 'desc'),
-    limit(limitCount)
+    where("userId", "==", userId),
+    orderBy("createdAt", "desc"),
+    limit(limitCount),
   );
 
   const unsubscribe = onSnapshot(
     q,
     (snapshot) => {
-      const notifications = snapshot.docs.map((doc) => doc.data() as Notification);
+      const notifications = snapshot.docs.map(
+        (doc) => doc.data() as Notification,
+      );
       callback(notifications);
     },
     (error) => {
-      console.error('Error listening to notifications:', error);
+      console.error("Error listening to notifications:", error);
       callback([]);
-    }
+    },
   );
 
   return unsubscribe;

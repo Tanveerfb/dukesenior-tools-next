@@ -20,7 +20,7 @@ function renderCommentWithLinks(content: string) {
         className="text-decoration-none"
       >
         @{uname}
-      </Link>
+      </Link>,
     );
     lastIndex = idx + m[0].length;
   }
@@ -28,7 +28,7 @@ function renderCommentWithLinks(content: string) {
   return (
     <span style={{ whiteSpace: "pre-wrap" }}>
       {parts.map((p, i) =>
-        typeof p === "string" ? <span key={i}>{p}</span> : p
+        typeof p === "string" ? <span key={i}>{p}</span> : p,
       )}
     </span>
   );
@@ -112,7 +112,7 @@ function transformEmbeds(markdown: string) {
         const id = vidMatch ? vidMatch[1] : "";
         if (!id) return full;
         return `\n<div class=\"ratio ratio-16x9 my-3\"><iframe src=\"https://www.youtube.com/embed/${id}\" title=\"YouTube video\" allowfullscreen loading=\"lazy\"></iframe></div>\n`;
-      }
+      },
     )
     .replace(/<!--\s*TWITCH:\s*([a-zA-Z0-9_]{3,25})\s*-->/g, (_m, channel) => {
       const c = channel.trim();
@@ -148,7 +148,7 @@ async function notifyMentions(
   text: string,
   postId: string,
   commentId?: string,
-  postSlug?: string
+  postSlug?: string,
 ) {
   // Notifications functionality removed - this is a no-op now
   return;
@@ -306,7 +306,7 @@ export default function PostView() {
           if (process.env.NODE_ENV !== "production")
             console.debug(
               "[PostView] content preview:",
-              (base.content || "").slice(0, 400)
+              (base.content || "").slice(0, 400),
             );
         } catch (_e) {}
         // Build image gallery from fetched post (banner + markdown/html images)
@@ -361,7 +361,7 @@ export default function PostView() {
                   userReaction = await getUserCommentReaction(r.id, user.uid);
                 }
                 return { ...r, userReaction, replies: childrenMap[r.id] || [] };
-              })
+              }),
             );
             setComments(enriched);
           });
@@ -510,7 +510,7 @@ export default function PostView() {
         where("username", ">=", start),
         where("username", "<=", end),
         orderBy("username"),
-        limit(8)
+        limit(8),
       );
       const snap = await getDocs(qref as any);
       const out: { username: string; uid: string }[] = [];
@@ -553,7 +553,7 @@ export default function PostView() {
         // mark owner as main textarea so only it shows suggestions
         suggestionTimerRef.current = window.setTimeout(
           () => fetchSuggestions(partial.toLowerCase(), "main"),
-          200
+          200,
         ) as unknown as number;
         return;
       }
@@ -637,7 +637,7 @@ export default function PostView() {
   }
   const memoizedMarkdown = useMemo(
     () => renderContent(post?.content || ""),
-    [post?.content]
+    [post?.content],
   );
 
   if (loading)
@@ -758,7 +758,7 @@ export default function PostView() {
                                   .toString()
                                   .toLowerCase()
                                   .replace(/[^a-z0-9\- ]/g, "")
-                                  .replace(/\s+/g, "-")
+                                  .replace(/\s+/g, "-"),
                             );
                             setCopied(true);
                             setTimeout(() => setCopied(false), 1200);
@@ -1146,11 +1146,11 @@ function CommentItem({
     await reactToCommentForUser(node.id, user.uid, type);
     // optimistic update
     setLikeCount(
-      (c) => c + (type === "like" ? 1 : 0) - (userReaction === "like" ? 1 : 0)
+      (c) => c + (type === "like" ? 1 : 0) - (userReaction === "like" ? 1 : 0),
     );
     setDislikeCount(
       (c) =>
-        c + (type === "dislike" ? 1 : 0) - (userReaction === "dislike" ? 1 : 0)
+        c + (type === "dislike" ? 1 : 0) - (userReaction === "dislike" ? 1 : 0),
     );
     setUserReaction(type);
   }
@@ -1249,7 +1249,7 @@ function CommentItem({
           )}
         </div>
         <Collapse in={replyOpen}>
-          <div>
+          <div style={{ overflow: "visible" }}>
             <Form
               className="mt-2"
               onSubmit={(e) => {
@@ -1277,7 +1277,7 @@ function CommentItem({
                       setSuggestionOwner(node.id);
                       setTimeout(
                         () => fetchSuggestions(partial.toLowerCase(), node.id),
-                        200
+                        200,
                       );
                     }
                   }
@@ -1296,7 +1296,7 @@ function CommentItem({
                     if (e.key === "ArrowDown") {
                       e.preventDefault();
                       setActiveSuggestion((i: number) =>
-                        Math.min(suggestions.length - 1, i + 1)
+                        Math.min(suggestions.length - 1, i + 1),
                       );
                     } else if (e.key === "ArrowUp") {
                       e.preventDefault();
@@ -1350,7 +1350,7 @@ function CommentItem({
                           >
                             @{s.username}
                           </div>
-                        )
+                        ),
                       )}
                     </div>
                   </div>
