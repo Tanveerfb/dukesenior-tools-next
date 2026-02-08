@@ -221,18 +221,20 @@ export default function ProfilePage() {
 
     setPending("profile");
     try {
+      // Filter out empty social links
+      const socialLinks: Record<string, string> = {};
+      if (discordRef.current?.value) socialLinks.discord = discordRef.current.value;
+      if (twitchRef.current?.value) socialLinks.twitch = twitchRef.current.value;
+      if (twitterRef.current?.value) socialLinks.twitter = twitterRef.current.value;
+      if (youtubeRef.current?.value) socialLinks.youtube = youtubeRef.current.value;
+
       const updates: Partial<UserDoc> = {
         bio: bioRef.current?.value || "",
         pronouns: pronounsRef.current?.value || "",
         location: locationRef.current?.value || "",
         timezone: timezoneRef.current?.value || "",
         accentColor: accentColorRef.current?.value || "#5865F2",
-        socialLinks: {
-          discord: discordRef.current?.value || "",
-          twitch: twitchRef.current?.value || "",
-          twitter: twitterRef.current?.value || "",
-          youtube: youtubeRef.current?.value || "",
-        },
+        socialLinks: Object.keys(socialLinks).length > 0 ? socialLinks : {},
       };
 
       await updateUserProfile(user.uid, updates);

@@ -126,18 +126,22 @@ export default function ProfileHeader({
                       variant="outline-primary"
                       size="sm"
                       onClick={() => router.push("/profile")}
-                      style={{ borderColor: accentColor, color: accentColor }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = accentColor;
-                        e.currentTarget.style.color = "white";
+                      style={{ 
+                        borderColor: accentColor, 
+                        color: accentColor,
+                        transition: "all 0.2s",
                       }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = "transparent";
-                        e.currentTarget.style.color = accentColor;
-                      }}
+                      className="profile-edit-btn"
                     >
                       Edit Profile
                     </Button>
+                    <style jsx>{`
+                      .profile-edit-btn:hover {
+                        background: ${accentColor} !important;
+                        color: white !important;
+                        border-color: ${accentColor} !important;
+                      }
+                    `}</style>
                   </>
                 ) : (
                   <>
