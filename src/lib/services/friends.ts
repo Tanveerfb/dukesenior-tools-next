@@ -17,7 +17,6 @@ import {
   orderBy,
   runTransaction,
   Timestamp,
-  WriteBatch,
   writeBatch
 } from 'firebase/firestore';
 import type { FriendRequest, Friend, BlockedUser } from '@/types/friends';
@@ -73,21 +72,29 @@ export async function sendFriendRequest(
   }
 
   // Check for existing pending request (in either direction)
-  const existingRequests = await getDocs(
-    query(
-      collection(db, FRIEND_REQUESTS_COL),
-      where('status', '==', 'pending')
-    )
+  // Query for requests from this user to target
+  const outgoingQuery = query(
+    collection(db, FRIEND_REQUESTS_COL),
+    where('from', '==', fromUID),
+    where('to', '==', toUID),
+    where('status', '==', 'pending')
+  );
+  
+  // Query for requests from target to this user
+  const incomingQuery = query(
+    collection(db, FRIEND_REQUESTS_COL),
+    where('from', '==', toUID),
+    where('to', '==', fromUID),
+    where('status', '==', 'pending')
   );
 
-  for (const doc of existingRequests.docs) {
-    const data = doc.data();
-    if (
-      (data.from === fromUID && data.to === toUID) ||
-      (data.from === toUID && data.to === fromUID)
-    ) {
-      throw new Error("A friend request already exists between you and this user");
-    }
+  const [outgoingSnap, incomingSnap] = await Promise.all([
+    getDocs(outgoingQuery),
+    getDocs(incomingQuery)
+  ]);
+
+  if (!outgoingSnap.empty || !incomingSnap.empty) {
+    throw new Error("A friend request already exists between you and this user");
   }
 
   // Create the friend request
@@ -331,24 +338,30 @@ export async function blockUser(
   await batch.commit();
 
   // Handle pending friend requests separately (need to query first)
-  // Cancel any pending requests between the users
-  const requests = await getDocs(
-    query(
-      collection(db, FRIEND_REQUESTS_COL),
-      where('status', '==', 'pending')
-    )
+  // Query for requests between these two users
+  const outgoingRequestsQuery = query(
+    collection(db, FRIEND_REQUESTS_COL),
+    where('from', '==', uid),
+    where('to', '==', blockedUID),
+    where('status', '==', 'pending')
+  );
+  
+  const incomingRequestsQuery = query(
+    collection(db, FRIEND_REQUESTS_COL),
+    where('from', '==', blockedUID),
+    where('to', '==', uid),
+    where('status', '==', 'pending')
   );
 
-  const requestsToDelete: string[] = [];
-  requests.docs.forEach(doc => {
-    const data = doc.data();
-    if (
-      (data.from === uid && data.to === blockedUID) ||
-      (data.from === blockedUID && data.to === uid)
-    ) {
-      requestsToDelete.push(doc.id);
-    }
-  });
+  const [outgoingSnap, incomingSnap] = await Promise.all([
+    getDocs(outgoingRequestsQuery),
+    getDocs(incomingRequestsQuery)
+  ]);
+
+  const requestsToDelete = [
+    ...outgoingSnap.docs.map(d => d.id),
+    ...incomingSnap.docs.map(d => d.id)
+  ];
 
   // Delete the requests
   await Promise.all(
