@@ -96,13 +96,13 @@ export default function ProfileHeader({
     async function checkRelationship() {
       setLoading(true);
       try {
-        const result = await getRelationshipStatus(user.uid, uid);
+        const result = await getRelationshipStatus(user.uid, uid!);
         setFriendStatus(result.status);
         setRequestId(result.requestId);
 
         // Get mutual friends count if they are friends
         if (result.status === 'friends') {
-          const mutuals = await getMutualFriends(user.uid, uid);
+          const mutuals = await getMutualFriends(user.uid, uid!);
           setMutualFriendsCount(mutuals.length);
         }
       } catch (error) {
@@ -338,7 +338,7 @@ export default function ProfileHeader({
                         <Button
                           variant="primary"
                           size="sm"
-                          onClick={() => router.push(`/messages/${username}`)}
+                          onClick={() => router.push(`/messages?username=${username}`)}
                           style={{ background: accentColor, borderColor: accentColor }}
                         >
                           Message

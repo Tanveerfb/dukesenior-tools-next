@@ -99,7 +99,7 @@ export default function MessageBubble({
     <div
       className={`d-flex mb-3 ${isOwn ? 'justify-content-end' : 'justify-content-start'}`}
     >
-      {!isOwn && showAvatar && (
+      {!isOwn && showAvatar && sender && (
         <div className="me-2" style={{ width: 32, height: 32, flexShrink: 0 }}>
           <UserAvatar user={sender} size="small" />
         </div>
@@ -155,7 +155,7 @@ export default function MessageBubble({
         )}
       </div>
 
-      {isOwn && showAvatar && (
+      {isOwn && showAvatar && sender && (
         <div className="ms-2" style={{ width: 32, height: 32, flexShrink: 0 }}>
           <UserAvatar user={sender} size="small" />
         </div>

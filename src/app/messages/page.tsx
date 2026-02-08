@@ -44,7 +44,7 @@ export default function MessagesPage() {
 
     async function openThreadWithUser() {
       try {
-        const targetUser = await getUserByUsername(usernameParam);
+        const targetUser = await getUserByUsername(usernameParam!);
         if (!targetUser) {
           alert(`User @${usernameParam} not found`);
           router.push('/messages');
