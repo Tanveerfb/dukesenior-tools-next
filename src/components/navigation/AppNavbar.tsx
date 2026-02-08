@@ -383,6 +383,30 @@ export default function AppNavbar() {
             <ListItemText primary="Community Updates" />
           </ListItemButton>
         </ListItem>
+
+        {/* Friends - Only show when logged in */}
+        {user && (
+          <ListItem disablePadding>
+            <ListItemButton component={Link} href="/friends">
+              <ListItemIcon>
+                <AccountCircleIcon />
+              </ListItemIcon>
+              <ListItemText primary="Friends" />
+            </ListItemButton>
+          </ListItem>
+        )}
+
+        {/* Messages - Only show when logged in */}
+        {user && (
+          <ListItem disablePadding>
+            <ListItemButton component={Link} href="/messages">
+              <ListItemIcon>
+                <NewspaperIcon />
+              </ListItemIcon>
+              <ListItemText primary="Messages" />
+            </ListItemButton>
+          </ListItem>
+        )}
       </List>
 
       <Divider />
