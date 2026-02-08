@@ -44,6 +44,13 @@ export default function HouseDutiesPage() {
   // Confirmation modal
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [checklistToDelete, setChecklistToDelete] = useState<Checklist | null>(null);
+  
+  // Duplicate modal
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
+  const [duplicateSource, setDuplicateSource] = useState<Checklist | null>(null);
+  const [duplicateAsTemplate, setDuplicateAsTemplate] = useState(false);
+  const [duplicateName, setDuplicateName] = useState("");
+  const [duplicateError, setDuplicateError] = useState("");
 
   useEffect(() => {
     if (user?.uid) {
@@ -99,30 +106,41 @@ export default function HouseDutiesPage() {
       loadData();
     } catch (error) {
       console.error("Error deleting checklist:", error);
-      alert("Failed to delete checklist");
     }
   };
 
-  const handleDuplicate = async (checklist: Checklist, asTemplate: boolean) => {
-    if (!user?.uid || !user?.displayName) return;
+  const handleDuplicateClick = (checklist: Checklist, asTemplate: boolean) => {
+    setDuplicateSource(checklist);
+    setDuplicateAsTemplate(asTemplate);
+    setDuplicateName(`${checklist.name} (Copy)`);
+    setDuplicateError("");
+    setShowDuplicateModal(true);
+  };
+
+  const handleDuplicateConfirm = async () => {
+    if (!duplicateSource || !user?.uid || !user?.displayName) return;
+    
+    if (!duplicateName.trim()) {
+      setDuplicateError("Please enter a name");
+      return;
+    }
+    
     try {
-      const newName = prompt(
-        `Enter name for ${asTemplate ? "template" : "checklist"}:`,
-        `${checklist.name} (Copy)`
-      );
-      if (!newName) return;
-      
       await duplicateChecklist(
-        checklist.id,
+        duplicateSource.id,
         user.uid,
         user.displayName,
-        newName,
-        asTemplate
+        duplicateName.trim(),
+        duplicateAsTemplate
       );
+      setShowDuplicateModal(false);
+      setDuplicateSource(null);
+      setDuplicateName("");
+      setDuplicateError("");
       loadData();
     } catch (error) {
       console.error("Error duplicating checklist:", error);
-      alert("Failed to duplicate checklist");
+      setDuplicateError("Failed to duplicate checklist. Please try again.");
     }
   };
 
@@ -304,7 +322,7 @@ export default function HouseDutiesPage() {
                       size="sm"
                       variant="outline-info"
                       onClick={() =>
-                        handleDuplicate(checklist, !checklist.isTemplate)
+                        handleDuplicateClick(checklist, !checklist.isTemplate)
                       }
                     >
                       <FaCopy className="me-1" />
@@ -367,6 +385,41 @@ export default function HouseDutiesPage() {
           </Button>
           <Button variant="danger" onClick={handleDeleteConfirm}>
             Delete
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Duplicate Modal */}
+      <Modal show={showDuplicateModal} onHide={() => setShowDuplicateModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>
+            Duplicate as {duplicateAsTemplate ? "Template" : "Checklist"}
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {duplicateError && <Alert variant="danger">{duplicateError}</Alert>}
+          <Form.Group>
+            <Form.Label>
+              Name for {duplicateAsTemplate ? "template" : "checklist"}
+            </Form.Label>
+            <Form.Control
+              type="text"
+              value={duplicateName}
+              onChange={(e) => setDuplicateName(e.target.value)}
+              placeholder="Enter name..."
+              autoFocus
+            />
+          </Form.Group>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={() => setShowDuplicateModal(false)}
+          >
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={handleDuplicateConfirm}>
+            Duplicate
           </Button>
         </Modal.Footer>
       </Modal>

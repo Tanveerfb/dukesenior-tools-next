@@ -1,8 +1,8 @@
 "use client";
 
-import { Modal, Button, Badge } from "react-bootstrap";
+import { Modal, Button, Badge, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { Checklist, DAYS_OF_WEEK } from "@/types/houseDuties";
-import { FaPrint, FaDownload } from "react-icons/fa";
+import { FaPrint, FaDownload, FaInfoCircle } from "react-icons/fa";
 import { useRef } from "react";
 
 interface Props {
@@ -18,12 +18,8 @@ export default function ViewChecklistModal({ show, onHide, checklist }: Props) {
     window.print();
   };
 
-  const handleExportPDF = async () => {
-    // For PDF export, we'll use the browser's print-to-PDF feature
-    // This is the most reliable cross-browser solution
-    alert(
-      "To export as PDF:\n1. Click 'Print Preview' button\n2. Select 'Save as PDF' as the printer\n3. Click 'Save'"
-    );
+  const handleExportPDF = () => {
+    // For PDF export, we use the browser's print-to-PDF feature
     window.print();
   };
 
@@ -129,10 +125,20 @@ export default function ViewChecklistModal({ show, onHide, checklist }: Props) {
             <FaPrint className="me-2" />
             Print Preview
           </Button>
-          <Button variant="success" onClick={handleExportPDF}>
-            <FaDownload className="me-2" />
-            Export PDF
-          </Button>
+          <OverlayTrigger
+            placement="top"
+            overlay={
+              <Tooltip>
+                Opens print dialog. Select "Save as PDF" as the printer to export.
+              </Tooltip>
+            }
+          >
+            <Button variant="success" onClick={handleExportPDF}>
+              <FaDownload className="me-2" />
+              Export PDF
+              <FaInfoCircle className="ms-1" size={12} />
+            </Button>
+          </OverlayTrigger>
         </Modal.Footer>
       </Modal>
 
