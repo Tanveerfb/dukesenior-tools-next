@@ -156,7 +156,8 @@ export default function NotificationsPage() {
         </Box>
         {unreadCount > 0 && (
           <Typography variant="body2" color="text.secondary">
-            You have {unreadCount} unread notification{unreadCount !== 1 ? "s" : ""}
+            You have {unreadCount} unread notification
+            {unreadCount !== 1 ? "s" : ""}
           </Typography>
         )}
       </Box>
@@ -193,9 +194,7 @@ export default function NotificationsPage() {
                     py: 2,
                     px: 2,
                     cursor: notification.link ? "pointer" : "default",
-                    bgcolor: notification.read
-                      ? "transparent"
-                      : "action.hover",
+                    bgcolor: notification.read ? "transparent" : "action.hover",
                     "&:hover": {
                       bgcolor: notification.read
                         ? "action.hover"
@@ -262,12 +261,17 @@ export default function NotificationsPage() {
                     }
                     secondary={
                       <Box>
-                        <Typography variant="body2" color="text.secondary">
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          component="span"
+                        >
                           {notification.body}
                         </Typography>
                         <Typography
                           variant="caption"
                           color="text.secondary"
+                          component="span"
                           sx={{ mt: 0.5, display: "block" }}
                         >
                           {formatTimestamp(notification.createdAt)}
