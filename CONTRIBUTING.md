@@ -74,11 +74,11 @@ git commit -m "feat: add your feature description"
 
 ### Before Submitting
 
-✅ Run `npm run lint` - All linting checks pass
-✅ Run `npm run build` - Build completes successfully
-✅ Test your changes locally
-✅ Update documentation if needed
-✅ Write clear commit messages
+- Run `npm run lint` — all linting checks pass
+- Run `npm run build` — build completes successfully
+- Test your changes locally in both light and dark themes
+- Update documentation if needed
+- Write clear commit messages
 
 ### Submitting a Pull Request
 
@@ -87,62 +87,26 @@ git commit -m "feat: add your feature description"
    git push origin feature/your-feature-name
    ```
 
-2. **Open a Pull Request**
-   - Go to the repository on GitHub
-   - Click "Pull requests" → "New pull request"
-   - Select your branch
-   - Fill in the PR template with:
-     - Description of changes
-     - Why the changes are needed
-     - Any breaking changes
-     - Screenshots (for UI changes)
+2. **Open a Pull Request** on GitHub with:
+   - Description of changes
+   - Why the changes are needed
+   - Any breaking changes
+   - Screenshots (for UI changes — include both light & dark theme)
 
-3. **Wait for CI Checks** 🚦
-   - GitHub Actions will automatically run build checks
-   - Vercel will create a preview deployment
-   - **All checks must pass** (green ✓) before merging
-   - If checks fail, review the logs and fix issues
+3. **Wait for CI Checks** — GitHub Actions builds and Vercel deploys a preview. All checks must pass.
 
-4. **Address Review Feedback**
-   - Respond to reviewer comments
-   - Make requested changes
-   - Push updates - CI will re-run automatically
+4. **Address Review Feedback** — make changes and push; CI re-runs automatically.
 
-5. **Merge**
-   - Once approved and all checks pass, your PR will be merged!
+5. **Merge** — once approved and green, your PR will be merged.
 
 ## CI/CD Quality Gates
 
 All pull requests must pass these checks before merging:
 
-### Required Checks
+1. **Build Next.js Application** (GitHub Actions) — install, lint, build
+2. **Vercel Preview Deployment** — creates a preview URL for testing
 
-1. **Build Next.js Application** (GitHub Actions)
-   - Installs dependencies
-   - Runs linter
-   - Builds the application
-   - Must complete successfully
-
-2. **Vercel Preview Deployment** (if configured)
-   - Creates a preview deployment
-   - Must deploy successfully
-   - Provides a preview URL for testing
-
-### What If Checks Fail?
-
-**Build fails?**
-- Click "Details" to view the error log
-- Fix the errors in your branch
-- Push the fix - checks re-run automatically
-
-**Linting errors?**
-- Run `npm run lint` locally to see errors
-- Fix all issues
-- Commit and push
-
-**Need help?**
-- Ask in the PR comments
-- Review the [CI/CD documentation](docs/CI_QUALITY_ASSURANCE.md)
+See [CI/CD documentation](docs/CI_QUALITY_ASSURANCE.md) if checks fail.
 
 ## Code Style Guidelines
 
@@ -153,34 +117,50 @@ All pull requests must pass these checks before merging:
 - **Comments**: Add comments for complex logic, not obvious code
 - **TypeScript**: Use proper types, avoid `any` when possible
 
-### React/Next.js Specific
+### React / Next.js
 
 - Use functional components with hooks
-- Prefer server components over client components (use `'use client'` only when needed)
+- Prefer server components; use `'use client'` only when needed
 - Follow Next.js 16 App Router conventions
 - Keep components focused and single-purpose
 
 ### Styling
 
-- Use Bootstrap utilities from React-Bootstrap
-- Follow existing SCSS variable patterns in `src/styles/global.scss`
-- Use CSS custom properties for theme-aware styling
-- Ensure dark mode compatibility
+This project uses **Tailwind CSS 3.4** as the sole styling framework. **No MUI, no Bootstrap** — those are fully removed.
+
+- **Tailwind utilities** for all layout and styling
+- **Semantic tokens** (`text-foreground`, `bg-background`, `bg-card`, `border-border`) auto-switch between light/dark themes — no `dark:` prefix needed
+- **`cn()`** from `@/lib/utils` (clsx + tailwind-merge) for conditional class composition
+- **CSS custom properties** defined in `src/styles/global.scss` for theme colors
+- **Marker colors**: `text-marker-red`, `text-marker-blue`, `text-marker-green`, `text-marker-orange`, `text-marker-purple`
+- **Board aesthetic**: Use `border-2 border-dashed` and `rounded-md` on cards and sections
+- **Utility classes**: `chalk-underline`, `marker-highlight`, `card-board`, `chalk-dust`, `tilt-sm/md/lg`
+- **Dark mode**: Verify all changes in both themes — the whiteboard (light) and chalkboard (dark)
+- **Font scaling**: Respect `var(--font-scale,1)` for user-controlled sizing (0.8x–1.6x)
 
 ### File Organization
 
 ```
 src/
 ├── app/              # Next.js App Router pages
-├── components/       # Reusable React components
-├── lib/              # Utilities, services, helpers
-├── styles/           # Global styles and SCSS
-└── types/            # TypeScript type definitions
+├── components/
+│   ├── ui/           # Card, EmptyState, ErrorBoundary, Footer, Toast
+│   ├── layout/       # PageLayout
+│   ├── navigation/   # AppNavbar, SearchModal
+│   └── ...           # Feature-specific components
+├── hooks/            # useAuth, useNotifications, etc.
+├── lib/
+│   ├── services/     # Firestore CRUD modules
+│   ├── navigation/   # Route classification helpers
+│   ├── content/      # Tag manifest (tags.ts)
+│   └── utils/        # Shared utilities
+├── styles/           # global.scss (all CSS custom properties)
+└── types/            # TypeScript interfaces
 ```
 
 ## Testing
 
-Currently, the project uses Vitest for testing:
+The project uses Vitest:
 
 ```bash
 npm test
@@ -233,6 +213,4 @@ Contributors are valued! Your contributions will be recognized through:
 
 ---
 
-Thank you for contributing to DukeSenior Tools! Your efforts help make this project better for everyone. 🎉
-
-**Remember**: The green Vercel tick ✅ is your friend - it means your changes are production-ready!
+Thank you for contributing to DukeSenior Tools! Your efforts help make this project better for everyone.
