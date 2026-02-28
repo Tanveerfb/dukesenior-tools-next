@@ -2,36 +2,15 @@
 
 import { useEffect, useState, useMemo } from "react";
 import {
-  Box,
-  Container,
-  Typography,
-  Button,
-  TextField,
-  CircularProgress,
-  Chip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Alert,
-  Card,
-  CardContent,
-  CardActions,
-  Grid,
-  MenuItem,
-  Select,
-  FormControl,
-  InputLabel,
-  Stack,
-} from "@mui/material";
-import {
-  Add as AddIcon,
-  Delete as DeleteIcon,
-  Visibility as VisibilityIcon,
-  Edit as EditIcon,
-  FileCopy as FileCopyIcon,
-  Description as DescriptionIcon,
-} from "@mui/icons-material";
+  FiPlus,
+  FiTrash2,
+  FiEye,
+  FiEdit,
+  FiCopy,
+  FiFileText,
+  FiLoader,
+} from "react-icons/fi";
+import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import {
   listChecklistsForUser,
@@ -52,20 +31,26 @@ export default function HouseDutiesPage() {
   const [loading, setLoading] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("all");
   const [searchQuery, setSearchQuery] = useState("");
-  
+
   // Modal states
   const [showEditModal, setShowEditModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
-  const [selectedChecklist, setSelectedChecklist] = useState<Checklist | null>(null);
+  const [selectedChecklist, setSelectedChecklist] = useState<Checklist | null>(
+    null,
+  );
   const [createAsTemplate, setCreateAsTemplate] = useState(false);
 
   // Confirmation modal
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [checklistToDelete, setChecklistToDelete] = useState<Checklist | null>(null);
-  
+  const [checklistToDelete, setChecklistToDelete] = useState<Checklist | null>(
+    null,
+  );
+
   // Duplicate modal
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
-  const [duplicateSource, setDuplicateSource] = useState<Checklist | null>(null);
+  const [duplicateSource, setDuplicateSource] = useState<Checklist | null>(
+    null,
+  );
   const [duplicateAsTemplate, setDuplicateAsTemplate] = useState(false);
   const [duplicateName, setDuplicateName] = useState("");
   const [duplicateError, setDuplicateError] = useState("");
@@ -74,7 +59,7 @@ export default function HouseDutiesPage() {
     if (user?.uid) {
       loadData();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.uid]);
 
   const loadData = async () => {
@@ -137,19 +122,19 @@ export default function HouseDutiesPage() {
 
   const handleDuplicateConfirm = async () => {
     if (!duplicateSource || !user?.uid || !user?.displayName) return;
-    
+
     if (!duplicateName.trim()) {
       setDuplicateError("Please enter a name");
       return;
     }
-    
+
     try {
       await duplicateChecklist(
         duplicateSource.id,
         user.uid,
         user.displayName,
         duplicateName.trim(),
-        duplicateAsTemplate
+        duplicateAsTemplate,
       );
       setShowDuplicateModal(false);
       setDuplicateSource(null);
@@ -177,7 +162,7 @@ export default function HouseDutiesPage() {
   // Filter checklists based on view mode and search
   const displayedChecklists = useMemo(() => {
     let items: Checklist[] = [];
-    
+
     if (viewMode === "all") {
       items = [...checklists, ...templates];
     } else if (viewMode === "active") {
@@ -192,7 +177,7 @@ export default function HouseDutiesPage() {
       items = items.filter(
         (item) =>
           item.name.toLowerCase().includes(query) ||
-          (item.description || "").toLowerCase().includes(query)
+          (item.description || "").toLowerCase().includes(query),
       );
     }
 
@@ -201,159 +186,201 @@ export default function HouseDutiesPage() {
 
   if (!user) {
     return (
-      <Container maxWidth="lg" sx={{ py: 5 }}>
-        <Alert severity="warning">
+      <div className="max-w-5xl mx-auto px-4 py-10">
+        <div className="rounded-lg border border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20 dark:border-yellow-600 p-4 text-yellow-800 dark:text-yellow-200">
           Please log in to use the House Duties Checklist tool.
-        </Alert>
-      </Container>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <div className="max-w-5xl mx-auto px-4 py-8">
       {/* Header */}
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-foreground mb-2">
           House Duties Checklist
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Create and manage 7-day checklists for house duties and responsibilities.
-        </Typography>
-      </Box>
+        </h1>
+        <p className="text-foreground-secondary">
+          Create and manage 7-day checklists for house duties and
+          responsibilities.
+        </p>
+      </div>
 
       {/* Action Buttons */}
-      <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ mb: 4 }}>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
+      <div className="flex flex-col sm:flex-row gap-3 mb-8">
+        <button
+          className={cn(
+            "inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-colors",
+            "bg-primary-500 text-white hover:bg-primary-600",
+          )}
           onClick={() => handleCreateNew(false)}
         >
+          <FiPlus className="w-4 h-4" />
           New Checklist
-        </Button>
-        <Button
-          variant="outlined"
-          startIcon={<DescriptionIcon />}
+        </button>
+        <button
+          className={cn(
+            "inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-colors",
+            "border border-border dark:border-border-dark text-foreground hover:bg-card dark:hover:bg-card-dark",
+          )}
           onClick={() => handleCreateNew(true)}
         >
+          <FiFileText className="w-4 h-4" />
           New Template
-        </Button>
-      </Stack>
+        </button>
+      </div>
 
       {/* Filter and Search */}
-      <Grid container spacing={2} sx={{ mb: 4 }}>
-        <Grid item xs={12} md={6}>
-          <FormControl fullWidth>
-            <InputLabel>View</InputLabel>
-            <Select
-              value={viewMode}
-              label="View"
-              onChange={(e) => setViewMode(e.target.value as ViewMode)}
-            >
-              <MenuItem value="all">All Items</MenuItem>
-              <MenuItem value="active">Active Checklists</MenuItem>
-              <MenuItem value="templates">Templates Only</MenuItem>
-            </Select>
-          </FormControl>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <TextField
-            fullWidth
-            label="Search"
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+        <div>
+          <label
+            htmlFor="view-select"
+            className="block text-sm font-medium text-foreground-secondary mb-1"
+          >
+            View
+          </label>
+          <select
+            id="view-select"
+            value={viewMode}
+            onChange={(e) => setViewMode(e.target.value as ViewMode)}
+            className={cn(
+              "w-full rounded-lg border border-border dark:border-border-dark px-3 py-2 text-sm",
+              "bg-background dark:bg-background-dark text-foreground",
+              "focus:outline-none focus:ring-2 focus:ring-primary-500",
+            )}
+          >
+            <option value="all">All Items</option>
+            <option value="active">Active Checklists</option>
+            <option value="templates">Templates Only</option>
+          </select>
+        </div>
+        <div>
+          <label
+            htmlFor="search-input"
+            className="block text-sm font-medium text-foreground-secondary mb-1"
+          >
+            Search
+          </label>
+          <input
+            id="search-input"
+            type="text"
             placeholder="Search by name or description..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            className={cn(
+              "w-full rounded-lg border border-border dark:border-border-dark px-3 py-2 text-sm",
+              "bg-background dark:bg-background-dark text-foreground",
+              "focus:outline-none focus:ring-2 focus:ring-primary-500",
+              "placeholder:text-foreground-secondary",
+            )}
           />
-        </Grid>
-      </Grid>
+        </div>
+      </div>
 
       {/* Loading State */}
       {loading && (
-        <Box sx={{ display: "flex", justifyContent: "center", py: 5 }}>
-          <CircularProgress />
-        </Box>
+        <div className="flex justify-center py-10">
+          <FiLoader className="w-8 h-8 animate-spin text-primary-500" />
+        </div>
       )}
 
       {/* Checklists List */}
       {!loading && displayedChecklists.length === 0 && (
-        <Alert severity="info">
+        <div className="rounded-lg border border-blue-400 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-600 p-4 text-blue-800 dark:text-blue-200">
           {searchQuery
             ? "No checklists match your search."
             : "No checklists yet. Create your first one!"}
-        </Alert>
+        </div>
       )}
 
       {!loading && displayedChecklists.length > 0 && (
-        <Grid container spacing={3}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {displayedChecklists.map((checklist) => (
-            <Grid item xs={12} md={6} lg={4} key={checklist.id}>
-              <Card sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
-                <CardContent sx={{ flexGrow: 1 }}>
-                  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "start", mb: 1 }}>
-                    <Typography variant="h6" component="h2">
-                      {checklist.name}
-                    </Typography>
-                    {checklist.isTemplate && (
-                      <Chip label="Template" color="info" size="small" />
-                    )}
-                  </Box>
-                  
-                  {checklist.description && (
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                      {checklist.description.length > 100
-                        ? checklist.description.substring(0, 100) + "..."
-                        : checklist.description}
-                    </Typography>
+            <div
+              key={checklist.id}
+              className={cn(
+                "flex flex-col rounded-xl border border-border dark:border-border-dark",
+                "bg-card dark:bg-card-dark shadow-sm",
+              )}
+            >
+              <div className="flex-1 p-4">
+                <div className="flex justify-between items-start mb-2">
+                  <h2 className="text-lg font-semibold text-foreground">
+                    {checklist.name}
+                  </h2>
+                  {checklist.isTemplate && (
+                    <span className="rounded-full px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">
+                      Template
+                    </span>
                   )}
+                </div>
 
-                  <Typography variant="caption" color="text.secondary">
-                    {checklist.duties.length} duties • {checklist.people.length} people
-                  </Typography>
+                {checklist.description && (
+                  <p className="text-sm text-foreground-secondary mb-3">
+                    {checklist.description.length > 100
+                      ? checklist.description.substring(0, 100) + "..."
+                      : checklist.description}
+                  </p>
+                )}
 
-                  <Typography variant="caption" display="block" color="text.secondary" sx={{ mt: 2 }}>
-                    Updated: {new Date(checklist.updatedAt).toLocaleDateString()}
-                  </Typography>
-                </CardContent>
+                <span className="text-xs text-foreground-secondary">
+                  {checklist.duties.length} duties • {checklist.people.length}{" "}
+                  people
+                </span>
 
-                <CardActions sx={{ flexWrap: "wrap", gap: 1, p: 2, pt: 0 }}>
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    startIcon={<VisibilityIcon />}
-                    onClick={() => handleView(checklist)}
-                  >
-                    View
-                  </Button>
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    startIcon={<EditIcon />}
-                    onClick={() => handleEdit(checklist)}
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    color="info"
-                    startIcon={<FileCopyIcon />}
-                    onClick={() => handleDuplicateClick(checklist, !checklist.isTemplate)}
-                  >
-                    Copy
-                  </Button>
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    color="error"
-                    startIcon={<DeleteIcon />}
-                    onClick={() => handleDeleteClick(checklist)}
-                  >
-                    Delete
-                  </Button>
-                </CardActions>
-              </Card>
-            </Grid>
+                <span className="block text-xs text-foreground-secondary mt-3">
+                  Updated: {new Date(checklist.updatedAt).toLocaleDateString()}
+                </span>
+              </div>
+
+              <div className="flex flex-wrap gap-2 px-4 pb-4">
+                <button
+                  className={cn(
+                    "inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors",
+                    "border border-border dark:border-border-dark text-foreground hover:bg-background dark:hover:bg-background-dark",
+                  )}
+                  onClick={() => handleView(checklist)}
+                >
+                  <FiEye className="w-3.5 h-3.5" />
+                  View
+                </button>
+                <button
+                  className={cn(
+                    "inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors",
+                    "border border-border dark:border-border-dark text-foreground hover:bg-background dark:hover:bg-background-dark",
+                  )}
+                  onClick={() => handleEdit(checklist)}
+                >
+                  <FiEdit className="w-3.5 h-3.5" />
+                  Edit
+                </button>
+                <button
+                  className={cn(
+                    "inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors",
+                    "border border-blue-300 dark:border-blue-700 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20",
+                  )}
+                  onClick={() =>
+                    handleDuplicateClick(checklist, !checklist.isTemplate)
+                  }
+                >
+                  <FiCopy className="w-3.5 h-3.5" />
+                  Copy
+                </button>
+                <button
+                  className={cn(
+                    "inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors",
+                    "border border-red-300 dark:border-red-700 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20",
+                  )}
+                  onClick={() => handleDeleteClick(checklist)}
+                >
+                  <FiTrash2 className="w-3.5 h-3.5" />
+                  Delete
+                </button>
+              </div>
+            </div>
           ))}
-        </Grid>
+        </div>
       )}
 
       {/* Edit/Create Modal */}
@@ -377,52 +404,117 @@ export default function HouseDutiesPage() {
       )}
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={showDeleteConfirm} onClose={() => setShowDeleteConfirm(false)}>
-        <DialogTitle>Confirm Delete</DialogTitle>
-        <DialogContent>
-          Are you sure you want to delete "{checklistToDelete?.name}"? This action
-          cannot be undone.
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setShowDeleteConfirm(false)}>
-            Cancel
-          </Button>
-          <Button onClick={handleDeleteConfirm} color="error" variant="contained">
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {showDeleteConfirm && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+          onClick={() => setShowDeleteConfirm(false)}
+        >
+          <div
+            className={cn(
+              "w-full max-w-md rounded-xl p-6",
+              "bg-card dark:bg-card-dark border border-border dark:border-border-dark shadow-lg",
+            )}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="text-lg font-semibold text-foreground mb-3">
+              Confirm Delete
+            </h2>
+            <p className="text-sm text-foreground-secondary mb-6">
+              Are you sure you want to delete &quot;{checklistToDelete?.name}
+              &quot;? This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                className={cn(
+                  "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+                  "border border-border dark:border-border-dark text-foreground hover:bg-background dark:hover:bg-background-dark",
+                )}
+                onClick={() => setShowDeleteConfirm(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className={cn(
+                  "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+                  "bg-red-600 text-white hover:bg-red-700",
+                )}
+                onClick={handleDeleteConfirm}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Duplicate Dialog */}
-      <Dialog open={showDuplicateModal} onClose={() => setShowDuplicateModal(false)}>
-        <DialogTitle>
-          Duplicate as {duplicateAsTemplate ? "Template" : "Checklist"}
-        </DialogTitle>
-        <DialogContent>
-          {duplicateError && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {duplicateError}
-            </Alert>
-          )}
-          <TextField
-            autoFocus
-            margin="dense"
-            label={`Name for ${duplicateAsTemplate ? "template" : "checklist"}`}
-            fullWidth
-            value={duplicateName}
-            onChange={(e) => setDuplicateName(e.target.value)}
-            placeholder="Enter name..."
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setShowDuplicateModal(false)}>
-            Cancel
-          </Button>
-          <Button onClick={handleDuplicateConfirm} variant="contained">
-            Duplicate
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Container>
+      {showDuplicateModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+          onClick={() => setShowDuplicateModal(false)}
+        >
+          <div
+            className={cn(
+              "w-full max-w-md rounded-xl p-6",
+              "bg-card dark:bg-card-dark border border-border dark:border-border-dark shadow-lg",
+            )}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="text-lg font-semibold text-foreground mb-3">
+              Duplicate as {duplicateAsTemplate ? "Template" : "Checklist"}
+            </h2>
+            <div className="space-y-3">
+              {duplicateError && (
+                <div className="rounded-lg border border-red-400 bg-red-50 dark:bg-red-900/20 dark:border-red-600 p-3 text-sm text-red-800 dark:text-red-200">
+                  {duplicateError}
+                </div>
+              )}
+              <div>
+                <label
+                  htmlFor="duplicate-name"
+                  className="block text-sm font-medium text-foreground-secondary mb-1"
+                >
+                  Name for {duplicateAsTemplate ? "template" : "checklist"}
+                </label>
+                <input
+                  id="duplicate-name"
+                  type="text"
+                  autoFocus
+                  placeholder="Enter name..."
+                  value={duplicateName}
+                  onChange={(e) => setDuplicateName(e.target.value)}
+                  className={cn(
+                    "w-full rounded-lg border border-border dark:border-border-dark px-3 py-2 text-sm",
+                    "bg-background dark:bg-background-dark text-foreground",
+                    "focus:outline-none focus:ring-2 focus:ring-primary-500",
+                    "placeholder:text-foreground-secondary",
+                  )}
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                className={cn(
+                  "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+                  "border border-border dark:border-border-dark text-foreground hover:bg-background dark:hover:bg-background-dark",
+                )}
+                onClick={() => setShowDuplicateModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className={cn(
+                  "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+                  "bg-primary-500 text-white hover:bg-primary-600",
+                )}
+                onClick={handleDuplicateConfirm}
+              >
+                Duplicate
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

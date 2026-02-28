@@ -1,7 +1,7 @@
 "use client";
 
-import { Box, Typography, Chip, Tooltip } from "@mui/material";
-import { StarOutline, Star } from "@mui/icons-material";
+import { cn } from "@/lib/utils";
+import { FiStar } from "react-icons/fi";
 import { getLevelTitle } from "@/types/gamification";
 
 interface LevelBadgeProps {
@@ -21,149 +21,95 @@ export function LevelBadge({
 }: LevelBadgeProps) {
   const title = getLevelTitle(level);
 
-  // Color scheme based on level
   const getColor = () => {
-    if (level >= 90) return { bg: "#FFD700", text: "#000" }; // Legendary - Gold
-    if (level >= 75) return { bg: "#9C27B0", text: "#FFF" }; // Master - Purple
-    if (level >= 60) return { bg: "#2196F3", text: "#FFF" }; // Expert - Blue
-    if (level >= 45) return { bg: "#FF9800", text: "#FFF" }; // Veteran - Orange
-    if (level >= 30) return { bg: "#4CAF50", text: "#FFF" }; // Skilled - Green
-    if (level >= 20) return { bg: "#00BCD4", text: "#FFF" }; // Proficient - Cyan
-    if (level >= 10) return { bg: "#607D8B", text: "#FFF" }; // Intermediate - Grey
-    if (level >= 5) return { bg: "#795548", text: "#FFF" }; // Apprentice - Brown
-    return { bg: "#9E9E9E", text: "#FFF" }; // Novice - Grey
+    if (level >= 90)
+      return { bg: "#FFD700", text: "#000", ring: "ring-yellow-400/30" };
+    if (level >= 75)
+      return { bg: "#9C27B0", text: "#FFF", ring: "ring-purple-400/30" };
+    if (level >= 60)
+      return { bg: "#2196F3", text: "#FFF", ring: "ring-blue-400/30" };
+    if (level >= 45)
+      return { bg: "#FF9800", text: "#FFF", ring: "ring-orange-400/30" };
+    if (level >= 30)
+      return { bg: "#4CAF50", text: "#FFF", ring: "ring-green-400/30" };
+    if (level >= 20)
+      return { bg: "#00BCD4", text: "#FFF", ring: "ring-cyan-400/30" };
+    if (level >= 10)
+      return { bg: "#607D8B", text: "#FFF", ring: "ring-gray-400/30" };
+    if (level >= 5)
+      return { bg: "#795548", text: "#FFF", ring: "ring-amber-700/30" };
+    return { bg: "#9E9E9E", text: "#FFF", ring: "ring-gray-400/30" };
   };
 
   const colors = getColor();
 
-  // Size configuration
   const sizeConfig = {
-    small: { width: 32, height: 32, fontSize: "0.75rem", iconSize: 16 },
-    medium: { width: 48, height: 48, fontSize: "1rem", iconSize: 20 },
-    large: { width: 64, height: 64, fontSize: "1.25rem", iconSize: 28 },
+    small: { dim: "h-8 w-8", text: "text-xs", icon: "h-4 w-4" },
+    medium: { dim: "h-12 w-12", text: "text-base", icon: "h-5 w-5" },
+    large: { dim: "h-16 w-16", text: "text-xl", icon: "h-7 w-7" },
   };
 
   const config = sizeConfig[size];
+  const tooltipText = `Level ${level} - ${title}${totalXP ? ` (${totalXP.toLocaleString()} XP)` : ""}`;
 
   if (variant === "icon-only") {
     return (
-      <Tooltip
-        title={`Level ${level} - ${title}${totalXP ? ` (${totalXP.toLocaleString()} XP)` : ""}`}
-        arrow
+      <div
+        title={tooltipText}
+        className={cn(
+          "flex items-center justify-center rounded-full font-bold shadow-md ring-2 transition-transform hover:scale-110",
+          config.dim,
+          config.text,
+          colors.ring,
+        )}
+        style={{ backgroundColor: colors.bg, color: colors.text }}
       >
-        <Box
-          sx={{
-            width: config.width,
-            height: config.height,
-            borderRadius: "50%",
-            backgroundColor: colors.bg,
-            color: colors.text,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontWeight: "bold",
-            fontSize: config.fontSize,
-            cursor: "pointer",
-            border: "2px solid rgba(255, 255, 255, 0.3)",
-            boxShadow: "0 2px 8px rgba(0, 0, 0, 0.2)",
-            transition: "transform 0.2s",
-            "&:hover": {
-              transform: "scale(1.1)",
-            },
-          }}
-        >
-          {level}
-        </Box>
-      </Tooltip>
+        {level}
+      </div>
     );
   }
 
   if (variant === "compact") {
     return (
-      <Chip
-        icon={
-          <Star
-            sx={{
-              fontSize: config.iconSize,
-              color: `${colors.text} !important`,
-            }}
-          />
-        }
-        label={`Lv. ${level}`}
-        size={size === "large" ? "medium" : size}
-        sx={{
-          backgroundColor: colors.bg,
-          color: colors.text,
-          fontWeight: "bold",
-          "& .MuiChip-icon": {
-            color: colors.text,
-          },
-        }}
-      />
+      <span
+        className={cn(
+          "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 font-bold",
+          size === "small" ? "text-xs" : "text-sm",
+        )}
+        style={{ backgroundColor: colors.bg, color: colors.text }}
+      >
+        <FiStar className={config.icon} />
+        Lv. {level}
+      </span>
     );
   }
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: 0.5,
-      }}
-    >
-      <Tooltip
-        title={totalXP ? `${totalXP.toLocaleString()} Total XP` : ""}
-        arrow
+    <div className="flex flex-col items-center gap-1">
+      <div
+        title={totalXP ? `${totalXP.toLocaleString()} Total XP` : undefined}
+        className={cn(
+          "relative flex items-center justify-center rounded-full font-bold shadow-lg ring-[3px] transition-transform",
+          config.dim,
+          config.text,
+          colors.ring,
+          totalXP && "cursor-pointer hover:scale-105",
+        )}
+        style={{ backgroundColor: colors.bg, color: colors.text }}
       >
-        <Box
-          sx={{
-            width: config.width,
-            height: config.height,
-            borderRadius: "50%",
-            backgroundColor: colors.bg,
-            color: colors.text,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontWeight: "bold",
-            fontSize: config.fontSize,
-            border: "3px solid rgba(255, 255, 255, 0.3)",
-            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-            position: "relative",
-            cursor: totalXP ? "pointer" : "default",
-            transition: "transform 0.2s",
-            "&:hover": {
-              transform: totalXP ? "scale(1.05)" : "none",
-            },
-          }}
-        >
-          {level}
-          {level >= 90 && (
-            <Star
-              sx={{
-                position: "absolute",
-                top: -4,
-                right: -4,
-                fontSize: 16,
-                color: "#FFF",
-              }}
-            />
-          )}
-        </Box>
-      </Tooltip>
+        {level}
+        {level >= 90 && (
+          <FiStar className="absolute -right-1 -top-1 h-4 w-4 text-white" />
+        )}
+      </div>
       {showTitle && (
-        <Typography
-          variant="caption"
-          sx={{
-            fontWeight: "bold",
-            color: colors.bg,
-            textAlign: "center",
-          }}
+        <span
+          className="text-center text-xs font-bold"
+          style={{ color: colors.bg }}
         >
           {title}
-        </Typography>
+        </span>
       )}
-    </Box>
+    </div>
   );
 }

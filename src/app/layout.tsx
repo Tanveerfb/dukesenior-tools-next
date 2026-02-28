@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Permanent_Marker } from "next/font/google";
 import "@/styles/global.scss";
 import Providers from "../components/Providers";
 import AppChrome from "../components/layout/AppChrome";
@@ -16,10 +16,28 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const permanentMarker = Permanent_Marker({
+  weight: "400",
+  variable: "--font-permanent-marker",
+  subsets: ["latin"],
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "The Lair of Evil Tools",
   description:
     "A website developed by DukeSenior for the discord server members of 'The Lair of Evil",
+  icons: {
+    icon: "/logos/faivcon.png",
+    apple: "/logos/faivcon.png",
+  },
+  openGraph: {
+    title: "The Lair of Evil Tools",
+    description:
+      "Tools, event dashboards, and community resources powering the Phasmo Tourney project and the DukeSenior community.",
+    siteName: "The Lair of Evil",
+    images: ["/logos/logo-square-light.svg"],
+  },
 };
 
 export default function RootLayout({
@@ -31,7 +49,7 @@ export default function RootLayout({
     <html lang="en">
       <body
         suppressHydrationWarning
-        className={`${geistSans.variable} ${geistMono.variable}`}
+        className={`${geistSans.variable} ${geistMono.variable} ${permanentMarker.variable}`}
       >
         <Providers>
           <AppChrome>{children}</AppChrome>

@@ -1,9 +1,6 @@
-"use client";
+﻿"use client";
 import React, { useEffect, useState } from "react";
-import Card from "react-bootstrap/Card";
-import Tabs from "react-bootstrap/Tabs";
-import Tab from "react-bootstrap/Tab";
-import Spinner from "react-bootstrap/Spinner";
+import { cn } from "@/lib/utils";
 import type { GameSettings } from "../../types/gameSettings";
 import { defaultGameSettings } from "../../types/gameSettings";
 
@@ -12,9 +9,13 @@ type Props = {
   hideScoring?: boolean;
 };
 
+const tabKeys = ["player", "ghost", "contract"] as const;
+type TabKey = (typeof tabKeys)[number];
+
 export default function GameSettingsCard({ roundId, hideScoring }: Props) {
   const [settings, setSettings] = useState<GameSettings | null>(null);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<TabKey>("player");
 
   useEffect(() => {
     let mounted = true;
@@ -45,14 +46,15 @@ export default function GameSettingsCard({ roundId, hideScoring }: Props) {
   const scoreAssigned = Boolean(s.meta?.scoreSystemAssigned);
 
   return (
-    <Card className="mb-3">
-      <Card.Header>
+    <div className="rounded-xl border border-border bg-card dark:bg-card-dark dark:border-border-dark shadow-sm mb-3">
+      <div className="px-4 py-3 border-b border-border dark:border-border-dark">
         <strong>Round Settings</strong>
-      </Card.Header>
-      <Card.Body>
+      </div>
+      <div className="p-4">
         {loading ? (
-          <div className="d-flex align-items-center gap-2">
-            <Spinner size="sm" /> Loading…
+          <div className="flex items-center gap-2">
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+            Loading
           </div>
         ) : (
           <>
@@ -62,8 +64,8 @@ export default function GameSettingsCard({ roundId, hideScoring }: Props) {
             {scoreAssigned && !hideScoring && (
               <div className="mb-3">
                 <strong>Scoring:</strong>
-                <ul className="mb-2">
-                  <li>Completed Objectives (Max 3): +2 each → +6 max</li>
+                <ul className="mb-2 list-disc pl-5">
+                  <li>Completed Objectives (Max 3): +2 each  +6 max</li>
                   <li>Ghost Picture: +5</li>
                   <li>Bone Picture: +3</li>
                   <li>Player Survival: +3</li>
@@ -73,13 +75,28 @@ export default function GameSettingsCard({ roundId, hideScoring }: Props) {
                 <em>Max total: 25</em>
               </div>
             )}
-            <Tabs
-              defaultActiveKey="player"
-              id="game-settings-tabs"
-              className="mb-3"
-            >
-              <Tab eventKey="player" title="Player">
-                <ul className="mb-3">
+            {/* Tabs */}
+            <div className="mb-3">
+              <div className="flex border-b border-border dark:border-border-dark">
+                {tabKeys.map((key) => (
+                  <button
+                    key={key}
+                    type="button"
+                    className={cn(
+                      "px-4 py-2 text-sm font-medium capitalize transition-colors -mb-px",
+                      activeTab === key
+                        ? "border-b-2 border-primary-500 text-primary-500"
+                        : "text-foreground-secondary hover:text-foreground"
+                    )}
+                    onClick={() => setActiveTab(key)}
+                  >
+                    {key}
+                  </button>
+                ))}
+              </div>
+
+              {activeTab === "player" && (
+                <ul className="mb-3 mt-3 list-disc pl-5 space-y-1">
                   <li>Starting sanity: {s.player.startingSanity}</li>
                   <li>
                     Sanity Pill restoration (%):{" "}
@@ -96,9 +113,10 @@ export default function GameSettingsCard({ roundId, hideScoring }: Props) {
                     {s.player.loseItemsAndConsumables}
                   </li>
                 </ul>
-              </Tab>
-              <Tab eventKey="ghost" title="Ghost">
-                <ul className="mb-3">
+              )}
+
+              {activeTab === "ghost" && (
+                <ul className="mb-3 mt-3 list-disc pl-5 space-y-1">
                   <li>Ghost speed (%): {s.ghost.ghostSpeedPercent}</li>
                   <li>Roaming frequency: {s.ghost.roamingFrequency}</li>
                   <li>
@@ -118,9 +136,10 @@ export default function GameSettingsCard({ roundId, hideScoring }: Props) {
                     {s.ghost.fingerprintDurationSeconds}
                   </li>
                 </ul>
-              </Tab>
-              <Tab eventKey="contract" title="Contract">
-                <ul className="mb-3">
+              )}
+
+              {activeTab === "contract" && (
+                <ul className="mb-3 mt-3 list-disc pl-5 space-y-1">
                   {s.contract.mapName && <li>Map: {s.contract.mapName}</li>}
                   <li>Setup time (s): {s.contract.setupTimeSeconds}</li>
                   <li>Weather: {s.contract.weather}</li>
@@ -139,11 +158,11 @@ export default function GameSettingsCard({ roundId, hideScoring }: Props) {
                   </li>
                   <li>Cursed Possessions: {s.contract.cursedPossession}</li>
                 </ul>
-              </Tab>
-            </Tabs>
+              )}
+            </div>
           </>
         )}
-      </Card.Body>
-    </Card>
+      </div>
+    </div>
   );
 }

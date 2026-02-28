@@ -1,146 +1,70 @@
 "use client";
-import { Box, Container, Stack, Typography, Button } from "@mui/material";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { useTheme } from "@mui/material/styles";
-
-const MotionBox = motion.create(Box);
-const MotionTypography = motion.create(Typography);
-const MotionButton = motion.create(Button);
 
 export default function HeroSection() {
-  const theme = useTheme();
-
   return (
-    <Box
-      sx={{
-        position: "relative",
-        overflow: "hidden",
-        borderBottom: `1px solid ${theme.palette.divider}`,
-        background: `linear-gradient(135deg, ${theme.palette.background.default} 0%, ${
-          theme.palette.mode === "dark"
-            ? "rgba(171, 47, 177, 0.15)"
-            : "rgba(171, 47, 177, 0.08)"
-        } 50%, ${theme.palette.background.default} 100%)`,
-      }}
-    >
+    <section className="relative overflow-hidden border-b-2 border-dashed border-border dark:border-border-dark">
       {/* Animated background shape */}
-      <MotionBox
+      <motion.div
         initial={{ scale: 0.8, opacity: 0 }}
-        animate={{ scale: 1, opacity: 0.1 }}
+        animate={{ scale: 1, opacity: 0.08 }}
         transition={{ duration: 1.5, ease: "easeOut" }}
-        sx={{
-          position: "absolute",
-          top: "-20%",
-          right: "-10%",
-          width: "50%",
-          height: "140%",
-          background: `radial-gradient(circle, ${theme.palette.primary.main} 0%, transparent 70%)`,
-          borderRadius: "50%",
-          pointerEvents: "none",
-        }}
+        className="absolute -top-[20%] -right-[10%] w-1/2 h-[140%] bg-[radial-gradient(circle,var(--marker-orange)_0%,transparent_70%)] rounded-full pointer-events-none"
       />
-      <Container
-        maxWidth="lg"
-        sx={{ py: { xs: 6, md: 10 }, position: "relative", zIndex: 1 }}
-      >
-        <Stack spacing={4} alignItems="center" textAlign="center">
-          <MotionBox
+
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20 relative z-10">
+        <div className="flex flex-col items-center text-center gap-6">
+          <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <Box
-              component="span"
-              sx={{
-                px: 2,
-                py: 0.5,
-                borderRadius: 2,
-                bgcolor:
-                  theme.palette.mode === "dark"
-                    ? "primary.dark"
-                    : "primary.light",
-                color: "primary.contrastText",
-                fontSize: "0.875rem",
-                fontWeight: 600,
-                textTransform: "uppercase",
-                letterSpacing: 0.5,
-              }}
-            >
+            <span className="inline-block px-3 py-1 rounded-md border-2 border-dashed border-primary/40 bg-primary/10 text-primary text-sm font-semibold uppercase tracking-wider -tilt-sm">
               The Lair of Evil
-            </Box>
-          </MotionBox>
+            </span>
+          </motion.div>
 
-          <MotionTypography
-            variant="h1"
+          <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            sx={{
-              fontSize: { xs: "2.5rem", md: "3.5rem", lg: "4rem" },
-              fontWeight: 700,
-              lineHeight: 1.2,
-              maxWidth: "900px",
-            }}
+            className="text-3xl md:text-5xl lg:text-6xl font-bold leading-tight max-w-4xl text-foreground dark:text-foreground-dark chalk-underline"
           >
             Your Hub for Phasmo Tournaments & Community Tools
-          </MotionTypography>
+          </motion.h1>
 
-          <MotionTypography
-            variant="h5"
-            color="text.secondary"
+          <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            sx={{
-              maxWidth: "700px",
-              fontSize: { xs: "1rem", md: "1.25rem" },
-            }}
+            className="max-w-2xl text-base md:text-lg text-foreground-muted dark:text-foreground-dark-muted"
           >
             Brackets, recorded runs, stats, leaderboards, and community features
             — all in one place. Join the DukeSenior community today.
-          </MotionTypography>
+          </motion.p>
 
-          <MotionBox
+          <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
+            className="flex flex-col sm:flex-row gap-3"
           >
-            <Stack
-              direction={{ xs: "column", sm: "row" }}
-              spacing={2}
-              justifyContent="center"
+            <Link
+              href="/phasmotourney-series"
+              className="inline-flex items-center justify-center px-6 py-3 text-base font-medium bg-primary hover:bg-primary-600 text-white rounded-md border-2 border-primary-700/30 transition-all hover:scale-105 active:scale-95 no-underline shadow-soft tilt-sm"
             >
-              <Link href="/phasmotourney-series">
-                {/* @next-codemod-error This Link previously used the now removed `legacyBehavior` prop, and has a child that might not be an anchor. The codemod bailed out of lifting the child props to the Link. Check that the child component does not render an anchor, and potentially move the props manually to Link. */
-                }
-                <MotionButton
-                  variant="contained"
-                  size="large"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  sx={{ px: 4, py: 1.5, fontSize: "1rem" }}
-                >
-                  View Tournaments
-                </MotionButton>
-              </Link>
-              <Link href="/suggestions">
-                {/* @next-codemod-error This Link previously used the now removed `legacyBehavior` prop, and has a child that might not be an anchor. The codemod bailed out of lifting the child props to the Link. Check that the child component does not render an anchor, and potentially move the props manually to Link. */
-                }
-                <MotionButton
-                  variant="outlined"
-                  size="large"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  sx={{ px: 4, py: 1.5, fontSize: "1rem" }}
-                >
-                  Community Hub
-                </MotionButton>
-              </Link>
-            </Stack>
-          </MotionBox>
-        </Stack>
-      </Container>
-    </Box>
+              View Tournaments
+            </Link>
+            <Link
+              href="/suggestions"
+              className="inline-flex items-center justify-center px-6 py-3 text-base font-medium border-2 border-dashed border-border dark:border-border-dark text-foreground dark:text-foreground-dark rounded-md hover:bg-card/60 dark:hover:bg-card-dark/60 transition-all hover:scale-105 active:scale-95 no-underline -tilt-sm"
+            >
+              Community Hub
+            </Link>
+          </motion.div>
+        </div>
+      </div>
+    </section>
   );
 }

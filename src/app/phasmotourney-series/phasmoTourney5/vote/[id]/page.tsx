@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
-import { Alert, Button, Card, Container, Form, Stack } from "react-bootstrap";
+import { cn } from "@/lib/utils";
 
 interface Player {
   id: string;
@@ -55,28 +55,28 @@ export default function VoteSessionPage() {
 
   const active = useMemo(
     () => players.filter((p) => p.status === "Active"),
-    [players]
+    [players],
   );
   const nonImmuneActive = useMemo(
     () => active.filter((p) => !p.immune),
-    [active]
+    [active],
   );
   const pool = useMemo(
     () => (session?.type === "vote-out" ? nonImmuneActive : active),
-    [session?.type, active, nonImmuneActive]
+    [session?.type, active, nonImmuneActive],
   );
 
   // Require login before using the page
   if (!user) {
     return (
-      <Container className="py-4">
-        <Alert variant="warning" className="mb-3">
+      <div className="max-w-7xl mx-auto px-4 py-4">
+        <div className="rounded-lg border border-yellow-300 bg-yellow-50 dark:bg-yellow-900/20 dark:border-yellow-700 p-3 text-yellow-800 dark:text-yellow-200">
           Login required to vote.{" "}
-          <Link href="/login" className="alert-link">
+          <Link href="/login" className="underline font-medium">
             Log in
           </Link>
-        </Alert>
-      </Container>
+        </div>
+      </div>
     );
   }
 
@@ -88,7 +88,7 @@ export default function VoteSessionPage() {
     const confirmed = window.confirm(
       `Confirm your vote for ${
         players.find((p) => p.id === choice)?.name || choice
-      }?`
+      }?`,
     );
     if (!confirmed) return;
     try {
@@ -104,7 +104,7 @@ export default function VoteSessionPage() {
             voterUid: user.uid,
             voterName: user.displayName || user.email || user.uid,
           }),
-        }
+        },
       );
       if (!res.ok) {
         const j = await res.json().catch(() => null);
@@ -118,103 +118,118 @@ export default function VoteSessionPage() {
 
   if (loading) {
     return (
-      <Container className="py-4">
-        <div className="text-muted">Loading…</div>
-      </Container>
+      <div className="max-w-7xl mx-auto px-4 py-4">
+        <div className="text-muted-foreground">Loading…</div>
+      </div>
     );
   }
   if (error) {
     return (
-      <Container className="py-4">
-        <Alert variant="danger">{error}</Alert>
-      </Container>
+      <div className="max-w-7xl mx-auto px-4 py-4">
+        <div className="rounded-lg border border-red-300 bg-red-50 dark:bg-red-900/20 dark:border-red-700 p-3 text-red-800 dark:text-red-200">
+          {error}
+        </div>
+      </div>
     );
   }
   if (!session) {
     return (
-      <Container className="py-4">
-        <Alert variant="warning">Session not found.</Alert>
-      </Container>
+      <div className="max-w-7xl mx-auto px-4 py-4">
+        <div className="rounded-lg border border-yellow-300 bg-yellow-50 dark:bg-yellow-900/20 dark:border-yellow-700 p-3 text-yellow-800 dark:text-yellow-200">
+          Session not found.
+        </div>
+      </div>
     );
   }
 
   return (
-    <Container className="py-4">
-      <Card className="border-0 shadow-sm">
-        <Card.Body>
-          <Card.Title as="h1" className="h5 fw-semibold">
-            {session.name}
-          </Card.Title>
-          <Alert
-            variant={session.anonymous ? "info" : "secondary"}
-            className="mt-2"
-          >
-            {session.anonymous
-              ? "This session is Anonymous. Your name will not be shown."
-              : "This session is NOT anonymous. Your vote will show your name."}
-          </Alert>
-          <div className="mb-2 text-muted small">
-            Your name:{" "}
-            <strong>
-              {user?.displayName || user?.email || user?.uid || "Unknown"}
-            </strong>{" "}
-            · UID: <code>{user?.uid || "-"}</code>
-          </div>
-          {session.closed && (
-            <Alert variant="warning" className="mb-3">
-              Voting closed.
-            </Alert>
+    <div className="max-w-7xl mx-auto px-4 py-4">
+      <div className="rounded-xl border border-border bg-card dark:bg-card-dark dark:border-border-dark shadow-sm p-5">
+        <h1 className="text-lg font-semibold text-foreground">
+          {session.name}
+        </h1>
+        <div
+          className={cn(
+            "rounded-lg border p-3 mt-2 text-sm",
+            session.anonymous
+              ? "border-blue-300 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-700 text-blue-800 dark:text-blue-200"
+              : "border-gray-300 bg-gray-50 dark:bg-gray-800 dark:border-gray-600 text-gray-700 dark:text-gray-300",
           )}
+        >
+          {session.anonymous
+            ? "This session is Anonymous. Your name will not be shown."
+            : "This session is NOT anonymous. Your vote will show your name."}
+        </div>
+        <div className="mb-2 text-muted-foreground text-sm mt-2">
+          Your name:{" "}
+          <strong>
+            {user?.displayName || user?.email || user?.uid || "Unknown"}
+          </strong>{" "}
+          · UID:{" "}
+          <code className="text-xs bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded">
+            {user?.uid || "-"}
+          </code>
+        </div>
+        {session.closed && (
+          <div className="rounded-lg border border-yellow-300 bg-yellow-50 dark:bg-yellow-900/20 dark:border-yellow-700 p-3 text-yellow-800 dark:text-yellow-200 mb-3">
+            Voting closed.
+          </div>
+        )}
 
-          {!submitted ? (
-            <Form>
-              <Form.Group className="mb-3">
-                <Form.Label className="fw-semibold">
-                  {session.type === "vote-out"
-                    ? "Select one to vote out"
-                    : "Select one ally"}
-                </Form.Label>
-                {pool.length === 0 && (
-                  <div className="text-muted">No eligible players.</div>
-                )}
-                {pool.map((p) => (
-                  <Form.Check
-                    key={p.id}
+        {!submitted ? (
+          <form onSubmit={(e) => e.preventDefault()}>
+            <fieldset className="mb-3">
+              <legend className="font-semibold text-sm text-foreground mb-2">
+                {session.type === "vote-out"
+                  ? "Select one to vote out"
+                  : "Select one ally"}
+              </legend>
+              {pool.length === 0 && (
+                <div className="text-muted-foreground">
+                  No eligible players.
+                </div>
+              )}
+              {pool.map((p) => (
+                <label
+                  key={p.id}
+                  className="flex items-center gap-2 mb-2 cursor-pointer text-foreground"
+                >
+                  <input
                     type="radio"
                     name="choice"
-                    id={`choice-${p.id}`}
-                    label={p.name}
                     value={p.id}
                     checked={choice === p.id}
                     onChange={(e) => setChoice(e.currentTarget.value)}
-                    className="mb-2"
                     disabled={session.closed}
+                    className="accent-primary-500"
                   />
-                ))}
-              </Form.Group>
-              <Stack direction="horizontal" gap={3}>
-                <Button
-                  variant="primary"
-                  onClick={submitVote}
-                  disabled={session.closed}
-                >
-                  Submit Vote
-                </Button>
-                <Link
-                  href="/phasmotourney-series"
-                  className="btn btn-outline-secondary"
-                >
-                  Back
-                </Link>
-              </Stack>
-            </Form>
-          ) : (
-            <Alert variant="success" className="mt-3">
-              Vote submitted! Thank you.
-            </Alert>
-          )}
-        </Card.Body>
-      </Card>
-    </Container>
+                  {p.name}
+                </label>
+              ))}
+            </fieldset>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={submitVote}
+                disabled={session.closed}
+                className="px-4 py-2 rounded-lg bg-primary-500 text-white font-medium hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Submit Vote
+              </button>
+              <Link
+                href="/phasmotourney-series"
+                className="px-4 py-2 rounded-lg border border-border dark:border-border-dark text-foreground hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              >
+                Back
+              </Link>
+            </div>
+          </form>
+        ) : (
+          <div className="rounded-lg border border-green-300 bg-green-50 dark:bg-green-900/20 dark:border-green-700 p-3 text-green-800 dark:text-green-200 mt-3">
+            Vote submitted! Thank you.
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

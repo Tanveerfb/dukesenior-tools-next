@@ -1,67 +1,64 @@
 "use client";
-import { Alert, Button, Card, Container, ListGroup } from "react-bootstrap";
 
 export default function Round1ManageRunsPage() {
   return (
-    <Container className="py-4">
-      <h1 className="h4 fw-semibold mb-3">Round 1 — Manage Runs (Admin)</h1>
-      <Card className="border-0 shadow-sm mb-4">
-        <Card.Body>
-          <Card.Title as="h2" className="h5 fw-semibold">
-            Host Selections
-          </Card.Title>
-          <Alert variant="info" className="mt-2">
-            TODO: Configure map, settings, and score system for Round 1.
-          </Alert>
-        </Card.Body>
-      </Card>
+    <div className="max-w-7xl mx-auto px-4 py-6">
+      <h1 className="text-lg font-semibold mb-3">
+        Round 1 — Manage Runs (Admin)
+      </h1>
 
-      <Card className="border-0 shadow-sm mb-4">
-        <Card.Body>
-          <Card.Title as="h2" className="h5 fw-semibold">
-            Wildcard Choices
-          </Card.Title>
-          <Alert variant="secondary" className="mt-2">
+      <div className="rounded-xl border border-border bg-card dark:bg-card-dark dark:border-border-dark shadow-sm mb-4">
+        <div className="p-4">
+          <h2 className="text-base font-semibold">Host Selections</h2>
+          <div className="mt-2 rounded-xl border border-blue-300 bg-blue-50 text-blue-800 dark:border-blue-700 dark:bg-blue-900/30 dark:text-blue-300 px-4 py-3">
+            TODO: Configure map, settings, and score system for Round 1.
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-xl border border-border bg-card dark:bg-card-dark dark:border-border-dark shadow-sm mb-4">
+        <div className="p-4">
+          <h2 className="text-base font-semibold">Wildcard Choices</h2>
+          <div className="mt-2 rounded-xl border border-gray-300 bg-gray-50 text-gray-700 dark:border-gray-600 dark:bg-gray-800/30 dark:text-gray-300 px-4 py-3">
             TODO: Define N wildcards (N = number of players). Lower prestige
             players can go first to pick a wildcard or skip to default
             randomness. Once a wildcard is selected, remove it from the list.
-          </Alert>
-          <Button variant="outline-primary" disabled>
+          </div>
+          <button
+            disabled
+            className="mt-3 rounded-lg border border-blue-600 px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             TODO: Start Wildcard Selection Order
-          </Button>
-        </Card.Body>
-      </Card>
+          </button>
+        </div>
+      </div>
 
-      <Card className="border-0 shadow-sm mb-4">
-        <Card.Body>
-          <Card.Title as="h2" className="h5 fw-semibold">
-            Record Run Details
-          </Card.Title>
-          <Alert variant="warning" className="mt-2">
-            TODO: Admin form for entering each player\'s run details (map,
+      <div className="rounded-xl border border-border bg-card dark:bg-card-dark dark:border-border-dark shadow-sm mb-4">
+        <div className="p-4">
+          <h2 className="text-base font-semibold">Record Run Details</h2>
+          <div className="mt-2 rounded-xl border border-yellow-300 bg-yellow-50 text-yellow-800 dark:border-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300 px-4 py-3">
+            TODO: Admin form for entering each player&apos;s run details (map,
             settings reference, per-score sheet totals, notes). Persist and
             compute standings.
-          </Alert>
-          <ListGroup className="mt-3">
-            <ListGroup.Item className="text-muted">
+          </div>
+          <ul className="mt-3 divide-y divide-border dark:divide-border-dark rounded-xl border border-border dark:border-border-dark overflow-hidden">
+            <li className="px-4 py-3 text-gray-500">
               TODO: Runs list (player, score, time)
-            </ListGroup.Item>
-          </ListGroup>
-        </Card.Body>
-      </Card>
+            </li>
+          </ul>
+        </div>
+      </div>
 
-      <Card className="border-0 shadow-sm">
-        <Card.Body>
-          <Card.Title as="h2" className="h5 fw-semibold">
-            Post-Round Actions
-          </Card.Title>
-          <Alert variant="light" className="mt-2">
+      <div className="rounded-xl border border-border bg-card dark:bg-card-dark dark:border-border-dark shadow-sm">
+        <div className="p-4">
+          <h2 className="text-base font-semibold">Post-Round Actions</h2>
+          <div className="mt-2 rounded-xl border border-gray-200 bg-gray-50 text-gray-700 dark:border-gray-700 dark:bg-gray-800/20 dark:text-gray-300 px-4 py-3">
             TODO: After results are confirmed, mark Top 2 as Immune; open
             Vote-Out session for remaining players; enable optional
             Comeback/Eliminator pairing setup.
-          </Alert>
-        </Card.Body>
-      </Card>
-    </Container>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

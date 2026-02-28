@@ -1,8 +1,7 @@
 import Link from "next/link";
-import { Box, Container, Grid, Typography, Stack, Button, Link as MuiLink } from "@mui/material";
 import { FaDiscord, FaInstagram, FaTwitter } from "react-icons/fa";
 import { RiNextjsFill } from "react-icons/ri";
-import { SiKofi, SiMui, SiTailwindcss } from "react-icons/si";
+import { SiKofi, SiTailwindcss } from "react-icons/si";
 
 const navSections = [
   {
@@ -57,154 +56,98 @@ const socialLinks = [
 
 export default function Footer() {
   return (
-    <Box
-      component="footer"
-      sx={{
-        borderTop: 1,
-        borderColor: "divider",
-        bgcolor: "background.paper",
-        mt: "auto",
-        py: 5,
-      }}
-    >
-      <Container maxWidth="xl">
-        <Grid container spacing={5}>
-          <Grid item xs={12} lg={4}>
-            <Typography variant="h5" component="h2" gutterBottom fontWeight={600}>
+    <footer className="mt-auto border-t-2 border-dashed border-border dark:border-border-dark bg-card dark:bg-card-dark">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-10">
+          {/* Brand Column */}
+          <div className="lg:col-span-1">
+            <h2 className="text-xl font-bold text-foreground dark:text-foreground-dark mb-3">
               The Lair of Evil
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            </h2>
+            <p className="text-sm text-foreground-muted dark:text-foreground-dark-muted mb-5">
               Tools, event dashboards, and community resources powering the
               Phasmo Tourney project and the DukeSenior community.
-            </Typography>
-            <Stack direction="row" spacing={2} flexWrap="wrap" alignItems="center" sx={{ mb: 2 }}>
-              <Button
+            </p>
+            <div className="flex flex-wrap items-center gap-3 mb-4">
+              <a
                 href="https://ko-fi.com/dukesenior"
                 target="_blank"
                 rel="noopener noreferrer"
-                variant="contained"
-                color="warning"
-                startIcon={<SiKofi />}
-                sx={{
-                  textTransform: "none",
-                  transition: "transform 0.2s",
-                  "&:hover": {
-                    transform: "translateY(-2px)",
-                  },
-                }}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-warning hover:bg-warning-600 text-white rounded-lg font-medium text-sm transition-all hover:-translate-y-0.5"
               >
+                <SiKofi />
                 Support on Ko-Fi
-              </Button>
-              <Typography variant="caption" color="text.secondary">
+              </a>
+              <span className="text-xs text-foreground-muted dark:text-foreground-dark-muted">
                 &copy; {new Date().getFullYear()} DukeSenior
-              </Typography>
-            </Stack>
-            <Stack direction="row" spacing={2} alignItems="center">
-              <Typography variant="caption" color="text.secondary" sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+              </span>
+            </div>
+            <div className="flex items-center gap-4">
+              <span className="flex items-center gap-1 text-xs text-foreground-muted dark:text-foreground-dark-muted">
                 <RiNextjsFill size={16} /> Next.js
-              </Typography>
-              <Typography variant="caption" color="text.secondary" sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                <SiMui size={14} /> MUI
-              </Typography>
-              <Typography variant="caption" color="text.secondary" sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+              </span>
+              <span className="flex items-center gap-1 text-xs text-foreground-muted dark:text-foreground-dark-muted">
                 <SiTailwindcss size={14} /> Tailwind
-              </Typography>
-            </Stack>
-          </Grid>
+              </span>
+            </div>
+          </div>
 
+          {/* Navigation Sections */}
           {navSections.map((section) => (
-            <Grid item xs={6} md={4} lg={2} key={section.title}>
-              <Typography
-                variant="overline"
-                color="text.secondary"
-                fontWeight={600}
-                sx={{ mb: 2, display: "block" }}
-              >
+            <div key={section.title}>
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground-muted dark:text-foreground-dark-muted mb-4">
                 {section.title}
-              </Typography>
-              <Stack component="ul" spacing={1.5} sx={{ listStyle: "none", p: 0, m: 0 }}>
+              </h3>
+              <ul className="space-y-2.5">
                 {section.links.map((link) => (
-                  <Box component="li" key={link.href}>
+                  <li key={link.href}>
                     {link.external ? (
-                      <MuiLink
+                      <a
                         href={link.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        color="text.primary"
-                        underline="hover"
-                        sx={{
-                          fontSize: "0.875rem",
-                          transition: "color 0.2s",
-                          "&:hover": { color: "primary.main" },
-                        }}
+                        className="text-sm text-foreground dark:text-foreground-dark hover:text-primary transition-colors"
                       >
                         {link.label}
-                      </MuiLink>
+                      </a>
                     ) : (
-                      <MuiLink
-                        component={Link}
+                      <Link
                         href={link.href}
-                        color="text.primary"
-                        underline="hover"
-                        sx={{
-                          fontSize: "0.875rem",
-                          transition: "color 0.2s",
-                          "&:hover": { color: "primary.main" },
-                        }}
+                        className="text-sm text-foreground dark:text-foreground-dark hover:text-primary transition-colors"
                       >
                         {link.label}
-                      </MuiLink>
+                      </Link>
                     )}
-                  </Box>
+                  </li>
                 ))}
-              </Stack>
-            </Grid>
+              </ul>
+            </div>
           ))}
-        </Grid>
+        </div>
 
-        <Box
-          sx={{
-            mt: 5,
-            pt: 4,
-            borderTop: 1,
-            borderColor: "divider",
-            display: "flex",
-            flexDirection: { xs: "column", md: "row" },
-            justifyContent: "space-between",
-            alignItems: { xs: "flex-start", md: "center" },
-            gap: 3,
-          }}
-        >
-          <Typography variant="body2" color="text.secondary">
-            Built with care for players, casters, and crew of the Phasmo Tourney.
-          </Typography>
-          <Stack direction="row" spacing={3} flexWrap="wrap">
+        {/* Bottom Bar */}
+        <div className="mt-10 pt-8 border-t border-border dark:border-border-dark flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <p className="text-sm text-foreground-muted dark:text-foreground-dark-muted">
+            Built with care for players, casters, and crew of the Phasmo
+            Tourney.
+          </p>
+          <div className="flex flex-wrap gap-5">
             {socialLinks.map((social) => (
-              <MuiLink
+              <a
                 key={social.label}
                 href={social.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                color="text.secondary"
                 aria-label={social.label}
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1,
-                  transition: "color 0.2s, transform 0.2s",
-                  "&:hover": {
-                    color: "primary.main",
-                    transform: "translateY(-2px)",
-                  },
-                }}
+                className="flex items-center gap-1.5 text-foreground-muted dark:text-foreground-dark-muted hover:text-primary transition-all hover:-translate-y-0.5"
               >
                 {social.icon}
-                <Typography variant="caption">{social.label}</Typography>
-              </MuiLink>
+                <span className="text-xs">{social.label}</span>
+              </a>
             ))}
-          </Stack>
-        </Box>
-      </Container>
-    </Box>
+          </div>
+        </div>
+      </div>
+    </footer>
   );
 }

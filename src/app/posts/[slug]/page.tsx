@@ -17,7 +17,7 @@ function renderCommentWithLinks(content: string) {
       <Link
         key={idx}
         href={`/profile/${encodeURIComponent(uname)}`}
-        className="text-decoration-none"
+        className="text-primary-500 hover:underline"
       >
         @{uname}
       </Link>,
@@ -45,18 +45,6 @@ import {
   getUserCommentReaction,
 } from "@/lib/services/cms";
 import { getSamplePostBySlug } from "@/lib/content/samplePosts";
-import {
-  Container,
-  Badge,
-  Spinner,
-  Button,
-  Form,
-  Collapse,
-  Row,
-  Col,
-  Card,
-  Modal,
-} from "react-bootstrap";
 import { FaTwitch } from "react-icons/fa";
 import Image from "next/image";
 import ReactMarkdown from "react-markdown";
@@ -67,7 +55,33 @@ import rehypeSlug from "rehype-slug";
 import { useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { getAuth } from "firebase/auth";
+import { cn } from "@/lib/utils";
 import styles from "./post.module.css";
+
+function SpinnerIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={cn("animate-spin h-8 w-8 text-primary-500", className)}
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+    >
+      <circle
+        className="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="4"
+      />
+      <path
+        className="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+      />
+    </svg>
+  );
+}
 
 async function copyToClipboard(text: string) {
   try {
@@ -642,89 +656,77 @@ export default function PostView() {
 
   if (loading)
     return (
-      <Container className="py-5 text-center">
-        <Spinner animation="border" />
-      </Container>
+      <div className="max-w-7xl mx-auto px-4 py-10 text-center">
+        <SpinnerIcon />
+      </div>
     );
   if (!post)
     return (
-      <Container className="py-5">
-        <div className="text-muted">Post not found.</div>
-      </Container>
+      <div className="max-w-7xl mx-auto px-4 py-10">
+        <div className="text-foreground-secondary">Post not found.</div>
+      </div>
     );
 
   return (
     <>
-      <Container className={`py-4 post-view ${styles.postWrap}`}>
-        <Row>
-          <Col lg={8} className={styles.contentColumn}>
-            <div className="mb-3 d-flex flex-wrap gap-2 align-items-center">
+      <div className={cn("max-w-7xl mx-auto px-4 py-6", styles.postWrap)}>
+        <div className="flex flex-col lg:flex-row gap-8">
+          <div className={cn("lg:w-2/3", styles.contentColumn)}>
+            <div className="mb-3 flex flex-wrap gap-2 items-center">
               {post.tags?.map((t: string) => (
-                <Badge key={t} bg="info" className="me-2">
+                <span
+                  key={t}
+                  className="rounded-full bg-cyan-500 text-white px-2 py-0.5 text-xs font-medium mr-2"
+                >
                   {t}
-                </Badge>
+                </span>
               ))}
               {post.pinned && (
-                <Badge bg="warning" text="dark">
+                <span className="rounded-full bg-yellow-400 text-yellow-900 px-2 py-0.5 text-xs font-medium">
                   Pinned
-                </Badge>
+                </span>
               )}
-              <div className="ms-auto small text-muted">
+              <div className="ml-auto text-sm text-foreground-secondary">
                 {new Date(post.createdAt).toLocaleString()}
               </div>
             </div>
 
-            <h1 className="mb-2">
+            <h1 className="text-foreground text-3xl font-bold mb-2">
               {post.title}{" "}
               {post.id && post.id.startsWith("sample-") && (
-                <Badge bg="secondary" className="ms-2">
+                <span className="ml-2 rounded-full bg-gray-500 text-white px-2 py-0.5 text-xs font-medium align-middle">
                   Sample
-                </Badge>
+                </span>
               )}
             </h1>
-            <div className="text-muted small mb-3">
+            <div className="text-foreground-secondary text-sm mb-3">
               {post.author || "DukeSenior"} • {readTime} min read
             </div>
 
-            <div className="markdown-body mb-5" id="article-markdown">
+            <div className="markdown-body mb-10" id="article-markdown">
               {debugRaw && (
                 <div className="mb-3">
                   <strong>Debug: raw stored content preview</strong>
-                  <pre
-                    style={{
-                      maxHeight: 160,
-                      overflow: "auto",
-                      background: "#f8f9fa",
-                      padding: 8,
-                    }}
-                  >
+                  <pre className="max-h-40 overflow-auto bg-gray-100 dark:bg-gray-800 p-2 rounded">
                     {String(post.content || "").slice(0, 1000)}
                   </pre>
                   <div className="mt-2">
                     <strong>Debug (JSON.stringify)</strong>
-                    <pre
-                      style={{
-                        maxHeight: 160,
-                        overflow: "auto",
-                        background: "#fff8db",
-                        padding: 8,
-                      }}
-                    >
+                    <pre className="max-h-40 overflow-auto bg-yellow-50 dark:bg-yellow-900/20 p-2 rounded">
                       {JSON.stringify(post.content)}
                     </pre>
                   </div>
                   <div className="mt-2">
                     <strong>Minimal render (remark-gfm only)</strong>
-                    <div
-                      className="p-2 border rounded bg-body-tertiary"
-                      style={{ maxHeight: 220, overflow: "auto" }}
-                    >
+                    <div className="p-2 border border-border dark:border-border-dark rounded bg-gray-50 dark:bg-gray-800 max-h-56 overflow-auto">
                       {String(post.content || "").trim() ? (
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>
                           {String(post.content || "")}
                         </ReactMarkdown>
                       ) : (
-                        <div className="text-muted small">(empty)</div>
+                        <div className="text-foreground-secondary text-sm">
+                          (empty)
+                        </div>
                       )}
                     </div>
                   </div>
@@ -815,9 +817,9 @@ export default function PostView() {
                 {memoizedMarkdown}
               </ReactMarkdown>
             </div>
-          </Col>
+          </div>
 
-          <Col lg={4} className={styles.sidebar}>
+          <div className={cn("lg:w-1/3", styles.sidebar)}>
             <div className={styles.stickySidebar}>
               {post.bannerUrl && (
                 <div
@@ -840,44 +842,43 @@ export default function PostView() {
                   </div>
                 </div>
               )}
-              <Card className="mb-3">
-                <Card.Body>
-                  <h6>On this page</h6>
-                  <ul className={styles.tocList}>
-                    {headings.map((h) => (
-                      <li key={h.id} style={{ marginLeft: (h.level - 1) * 8 }}>
-                        <a className={styles.tocLink} href={`#${h.id}`}>
-                          {h.text}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </Card.Body>
-              </Card>
-              <Card>
-                <Card.Body>
-                  <h6>Share</h6>
-                  <div className="d-flex gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline-primary"
-                      onClick={() => copyToClipboard(window.location.href)}
-                    >
-                      Copy link
-                    </Button>
-                  </div>
-                </Card.Body>
-              </Card>
+              <div className="rounded-xl border border-border dark:border-border-dark bg-card dark:bg-card-dark shadow-sm mb-3 p-4">
+                <h6 className="text-foreground font-semibold mb-2">
+                  On this page
+                </h6>
+                <ul className={styles.tocList}>
+                  {headings.map((h) => (
+                    <li key={h.id} style={{ marginLeft: (h.level - 1) * 8 }}>
+                      <a className={styles.tocLink} href={`#${h.id}`}>
+                        {h.text}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="rounded-xl border border-border dark:border-border-dark bg-card dark:bg-card-dark shadow-sm p-4">
+                <h6 className="text-foreground font-semibold mb-2">Share</h6>
+                <div className="flex gap-2">
+                  <button
+                    className="rounded-lg border border-primary-500 text-primary-500 hover:bg-primary-500 hover:text-white px-3 py-1.5 text-sm font-medium transition-colors"
+                    onClick={() => copyToClipboard(window.location.href)}
+                  >
+                    Copy link
+                  </button>
+                </div>
+              </div>
             </div>
-          </Col>
-        </Row>
+          </div>
+        </div>
         {!post.id.startsWith("sample-") && (
-          <div className="d-flex align-items-center gap-2 mb-4">
-            <Button
-              size="sm"
-              variant={
-                userPostReaction === "like" ? "success" : "outline-success"
-              }
+          <div className="flex items-center gap-2 mb-4">
+            <button
+              className={cn(
+                "rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
+                userPostReaction === "like"
+                  ? "bg-green-500 text-white"
+                  : "border border-green-500 text-green-500 hover:bg-green-500 hover:text-white",
+              )}
               disabled={!user}
               onClick={async () => {
                 if (!user) return;
@@ -886,12 +887,14 @@ export default function PostView() {
               }}
             >
               👍 {post.likeCount}
-            </Button>
-            <Button
-              size="sm"
-              variant={
-                userPostReaction === "dislike" ? "danger" : "outline-danger"
-              }
+            </button>
+            <button
+              className={cn(
+                "rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
+                userPostReaction === "dislike"
+                  ? "bg-red-500 text-white"
+                  : "border border-red-500 text-red-500 hover:bg-red-500 hover:text-white",
+              )}
               disabled={!user}
               onClick={async () => {
                 if (!user) return;
@@ -900,50 +903,39 @@ export default function PostView() {
               }}
             >
               👎 {post.dislikeCount}
-            </Button>
+            </button>
           </div>
         )}
-        <section className="mb-5">
-          <h4 className="mb-3">Comments ({post.commentCount})</h4>
+        <section className="mb-10">
+          <h4 className="text-foreground text-xl font-semibold mb-3">
+            Comments ({post.commentCount})
+          </h4>
           {post.id.startsWith("sample-") ? (
-            <div className="text-muted small mb-3">
+            <div className="text-foreground-secondary text-sm mb-3">
               Comments disabled for sample post.
             </div>
           ) : user ? (
-            <Form
+            <form
               onSubmit={(e) => {
                 e.preventDefault();
                 submit();
               }}
               className="mb-4"
             >
-              <Form.Group className="mb-2" style={{ position: "relative" }}>
-                <Form.Control
-                  as="textarea"
+              <div className="mb-2 relative">
+                <textarea
                   rows={3}
                   value={newComment}
                   onChange={handleNewCommentChange}
                   onKeyDown={handleNewKeyDown}
                   placeholder="Write a comment..."
-                  ref={(el: any) => (newCommentRef.current = el)}
+                  ref={newCommentRef}
+                  className="w-full rounded-lg border border-border dark:border-border-dark bg-card dark:bg-card-dark text-foreground px-3 py-2 outline-none focus:ring-2 focus:ring-primary-500 resize-y"
                 />
                 {showSuggestions &&
                   suggestions.length > 0 &&
                   suggestionOwner === "main" && (
-                    <div
-                      style={{
-                        position: "absolute",
-                        left: 8,
-                        right: 8,
-                        top: "100%",
-                        zIndex: 2000,
-                        background: "var(--bs-body-bg)",
-                        border: "1px solid rgba(0,0,0,0.15)",
-                        borderRadius: 6,
-                        marginTop: 6,
-                        boxShadow: "0 6px 18px rgba(0,0,0,0.12)",
-                      }}
-                    >
+                    <div className="absolute left-2 right-2 top-full z-[2000] bg-card dark:bg-card-dark border border-border dark:border-border-dark rounded-md mt-1.5 shadow-lg">
                       {suggestions.map((s, idx) => (
                         <div
                           key={s.username}
@@ -951,35 +943,34 @@ export default function PostView() {
                             ev.preventDefault();
                             applySuggestionToTextarea(s.username);
                           }}
-                          style={{
-                            padding: "6px 10px",
-                            cursor: "pointer",
-                            background:
-                              idx === activeSuggestion
-                                ? "rgba(0,0,0,0.06)"
-                                : "transparent",
-                          }}
+                          className={cn(
+                            "px-3 py-1.5 cursor-pointer text-foreground",
+                            idx === activeSuggestion &&
+                              "bg-gray-100 dark:bg-gray-700",
+                          )}
                         >
                           @{s.username}
                         </div>
                       ))}
                     </div>
                   )}
-              </Form.Group>
-              <div className="small text-muted mb-2">
+              </div>
+              <div className="text-sm text-foreground-secondary mb-2">
                 Mention partial: <strong>{mentionPartial || "-"}</strong> •
                 Suggestions: {suggestions.length}
               </div>
-              <Button
-                size="sm"
+              <button
+                className="rounded-lg bg-primary-500 hover:bg-primary-600 disabled:opacity-50 text-white px-3 py-1.5 text-sm font-medium transition-colors"
                 disabled={!newComment.trim() || posting}
                 type="submit"
               >
                 {posting ? "Posting..." : "Post Comment"}
-              </Button>
-            </Form>
+              </button>
+            </form>
           ) : (
-            <div className="text-muted small mb-3">Login to comment.</div>
+            <div className="text-foreground-secondary text-sm mb-3">
+              Login to comment.
+            </div>
           )}
           {!post.id.startsWith("sample-") && (
             <div className="comments-tree">
@@ -1005,69 +996,63 @@ export default function PostView() {
                 />
               ))}
               {comments.length === 0 && (
-                <div className="text-muted small fst-italic">
+                <div className="text-foreground-secondary text-sm italic">
                   No comments yet.
                 </div>
               )}
             </div>
           )}
         </section>
-      </Container>
-      <Modal
-        show={lightboxOpen}
-        onHide={() => setLightboxOpen(false)}
-        centered
-        size="lg"
-        aria-label="Image viewer"
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>{lightboxAlt || ""}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body
-          className="text-center p-0"
-          style={{ position: "relative" }}
+      </div>
+
+      {/* Lightbox Modal */}
+      {lightboxOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70"
+          onClick={() => setLightboxOpen(false)}
+          aria-label="Image viewer"
         >
-          {lightboxSrc && (
-            <div
-              style={{
-                position: "relative",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                backgroundColor: "#000",
-              }}
-            >
-              <Image
-                src={lightboxSrc}
-                alt={lightboxAlt || ""}
-                width={1200}
-                height={800}
-                style={{
-                  maxWidth: "100%",
-                  maxHeight: "80vh",
-                  width: "auto",
-                  height: "auto",
-                }}
-                unoptimized
-              />
+          <div
+            className="relative bg-card dark:bg-card-dark rounded-xl shadow-2xl max-w-4xl w-full mx-4 overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-border dark:border-border-dark">
+              <h6 className="text-foreground font-semibold truncate m-0">
+                {lightboxAlt || ""}
+              </h6>
+              <button
+                className="text-foreground-secondary hover:text-foreground text-xl leading-none"
+                onClick={() => setLightboxOpen(false)}
+                aria-label="Close"
+              >
+                ✕
+              </button>
+            </div>
+            {/* Body */}
+            <div className="relative flex items-center justify-center bg-black">
+              {lightboxSrc && (
+                <Image
+                  src={lightboxSrc}
+                  alt={lightboxAlt || ""}
+                  width={1200}
+                  height={800}
+                  style={{
+                    maxWidth: "100%",
+                    maxHeight: "80vh",
+                    width: "auto",
+                    height: "auto",
+                  }}
+                  unoptimized
+                />
+              )}
 
               {/* Prev button */}
               {gallery.length > 1 && (
                 <button
                   aria-label="Previous image"
                   onClick={gotoPrev}
-                  style={{
-                    position: "absolute",
-                    left: 8,
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    background: "rgba(0,0,0,0.5)",
-                    border: "none",
-                    color: "#fff",
-                    padding: "8px 10px",
-                    borderRadius: 6,
-                    cursor: "pointer",
-                  }}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white px-2.5 py-2 rounded-md transition-colors"
                 >
                   ◀
                 </button>
@@ -1078,33 +1063,23 @@ export default function PostView() {
                 <button
                   aria-label="Next image"
                   onClick={gotoNext}
-                  style={{
-                    position: "absolute",
-                    right: 8,
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    background: "rgba(0,0,0,0.5)",
-                    border: "none",
-                    color: "#fff",
-                    padding: "8px 10px",
-                    borderRadius: 6,
-                    cursor: "pointer",
-                  }}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white px-2.5 py-2 rounded-md transition-colors"
                 >
                   ▶
                 </button>
               )}
             </div>
-          )}
-        </Modal.Body>
-        {gallery.length > 0 && (
-          <Modal.Footer className="justify-content-center">
-            <small className="text-muted">
-              {currentIndex + 1} / {gallery.length}
-            </small>
-          </Modal.Footer>
-        )}
-      </Modal>
+            {/* Footer */}
+            {gallery.length > 0 && (
+              <div className="flex justify-center py-2 border-t border-border dark:border-border-dark">
+                <span className="text-sm text-foreground-secondary">
+                  {currentIndex + 1} / {gallery.length}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </>
   );
 }
@@ -1215,170 +1190,165 @@ function CommentItem({
   }
   return (
     <div id={`comment-${node.id}`} className="mb-3">
-      <div className="p-2 border rounded bg-body-tertiary">
-        <div className="d-flex align-items-center gap-2 small text-muted mb-1">
-          <strong className="text-body">{node.authorName}</strong>
+      <div className="p-2 border border-border dark:border-border-dark rounded-lg bg-gray-50 dark:bg-gray-800/50">
+        <div className="flex items-center gap-2 text-sm text-foreground-secondary mb-1">
+          <strong className="text-foreground">{node.authorName}</strong>
           <span>{new Date(node.createdAt).toLocaleString()}</span>
         </div>
-        <div className="small mb-2">{renderCommentWithLinks(node.content)}</div>
-        <div className="d-flex gap-2">
-          <Button
-            size="sm"
-            variant={userReaction === "like" ? "success" : "outline-success"}
+        <div className="text-sm mb-2">
+          {renderCommentWithLinks(node.content)}
+        </div>
+        <div className="flex gap-2">
+          <button
+            className={cn(
+              "rounded-lg px-3 py-1 text-xs font-medium transition-colors",
+              userReaction === "like"
+                ? "bg-green-500 text-white"
+                : "border border-green-500 text-green-500 hover:bg-green-500 hover:text-white",
+            )}
             disabled={!user}
             onClick={() => react("like")}
           >
             👍 {likeCount}
-          </Button>
-          <Button
-            size="sm"
-            variant={userReaction === "dislike" ? "danger" : "outline-danger"}
+          </button>
+          <button
+            className={cn(
+              "rounded-lg px-3 py-1 text-xs font-medium transition-colors",
+              userReaction === "dislike"
+                ? "bg-red-500 text-white"
+                : "border border-red-500 text-red-500 hover:bg-red-500 hover:text-white",
+            )}
             disabled={!user}
             onClick={() => react("dislike")}
           >
             👎 {dislikeCount}
-          </Button>
+          </button>
           {user && (
-            <Button
-              size="sm"
-              variant="outline-primary"
+            <button
+              className="rounded-lg border border-primary-500 text-primary-500 hover:bg-primary-500 hover:text-white px-3 py-1 text-xs font-medium transition-colors"
               onClick={() => setReplyOpen((o) => !o)}
             >
               Reply
-            </Button>
+            </button>
           )}
         </div>
-        <Collapse in={replyOpen}>
-          <div style={{ overflow: "visible" }}>
-            <Form
-              className="mt-2"
-              onSubmit={(e) => {
-                e.preventDefault();
-                submit();
+        {/* Collapsible reply form */}
+        <div
+          className={cn(
+            "overflow-hidden transition-all duration-200",
+            replyOpen ? "max-h-[500px] opacity-100 mt-2" : "max-h-0 opacity-0",
+          )}
+        >
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              submit();
+            }}
+          >
+            <textarea
+              rows={2}
+              value={reply}
+              onChange={(e) => {
+                setReply(e.target.value);
+                // reply mention handling: set active textarea and look for @
+                const ta = e.target as HTMLTextAreaElement;
+                activeTextareaRef.current = ta;
+                const caret = ta.selectionStart || ta.value.length;
+                const before = ta.value.slice(0, caret);
+                const at = before.lastIndexOf("@");
+                if (at >= 0 && (at === 0 || /\s/.test(before[at - 1]))) {
+                  const partial = before.slice(at + 1);
+                  if (/^[A-Za-z0-9_]{1,32}$/.test(partial)) {
+                    // debounce: simple 200ms
+                    // mark this comment as suggestion owner so only its dropdown shows
+                    setSuggestionOwner(node.id);
+                    setTimeout(
+                      () => fetchSuggestions(partial.toLowerCase(), node.id),
+                      200,
+                    );
+                  }
+                }
               }}
-            >
-              <Form.Control
-                as="textarea"
-                rows={2}
-                value={reply}
-                onChange={(e) => {
-                  setReply(e.target.value);
-                  // reply mention handling: set active textarea and look for @
-                  const ta = e.target as HTMLTextAreaElement;
-                  activeTextareaRef.current = ta;
-                  const caret = ta.selectionStart || ta.value.length;
-                  const before = ta.value.slice(0, caret);
-                  const at = before.lastIndexOf("@");
-                  if (at >= 0 && (at === 0 || /\s/.test(before[at - 1]))) {
-                    const partial = before.slice(at + 1);
-                    if (/^[A-Za-z0-9_]{1,32}$/.test(partial)) {
-                      // debounce: simple 200ms
-                      // mark this comment as suggestion owner so only its dropdown shows
-                      setSuggestionOwner(node.id);
-                      setTimeout(
-                        () => fetchSuggestions(partial.toLowerCase(), node.id),
-                        200,
-                      );
-                    }
+              placeholder="Reply..."
+              className="w-full rounded-lg border border-border dark:border-border-dark bg-card dark:bg-card-dark text-foreground px-3 py-2 mb-2 outline-none focus:ring-2 focus:ring-primary-500 resize-y text-sm"
+              onFocus={(e) => {
+                activeTextareaRef.current = e.target as HTMLTextAreaElement;
+                setSuggestionOwner(node.id);
+              }}
+              onBlur={(e) => {
+                /* keep suggestions visible briefly; they will be cleared on apply or escape */
+              }}
+              onKeyDown={(e) => {
+                if (suggestionOwner === node.id && showSuggestions) {
+                  if (e.key === "ArrowDown") {
+                    e.preventDefault();
+                    setActiveSuggestion((i: number) =>
+                      Math.min(suggestions.length - 1, i + 1),
+                    );
+                  } else if (e.key === "ArrowUp") {
+                    e.preventDefault();
+                    setActiveSuggestion((i: number) => Math.max(0, i - 1));
+                  } else if (e.key === "Enter") {
+                    e.preventDefault();
+                    const s = suggestions[activeSuggestion];
+                    if (s) insertSuggestionLocal(s.username);
+                  } else if (e.key === "Escape") {
+                    setShowSuggestions(false);
+                    setSuggestionOwner(null);
                   }
-                }}
-                placeholder="Reply..."
-                className="mb-2"
-                onFocus={(e) => {
-                  activeTextareaRef.current = e.target as HTMLTextAreaElement;
-                  setSuggestionOwner(node.id);
-                }}
-                onBlur={(e) => {
-                  /* keep suggestions visible briefly; they will be cleared on apply or escape */
-                }}
-                onKeyDown={(e) => {
-                  if (suggestionOwner === node.id && showSuggestions) {
-                    if (e.key === "ArrowDown") {
-                      e.preventDefault();
-                      setActiveSuggestion((i: number) =>
-                        Math.min(suggestions.length - 1, i + 1),
-                      );
-                    } else if (e.key === "ArrowUp") {
-                      e.preventDefault();
-                      setActiveSuggestion((i: number) => Math.max(0, i - 1));
-                    } else if (e.key === "Enter") {
-                      e.preventDefault();
-                      const s = suggestions[activeSuggestion];
-                      if (s) insertSuggestionLocal(s.username);
-                    } else if (e.key === "Escape") {
-                      setShowSuggestions(false);
-                      setSuggestionOwner(null);
-                    }
-                  }
-                }}
-              />
-              {suggestionOwner === node.id &&
-                showSuggestions &&
-                suggestions.length > 0 && (
-                  <div style={{ position: "relative" }}>
-                    <div
-                      style={{
-                        position: "absolute",
-                        left: 8,
-                        right: 8,
-                        top: "100%",
-                        zIndex: 2000,
-                        background: "var(--bs-body-bg)",
-                        border: "1px solid rgba(0,0,0,0.15)",
-                        borderRadius: 6,
-                        marginTop: 6,
-                        boxShadow: "0 6px 18px rgba(0,0,0,0.12)",
-                      }}
-                    >
-                      {suggestions.map(
-                        (s: { username: string; uid: string }, idx: number) => (
-                          <div
-                            key={s.username}
-                            onMouseDown={(ev) => {
-                              ev.preventDefault(); // ensure owner still this before applying
-                              if (suggestionOwner === node.id)
-                                insertSuggestionLocal(s.username);
-                            }}
-                            style={{
-                              padding: "6px 10px",
-                              cursor: "pointer",
-                              background:
-                                idx === activeSuggestion
-                                  ? "rgba(0,0,0,0.06)"
-                                  : "transparent",
-                            }}
-                          >
-                            @{s.username}
-                          </div>
-                        ),
-                      )}
-                    </div>
+                }
+              }}
+            />
+            {suggestionOwner === node.id &&
+              showSuggestions &&
+              suggestions.length > 0 && (
+                <div className="relative">
+                  <div className="absolute left-2 right-2 top-full z-[2000] bg-card dark:bg-card-dark border border-border dark:border-border-dark rounded-md mt-1.5 shadow-lg">
+                    {suggestions.map(
+                      (s: { username: string; uid: string }, idx: number) => (
+                        <div
+                          key={s.username}
+                          onMouseDown={(ev) => {
+                            ev.preventDefault(); // ensure owner still this before applying
+                            if (suggestionOwner === node.id)
+                              insertSuggestionLocal(s.username);
+                          }}
+                          className={cn(
+                            "px-3 py-1.5 cursor-pointer text-foreground text-sm",
+                            idx === activeSuggestion &&
+                              "bg-gray-100 dark:bg-gray-700",
+                          )}
+                        >
+                          @{s.username}
+                        </div>
+                      ),
+                    )}
                   </div>
-                )}
-              <div className="d-flex gap-2">
-                <Button
-                  size="sm"
-                  disabled={!reply.trim() || working}
-                  type="submit"
-                >
-                  {working ? "Posting..." : "Submit"}
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline-secondary"
-                  onClick={() => {
-                    setReplyOpen(false);
-                    setReply("");
-                  }}
-                >
-                  Cancel
-                </Button>
-              </div>
-            </Form>
-          </div>
-        </Collapse>
+                </div>
+              )}
+            <div className="flex gap-2">
+              <button
+                className="rounded-lg bg-primary-500 hover:bg-primary-600 disabled:opacity-50 text-white px-3 py-1 text-xs font-medium transition-colors"
+                disabled={!reply.trim() || working}
+                type="submit"
+              >
+                {working ? "Posting..." : "Submit"}
+              </button>
+              <button
+                type="button"
+                className="rounded-lg border border-border dark:border-border-dark text-foreground-secondary hover:bg-gray-100 dark:hover:bg-gray-700 px-3 py-1 text-xs font-medium transition-colors"
+                onClick={() => {
+                  setReplyOpen(false);
+                  setReply("");
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
-      <div className="ms-4 mt-2">
+      <div className="ml-6 mt-2">
         {node.replies?.map((r) => (
           <CommentItem
             key={r.id}

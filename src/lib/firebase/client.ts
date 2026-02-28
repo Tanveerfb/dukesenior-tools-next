@@ -5,13 +5,13 @@ import { getStorage } from "firebase/storage";
 import { getAI, getGenerativeModel, GoogleAIBackend } from "firebase/ai";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAW_RZlJOe595z9cZf-Dzao0kAqlNIjiSk",
-  authDomain: "lair-of-evil-tools.firebaseapp.com",
-  projectId: "lair-of-evil-tools",
-  storageBucket: "lair-of-evil-tools.appspot.com",
-  messagingSenderId: "484461115908",
-  appId: "1:484461115908:web:5c90bfa6d7ef9eb9c15351",
-  measurementId: "G-BRT98Q1Z87",
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN!,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID!,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET!,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID!,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID!,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 

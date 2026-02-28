@@ -1,4 +1,3 @@
-import { Alert } from "react-bootstrap";
 import TourneyPage from "@/components/tourney/TourneyPage";
 import { buildTourneyBreadcrumbs } from "@/lib/navigation/tourneyBreadcrumbs";
 
@@ -58,30 +57,37 @@ export default function PhasmoTourney2BracketPage() {
       subtitle="Historic bracket recap covering every round from group stage to final showdown."
       breadcrumbs={breadcrumbs}
       badges={[{ label: "Phasmo Tourney 2" }, { label: "Bracket" }]}
-      containerProps={{ fluid: true, className: "py-3" }}
+      containerProps={{ className: "py-3" }}
     >
-      <Alert className="mb-3">
+      <div className="mb-3 rounded-lg border border-blue-300 bg-blue-50 p-4 text-blue-800 dark:border-blue-700 dark:bg-blue-950 dark:text-blue-200">
         The brackets of the tournament. <br /> <strong>Bold</strong> denotes the
         winner in each match.
-      </Alert>
+      </div>
 
-      <div className="d-flex flex-column gap-3">
+      <div className="flex flex-col gap-3">
         {rounds.map((r, i) => (
-          <div className="card" key={i}>
-            <div className="card-header fw-bold">{r.title}</div>
-            <div className="card-body">
-              <ul className="list-group mb-0">
+          <div
+            className="rounded-xl border border-border bg-card shadow-sm dark:bg-card-dark dark:border-border-dark overflow-hidden"
+            key={i}
+          >
+            <div className="border-b border-border dark:border-border-dark px-5 py-3 font-bold text-foreground">
+              {r.title}
+            </div>
+            <div className="p-5">
+              <ul className="divide-y divide-border dark:divide-border-dark">
                 {r.matches &&
                   r.matches.map((m, idx) => (
                     <li
-                      className="list-group-item"
+                      className="px-3 py-2 text-foreground"
                       key={`${i}-${idx}`}
                       dangerouslySetInnerHTML={{ __html: m }}
                     />
                   ))}
               </ul>
             </div>
-            <div className="card-footer small text-muted">{r.note}</div>
+            <div className="border-t border-border dark:border-border-dark px-5 py-3 text-sm text-foreground-secondary">
+              {r.note}
+            </div>
           </div>
         ))}
       </div>

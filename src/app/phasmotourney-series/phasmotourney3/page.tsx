@@ -2,13 +2,12 @@
 // Redesigned Phasmo Tourney 3 bracket: responsive horizontal flow of rounds.
 // Uses a data schema to keep presentation lean & consistent.
 import React from "react";
-import { Row, Col, Card, ListGroup, Badge } from "react-bootstrap";
 import { FaTrophy } from "react-icons/fa";
 import BracketMatchInfo from "@/components/tourney3/BracketMatchInfo";
 import TourneyPage from "@/components/tourney/TourneyPage";
 import { buildTourneyBreadcrumbs } from "@/lib/navigation/tourneyBreadcrumbs";
-// Redesigned Phasmo Tourney 3 bracket: responsive horizontal flow of rounds.
-// Uses a data schema to keep presentation lean & consistent.
+import { cn } from "@/lib/utils";
+
 interface MatchDef {
   id: number;
   content: React.ReactNode;
@@ -21,7 +20,7 @@ interface RoundDef {
   teamsNote?: string;
   map: string;
   matches: MatchDef[];
-  redemptionMatches?: MatchDef[]; // optional secondary card
+  redemptionMatches?: MatchDef[];
   redemptionNote?: string;
   extraNote?: string;
 }
@@ -117,12 +116,14 @@ const rounds: RoundDef[] = [
       {
         id: 10,
         content: (
-          <div className="d-flex flex-wrap align-items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <span>Team 3 32/50</span>
-            <span className="text-muted small">vs</span>
+            <span className="text-foreground-muted text-sm">vs</span>
             <span>Team 4 45/50</span>
-            <span className="text-muted small">vs</span>
-            <Badge bg="success">Team 6 48/50</Badge>
+            <span className="text-foreground-muted text-sm">vs</span>
+            <span className="rounded-full text-xs font-medium px-2.5 py-0.5 bg-success text-white">
+              Team 6 48/50
+            </span>
           </div>
         ),
         redemption: true,
@@ -155,13 +156,15 @@ const rounds: RoundDef[] = [
       {
         id: 13,
         content: (
-          <div className="d-flex flex-wrap align-items-center gap-2">
-            <Badge bg="success" className="fw-semibold">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="rounded-full text-xs font-semibold px-2.5 py-0.5 bg-success text-white">
               Team 2 49/50
-            </Badge>
-            <span className="small text-muted">vs</span>
+            </span>
+            <span className="text-sm text-foreground-muted">vs</span>
             <span>Team 2 18/25</span>
-            <span className="small text-muted">(2nd run not attempted)</span>
+            <span className="text-sm text-foreground-muted">
+              (2nd run not attempted)
+            </span>
           </div>
         ),
         redemption: true,
@@ -180,9 +183,9 @@ const rounds: RoundDef[] = [
         id: 14,
         content: (
           <>
-            <Badge bg="success" className="me-1">
+            <span className="rounded-full text-xs font-medium px-2.5 py-0.5 bg-success text-white mr-1">
               Team 2
-            </Badge>
+            </span>
             <b className="mx-1">vs</b>
             <span>Team 5</span>
           </>
@@ -192,9 +195,9 @@ const rounds: RoundDef[] = [
         id: 15,
         content: (
           <>
-            <Badge bg="success" className="me-1">
+            <span className="rounded-full text-xs font-medium px-2.5 py-0.5 bg-success text-white mr-1">
               Team 1
-            </Badge>
+            </span>
             <b className="mx-1">vs</b>
             <span>Team 5</span>
           </>
@@ -206,12 +209,9 @@ const rounds: RoundDef[] = [
           <>
             <span>Team 1</span>
             <b className="mx-1">vs</b>
-            <Badge
-              bg="success"
-              className="d-inline-flex align-items-center gap-1"
-            >
+            <span className="inline-flex items-center gap-1 rounded-full text-xs font-medium px-2.5 py-0.5 bg-success text-white">
               <FaTrophy /> Team 2
-            </Badge>
+            </span>
           </>
         ),
       },
@@ -223,75 +223,69 @@ const rounds: RoundDef[] = [
 
 function RoundColumn({ r }: { r: RoundDef }) {
   return (
-    <Col xs={12} md className="d-flex flex-column gap-3 mb-4 mb-md-0">
-      <Card className="h-100 shadow-sm border-0 bg-body-secondary bg-opacity-25">
-        <Card.Header className="py-2 d-flex flex-column gap-1 bg-primary text-white">
-          <span className="fw-bold small text-uppercase">{r.title}</span>
-          <span className="fw-semibold" style={{ fontSize: "0.8rem" }}>
-            {r.subtitle}
-          </span>
-        </Card.Header>
-        <Card.Body className="p-2">
-          <div className="small mb-2 text-muted">
+    <div className="min-w-[280px] md:min-w-0 flex-1 flex flex-col gap-3 mb-4 md:mb-0">
+      {/* Main round card */}
+      <div className="h-full rounded-xl border border-border bg-card dark:bg-card-dark dark:border-border-dark shadow-sm">
+        <div className="py-2 px-3 flex flex-col gap-1 bg-primary rounded-t-xl text-white">
+          <span className="font-bold text-sm uppercase">{r.title}</span>
+          <span className="font-semibold text-[0.8rem]">{r.subtitle}</span>
+        </div>
+        <div className="p-2">
+          <div className="text-sm mb-2 text-foreground-muted">
             <b>Map:</b> {r.map}
           </div>
-          <ListGroup variant="flush" className="small">
+          <ul className="divide-y divide-border dark:divide-border-dark text-sm">
             {r.matches.map((m) => (
-              <ListGroup.Item
-                key={m.id}
-                className="d-flex flex-column gap-1 py-2"
-              >
+              <li key={m.id} className="flex flex-col gap-1 py-2">
                 <div>
-                  <Badge bg="secondary" pill className="me-2">
+                  <span className="rounded-full text-xs font-medium px-2.5 py-0.5 bg-secondary text-white mr-2">
                     M{m.id}
-                  </Badge>
+                  </span>
                   {m.content}
                 </div>
-              </ListGroup.Item>
+              </li>
             ))}
-          </ListGroup>
+          </ul>
           {r.teamsNote && (
-            <div className="mt-2 small text-info">{r.teamsNote}</div>
+            <div className="mt-2 text-sm text-info">{r.teamsNote}</div>
           )}
           {r.extraNote && (
-            <div className="mt-1 small text-muted fst-italic">
+            <div className="mt-1 text-sm text-foreground-muted italic">
               {r.extraNote}
             </div>
           )}
-        </Card.Body>
-      </Card>
+        </div>
+      </div>
+      {/* Redemption card */}
       {r.redemptionMatches && (
-        <Card className="shadow-sm border-0 redemption-card">
-          <Card.Header className="py-2 d-flex flex-column gap-1 bg-danger text-white">
-            <span className="fw-bold small text-uppercase">
+        <div className="rounded-xl border border-border bg-card dark:bg-card-dark dark:border-border-dark shadow-sm">
+          <div className="py-2 px-3 flex flex-col gap-1 bg-danger rounded-t-xl text-white">
+            <span className="font-bold text-sm uppercase">
               {r.title} Redemption
             </span>
-          </Card.Header>
-          <Card.Body className="p-2">
-            <ListGroup variant="flush" className="small">
+          </div>
+          <div className="p-2">
+            <ul className="divide-y divide-border dark:divide-border-dark text-sm">
               {r.redemptionMatches.map((m) => (
-                <ListGroup.Item
-                  key={m.id}
-                  className="d-flex flex-column gap-1 py-2"
-                >
+                <li key={m.id} className="flex flex-col gap-1 py-2">
                   <div>
-                    <Badge bg="dark" pill className="me-2">
+                    <span className="rounded-full text-xs font-medium px-2.5 py-0.5 bg-gray-800 text-white mr-2">
                       M{m.id}
-                    </Badge>
+                    </span>
                     {m.content}
                   </div>
-                </ListGroup.Item>
+                </li>
               ))}
-            </ListGroup>
+            </ul>
             {r.redemptionNote && (
-              <div className="mt-2 small text-danger-emphasis">
+              <div className="mt-2 text-sm text-danger-600 dark:text-danger">
                 {r.redemptionNote}
               </div>
             )}
-          </Card.Body>
-        </Card>
+          </div>
+        </div>
       )}
-    </Col>
+    </div>
   );
 }
 
@@ -307,36 +301,45 @@ export default function T3BracketPage() {
       subtitle="Journey from eight squads to the champion, including redemption paths."
       breadcrumbs={breadcrumbs}
       badges={[{ label: "Phasmo Tourney 3" }, { label: "Bracket" }]}
-      containerProps={{ fluid: "lg", className: "py-3" }}
+      containerProps={{ className: "py-3" }}
     >
-      <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-3">
         <div>
-          <div className="small text-muted">
+          <div className="text-sm text-foreground-muted">
             Progression from 8 teams to final champion with live score
             highlighting.
           </div>
         </div>
-        <div className="d-flex flex-wrap gap-2 small">
-          <span className="d-flex align-items-center gap-1">
-            <Badge bg="primary">Main</Badge> Main Round
+        <div className="flex flex-wrap gap-2 text-sm">
+          <span className="flex items-center gap-1">
+            <span className="rounded-full text-xs font-medium px-2.5 py-0.5 bg-primary text-white">
+              Main
+            </span>{" "}
+            Main Round
           </span>
-          <span className="d-flex align-items-center gap-1">
-            <Badge bg="danger">R</Badge> Redemption
+          <span className="flex items-center gap-1">
+            <span className="rounded-full text-xs font-medium px-2.5 py-0.5 bg-danger text-white">
+              R
+            </span>{" "}
+            Redemption
           </span>
-          <span className="d-flex align-items-center gap-1">
-            <Badge bg="secondary">M#</Badge> Match #
+          <span className="flex items-center gap-1">
+            <span className="rounded-full text-xs font-medium px-2.5 py-0.5 bg-secondary text-white">
+              M#
+            </span>{" "}
+            Match #
           </span>
         </div>
       </div>
-      <Row
-        className="g-3 flex-nowrap overflow-auto pb-2"
+      <div
+        className="flex flex-nowrap gap-3 overflow-auto pb-2 md:grid md:grid-cols-4"
         style={{ scrollbarWidth: "thin" }}
       >
         {rounds.map((r) => (
           <RoundColumn key={r.key} r={r} />
         ))}
-      </Row>
-      <div className="mt-4 small text-muted">
+      </div>
+      <div className="mt-4 text-sm text-foreground-muted">
         Scores & winners update automatically as data changes (highlight via
         BracketMatchInfo). Redemption cards list tie-break / second-chance
         paths.

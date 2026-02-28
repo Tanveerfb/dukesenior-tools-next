@@ -1,17 +1,8 @@
-"use client";
+﻿"use client";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
-import {
-  Alert,
-  Button,
-  Card,
-  Container,
-  Form,
-  Modal,
-  Stack,
-  Table,
-} from "react-bootstrap";
+import { cn } from "@/lib/utils";
 import * as ct from "countries-and-timezones";
 import { formatNowInTimezone } from "@/lib/utils/time";
 
@@ -191,14 +182,14 @@ export default function ManagePlayersPage() {
 
   if (!admin) {
     return (
-      <Container className="py-4">
-        <Alert variant="warning" className="mb-0">
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="rounded-xl border border-yellow-300 bg-yellow-50 text-yellow-800 dark:border-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300 px-4 py-3">
           Admin access required.{" "}
-          <Link href="/login" className="alert-link">
+          <Link href="/login" className="underline font-semibold">
             Log in
           </Link>
-        </Alert>
-      </Container>
+        </div>
+      </div>
     );
   }
 
@@ -211,12 +202,12 @@ export default function ManagePlayersPage() {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(updatedData),
-        }
+        },
       );
       if (!res.ok) throw new Error(`Failed to update player: ${res.status}`);
       const updated: Player = await res.json();
       setPlayers((prev) =>
-        prev.map((p) => (p.id === updated.id ? updated : p))
+        prev.map((p) => (p.id === updated.id ? updated : p)),
       );
       setShowEditModal(false);
       setSelectedPlayer(null);
@@ -232,73 +223,89 @@ export default function ManagePlayersPage() {
   }
 
   return (
-    <Container className="py-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h1 className="h4 fw-semibold mb-0">Manage Players</h1>
-        <Stack direction="horizontal" gap={2} className="mb-3">
+    <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-lg font-semibold">Manage Players</h1>
+        <div className="flex items-center gap-2 mb-3">
           {/* Teams management is handled in Round 3 and Round 6 */}
-          <Button
-            as={Link as any}
+          <Link
             href="/admin/phasmoTourney5/manageeliminator"
-            variant="outline-secondary"
+            className="rounded-lg border border-gray-400 px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
           >
             Manage Eliminator
-          </Button>
-        </Stack>
-        <Button
-          variant={showAddForm ? "secondary" : "primary"}
+          </Link>
+        </div>
+        <button
+          className={cn(
+            "rounded-lg px-4 py-2 text-sm font-medium transition-colors",
+            showAddForm
+              ? "bg-gray-500 text-white hover:bg-gray-600"
+              : "bg-blue-600 text-white hover:bg-blue-700",
+          )}
           onClick={() => setShowAddForm(!showAddForm)}
         >
           {showAddForm ? "Cancel" : "+ Add Player"}
-        </Button>
+        </button>
       </div>
 
       {showAddForm && (
-        <Card className="border-0 shadow-sm mb-4">
-          <Card.Body>
-            <Card.Title as="h2" className="h5 fw-semibold">
-              Add New Player
-            </Card.Title>
-            <Form onSubmit={handleSubmit} className="mt-3">
+        <div className="rounded-xl border border-border bg-card dark:bg-card-dark dark:border-border-dark shadow-sm mb-4">
+          <div className="p-4">
+            <h2 className="text-base font-semibold">Add New Player</h2>
+            <form onSubmit={handleSubmit} className="mt-3">
               {error && (
-                <Alert
-                  variant="danger"
-                  onClose={() => setError(null)}
-                  dismissible
-                >
-                  {error}
-                </Alert>
+                <div className="mb-3 flex items-start justify-between rounded-xl border border-red-300 bg-red-50 text-red-800 dark:border-red-700 dark:bg-red-900/30 dark:text-red-300 px-4 py-3">
+                  <span>{error}</span>
+                  <button
+                    onClick={() => setError(null)}
+                    className="ml-4 font-bold hover:opacity-70"
+                  >
+                    Ã—
+                  </button>
+                </div>
               )}
-              <Form.Group className="mb-3">
-                <Form.Label>Name *</Form.Label>
-                <Form.Control
+              <div className="mb-3">
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  Name *
+                </label>
+                <input
+                  className="w-full rounded-lg border border-border bg-card dark:bg-card-dark dark:border-border-dark px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   required
                 />
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Twitch handle *</Form.Label>
-                <Form.Control
+              </div>
+              <div className="mb-3">
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  Twitch handle *
+                </label>
+                <input
+                  className="w-full rounded-lg border border-border bg-card dark:bg-card-dark dark:border-border-dark px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={form.twitch}
                   onChange={(e) => setForm({ ...form, twitch: e.target.value })}
                   required
                   placeholder="e.g., DukeSenior"
                 />
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Youtube handle</Form.Label>
-                <Form.Control
+              </div>
+              <div className="mb-3">
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  Youtube handle
+                </label>
+                <input
+                  className="w-full rounded-lg border border-border bg-card dark:bg-card-dark dark:border-border-dark px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={form.youtube}
                   onChange={(e) =>
                     setForm({ ...form, youtube: e.target.value })
                   }
                   placeholder="optional"
                 />
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Discord handle *</Form.Label>
-                <Form.Control
+              </div>
+              <div className="mb-3">
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  Discord handle *
+                </label>
+                <input
+                  className="w-full rounded-lg border border-border bg-card dark:bg-card-dark dark:border-border-dark px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={form.discord}
                   onChange={(e) =>
                     setForm({ ...form, discord: e.target.value })
@@ -306,10 +313,13 @@ export default function ManagePlayersPage() {
                   required
                   placeholder="e.g., User#1234 or @user"
                 />
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Prestige *</Form.Label>
-                <Form.Select
+              </div>
+              <div className="mb-3">
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  Prestige *
+                </label>
+                <select
+                  className="w-full rounded-lg border border-border bg-card dark:bg-card-dark dark:border-border-dark px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={form.prestige}
                   onChange={(e) =>
                     setForm({ ...form, prestige: e.target.value })
@@ -320,14 +330,17 @@ export default function ManagePlayersPage() {
                       {r}
                     </option>
                   ))}
-                </Form.Select>
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Timezone *</Form.Label>
-                <Form.Control
+                </select>
+              </div>
+              <div className="mb-3">
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  Timezone *
+                </label>
+                <input
                   type="text"
                   list="timezone-list"
                   placeholder="Start typing: e.g., America/New_York"
+                  className="w-full rounded-lg border border-border bg-card dark:bg-card-dark dark:border-border-dark px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={form.timezone}
                   onChange={(e) =>
                     setForm({ ...form, timezone: e.target.value })
@@ -339,31 +352,40 @@ export default function ManagePlayersPage() {
                     <option key={tz} value={tz} />
                   ))}
                 </datalist>
-                <Form.Text className="text-muted">
+                <p className="text-xs text-gray-500 mt-1">
                   Type to search; pick a suggested timezone.
-                </Form.Text>
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Link Auth UID (optional)</Form.Label>
-                <Form.Control
+                </p>
+              </div>
+              <div className="mb-3">
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  Link Auth UID (optional)
+                </label>
+                <input
+                  className="w-full rounded-lg border border-border bg-card dark:bg-card-dark dark:border-border-dark px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={form.uid}
                   onChange={(e) => setForm({ ...form, uid: e.target.value })}
                   placeholder="Paste Firebase UID to link player"
                 />
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Check
-                  type="checkbox"
-                  label="Audition done?"
-                  checked={form.auditionDone}
-                  onChange={(e) =>
-                    setForm({ ...form, auditionDone: e.target.checked })
-                  }
-                />
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Status *</Form.Label>
-                <Form.Select
+              </div>
+              <div className="mb-3">
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={form.auditionDone}
+                    onChange={(e) =>
+                      setForm({ ...form, auditionDone: e.target.checked })
+                    }
+                    className="rounded border-border"
+                  />
+                  <span>Audition done?</span>
+                </label>
+              </div>
+              <div className="mb-3">
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  Status *
+                </label>
+                <select
+                  className="w-full rounded-lg border border-border bg-card dark:bg-card-dark dark:border-border-dark px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={form.status}
                   onChange={(e) =>
                     setForm({
@@ -378,340 +400,423 @@ export default function ManagePlayersPage() {
                   <option value="Active">Active</option>
                   <option value="Inactive">Inactive</option>
                   <option value="Eliminated">Eliminated</option>
-                </Form.Select>
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Check
-                  type="checkbox"
-                  label="Immune?"
-                  checked={form.immune}
-                  onChange={(e) =>
-                    setForm({ ...form, immune: e.target.checked })
-                  }
-                />
-              </Form.Group>
-              <Stack direction="horizontal" gap={3}>
-                <Button type="submit" variant="primary">
+                </select>
+              </div>
+              <div className="mb-3">
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={form.immune}
+                    onChange={(e) =>
+                      setForm({ ...form, immune: e.target.checked })
+                    }
+                    className="rounded border-border"
+                  />
+                  <span>Immune?</span>
+                </label>
+              </div>
+              <div className="flex items-center gap-3">
+                <button
+                  type="submit"
+                  className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+                >
                   Add Player
-                </Button>
-              </Stack>
-            </Form>
-          </Card.Body>
-        </Card>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
 
-      <Card className="border-0 shadow-sm">
-        <Card.Body>
-          <Card.Title as="h2" className="h5 fw-semibold">
-            Players
-          </Card.Title>
+      <div className="rounded-xl border border-border bg-card dark:bg-card-dark dark:border-border-dark shadow-sm">
+        <div className="p-4">
+          <h2 className="text-base font-semibold">Players</h2>
           {loading ? (
-            <div className="text-muted">Loading…</div>
+            <div className="text-gray-500">Loadingâ€¦</div>
           ) : (
-            <Table responsive size="sm" className="mt-3">
-              <thead>
-                <tr>
-                  <th style={{ width: "3%" }}>#</th>
-                  <th>Name</th>
-                  <th>Twitch</th>
-                  <th>Discord</th>
-                  <th>Prestige</th>
-                  <th>Status</th>
-                  <th style={{ width: "5%" }}>Immune</th>
-                  <th>Local Time</th>
-                  <th style={{ width: "10%" }}>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {players.map((p, idx) => (
-                  <tr key={p.id}>
-                    <td className="fw-semibold">{idx + 1}</td>
-                    <td>{p.name}</td>
-                    <td>
-                      <a
-                        href={`https://twitch.tv/${p.twitch}`}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        {p.twitch}
-                      </a>
-                    </td>
-                    <td>{p.discord}</td>
-                    <td>{p.prestige}</td>
-                    <td>
-                      <span
-                        className={`badge ${
-                          p.status === "Active"
-                            ? "bg-success"
-                            : p.status === "Inactive"
-                            ? "bg-warning"
-                            : "bg-danger"
-                        }`}
-                      >
-                        {p.status}
-                      </span>
-                    </td>
-                    <td className="text-center">
-                      <Button
-                        size="sm"
-                        variant={p.immune ? "warning" : "outline-secondary"}
-                        onClick={() => {
-                          setSelectedPlayer(p);
-                          setShowImmunModal(true);
-                        }}
-                        title={
-                          p.immune
-                            ? "Player is immune"
-                            : "Click to toggle immune"
-                        }
-                      >
-                        {p.immune ? "🛡️" : "—"}
-                      </Button>
-                    </td>
-                    <td className="text-muted small">
-                      {liveTime[p.id] || "—"}
-                    </td>
-                    <td>
-                      <Button
-                        size="sm"
-                        variant="outline-primary"
-                        onClick={() => {
-                          setSelectedPlayer(p);
-                          setShowEditModal(true);
-                        }}
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline-danger"
-                        className="ms-2"
-                        onClick={async () => {
-                          const confirmed = window.confirm(
-                            `Delete player "${p.name}"? This can be undone only by re-adding.`
-                          );
-                          if (!confirmed) return;
-                          try {
-                            const res = await fetch(
-                              `/api/admin/phasmoTourney5/players/${p.id}`,
-                              { method: "DELETE" }
-                            );
-                            if (!res.ok)
-                              throw new Error(
-                                `Failed to delete player: ${res.status}`
-                              );
-                            setPlayers((prev) =>
-                              prev.filter((x) => x.id !== p.id)
-                            );
-                          } catch (e: any) {
-                            setError(e?.message || "Failed to delete player");
+            <div className="overflow-x-auto mt-3">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border dark:border-border-dark">
+                    <th className="text-left py-2 px-3 font-medium w-[3%]">
+                      #
+                    </th>
+                    <th className="text-left py-2 px-3 font-medium">Name</th>
+                    <th className="text-left py-2 px-3 font-medium">Twitch</th>
+                    <th className="text-left py-2 px-3 font-medium">Discord</th>
+                    <th className="text-left py-2 px-3 font-medium">
+                      Prestige
+                    </th>
+                    <th className="text-left py-2 px-3 font-medium">Status</th>
+                    <th className="text-left py-2 px-3 font-medium w-[5%]">
+                      Immune
+                    </th>
+                    <th className="text-left py-2 px-3 font-medium">
+                      Local Time
+                    </th>
+                    <th className="text-left py-2 px-3 font-medium w-[10%]">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {players.map((p, idx) => (
+                    <tr
+                      key={p.id}
+                      className="border-b border-border/50 dark:border-border-dark/50 hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                    >
+                      <td className="py-2 px-3 font-semibold">{idx + 1}</td>
+                      <td className="py-2 px-3">{p.name}</td>
+                      <td className="py-2 px-3">
+                        <a
+                          href={`https://twitch.tv/${p.twitch}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-blue-600 hover:underline"
+                        >
+                          {p.twitch}
+                        </a>
+                      </td>
+                      <td className="py-2 px-3">{p.discord}</td>
+                      <td className="py-2 px-3">{p.prestige}</td>
+                      <td className="py-2 px-3">
+                        <span
+                          className={cn(
+                            "inline-flex rounded-full text-xs font-medium px-2.5 py-0.5",
+                            p.status === "Active"
+                              ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                              : p.status === "Inactive"
+                                ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300"
+                                : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
+                          )}
+                        >
+                          {p.status}
+                        </span>
+                      </td>
+                      <td className="py-2 px-3 text-center">
+                        <button
+                          onClick={() => {
+                            setSelectedPlayer(p);
+                            setShowImmunModal(true);
+                          }}
+                          title={
+                            p.immune
+                              ? "Player is immune"
+                              : "Click to toggle immune"
                           }
-                        }}
-                      >
-                        Delete
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-                {players.length === 0 && (
-                  <tr>
-                    <td colSpan={9} className="text-muted">
-                      No players yet.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </Table>
+                          className={cn(
+                            "rounded-lg px-2.5 py-1 text-xs font-medium transition-colors",
+                            p.immune
+                              ? "bg-yellow-500 text-white hover:bg-yellow-600"
+                              : "border border-gray-400 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800",
+                          )}
+                        >
+                          {p.immune ? "ðŸ›¡ï¸" : "â€”"}
+                        </button>
+                      </td>
+                      <td className="py-2 px-3 text-gray-500 text-xs">
+                        {liveTime[p.id] || "â€”"}
+                      </td>
+                      <td className="py-2 px-3">
+                        <button
+                          onClick={() => {
+                            setSelectedPlayer(p);
+                            setShowEditModal(true);
+                          }}
+                          className="rounded-lg border border-blue-600 px-2.5 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="ml-2 rounded-lg border border-red-600 px-2.5 py-1 text-xs font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                          onClick={async () => {
+                            const confirmed = window.confirm(
+                              `Delete player "${p.name}"? This can be undone only by re-adding.`,
+                            );
+                            if (!confirmed) return;
+                            try {
+                              const res = await fetch(
+                                `/api/admin/phasmoTourney5/players/${p.id}`,
+                                { method: "DELETE" },
+                              );
+                              if (!res.ok)
+                                throw new Error(
+                                  `Failed to delete player: ${res.status}`,
+                                );
+                              setPlayers((prev) =>
+                                prev.filter((x) => x.id !== p.id),
+                              );
+                            } catch (e: any) {
+                              setError(e?.message || "Failed to delete player");
+                            }
+                          }}
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                  {players.length === 0 && (
+                    <tr>
+                      <td colSpan={9} className="py-2 px-3 text-gray-500">
+                        No players yet.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           )}
-        </Card.Body>
-      </Card>
+        </div>
+      </div>
 
       {/* Edit Player Modal */}
-      <Modal
-        show={showEditModal}
-        onHide={() => setShowEditModal(false)}
-        size="lg"
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>Edit Player: {selectedPlayer?.name}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {selectedPlayer && (
-            <Form>
-              <Form.Group className="mb-3">
-                <Form.Label>Name</Form.Label>
-                <Form.Control
-                  value={selectedPlayer.name}
-                  onChange={(e) =>
-                    setSelectedPlayer({
-                      ...selectedPlayer,
-                      name: e.target.value,
-                    })
+      {showEditModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="fixed inset-0 bg-black/50"
+            onClick={() => setShowEditModal(false)}
+          />
+          <div className="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl bg-card dark:bg-card-dark border border-border dark:border-border-dark shadow-xl mx-4">
+            <div className="flex items-center justify-between border-b border-border dark:border-border-dark p-4">
+              <h3 className="text-lg font-semibold">
+                Edit Player: {selectedPlayer?.name}
+              </h3>
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="text-gray-400 hover:text-gray-600 text-xl"
+              >
+                Ã—
+              </button>
+            </div>
+            <div className="p-4">
+              {selectedPlayer && (
+                <div>
+                  <div className="mb-3">
+                    <label className="block text-sm font-medium text-foreground mb-1">
+                      Name
+                    </label>
+                    <input
+                      className="w-full rounded-lg border border-border bg-card dark:bg-card-dark dark:border-border-dark px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      value={selectedPlayer.name}
+                      onChange={(e) =>
+                        setSelectedPlayer({
+                          ...selectedPlayer,
+                          name: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="block text-sm font-medium text-foreground mb-1">
+                      Twitch
+                    </label>
+                    <input
+                      className="w-full rounded-lg border border-border bg-card dark:bg-card-dark dark:border-border-dark px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      value={selectedPlayer.twitch}
+                      onChange={(e) =>
+                        setSelectedPlayer({
+                          ...selectedPlayer,
+                          twitch: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="block text-sm font-medium text-foreground mb-1">
+                      Youtube
+                    </label>
+                    <input
+                      className="w-full rounded-lg border border-border bg-card dark:bg-card-dark dark:border-border-dark px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      value={selectedPlayer.youtube || ""}
+                      onChange={(e) =>
+                        setSelectedPlayer({
+                          ...selectedPlayer,
+                          youtube: e.target.value || undefined,
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="block text-sm font-medium text-foreground mb-1">
+                      Discord
+                    </label>
+                    <input
+                      className="w-full rounded-lg border border-border bg-card dark:bg-card-dark dark:border-border-dark px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      value={selectedPlayer.discord}
+                      onChange={(e) =>
+                        setSelectedPlayer({
+                          ...selectedPlayer,
+                          discord: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="block text-sm font-medium text-foreground mb-1">
+                      Prestige
+                    </label>
+                    <select
+                      className="w-full rounded-lg border border-border bg-card dark:bg-card-dark dark:border-border-dark px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      value={selectedPlayer.prestige}
+                      onChange={(e) =>
+                        setSelectedPlayer({
+                          ...selectedPlayer,
+                          prestige: e.target.value,
+                        })
+                      }
+                    >
+                      {romanPrestige.map((r) => (
+                        <option key={r} value={r}>
+                          {r}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="mb-3">
+                    <label className="block text-sm font-medium text-foreground mb-1">
+                      Timezone
+                    </label>
+                    <input
+                      type="text"
+                      list="timezone-list-edit"
+                      className="w-full rounded-lg border border-border bg-card dark:bg-card-dark dark:border-border-dark px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      value={selectedPlayer.timezone}
+                      onChange={(e) =>
+                        setSelectedPlayer({
+                          ...selectedPlayer,
+                          timezone: e.target.value,
+                        })
+                      }
+                    />
+                    <datalist id="timezone-list-edit">
+                      {timezones.map((tz) => (
+                        <option key={tz} value={tz} />
+                      ))}
+                    </datalist>
+                  </div>
+                  <div className="mb-3">
+                    <label className="block text-sm font-medium text-foreground mb-1">
+                      Status
+                    </label>
+                    <select
+                      className="w-full rounded-lg border border-border bg-card dark:bg-card-dark dark:border-border-dark px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      value={selectedPlayer.status}
+                      onChange={(e) =>
+                        setSelectedPlayer({
+                          ...selectedPlayer,
+                          status: e.target.value as
+                            | "Active"
+                            | "Inactive"
+                            | "Eliminated",
+                        })
+                      }
+                    >
+                      <option value="Active">Active</option>
+                      <option value="Inactive">Inactive</option>
+                      <option value="Eliminated">Eliminated</option>
+                    </select>
+                  </div>
+                  <div className="mb-3">
+                    <label className="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={selectedPlayer.auditionDone}
+                        onChange={(e) =>
+                          setSelectedPlayer({
+                            ...selectedPlayer,
+                            auditionDone: e.target.checked,
+                          })
+                        }
+                        className="rounded border-border"
+                      />
+                      <span>Audition done?</span>
+                    </label>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="flex justify-end gap-2 border-t border-border dark:border-border-dark p-4">
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="rounded-lg bg-gray-500 px-4 py-2 text-sm font-medium text-white hover:bg-gray-600 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  if (selectedPlayer) {
+                    handleEditPlayer({
+                      name: selectedPlayer.name,
+                      twitch: selectedPlayer.twitch,
+                      youtube: selectedPlayer.youtube,
+                      discord: selectedPlayer.discord,
+                      prestige: selectedPlayer.prestige,
+                      timezone: selectedPlayer.timezone,
+                      status: selectedPlayer.status,
+                      auditionDone: selectedPlayer.auditionDone,
+                    });
                   }
-                />
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Twitch</Form.Label>
-                <Form.Control
-                  value={selectedPlayer.twitch}
-                  onChange={(e) =>
-                    setSelectedPlayer({
-                      ...selectedPlayer,
-                      twitch: e.target.value,
-                    })
-                  }
-                />
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Youtube</Form.Label>
-                <Form.Control
-                  value={selectedPlayer.youtube || ""}
-                  onChange={(e) =>
-                    setSelectedPlayer({
-                      ...selectedPlayer,
-                      youtube: e.target.value || undefined,
-                    })
-                  }
-                />
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Discord</Form.Label>
-                <Form.Control
-                  value={selectedPlayer.discord}
-                  onChange={(e) =>
-                    setSelectedPlayer({
-                      ...selectedPlayer,
-                      discord: e.target.value,
-                    })
-                  }
-                />
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Prestige</Form.Label>
-                <Form.Select
-                  value={selectedPlayer.prestige}
-                  onChange={(e) =>
-                    setSelectedPlayer({
-                      ...selectedPlayer,
-                      prestige: e.target.value,
-                    })
-                  }
-                >
-                  {romanPrestige.map((r) => (
-                    <option key={r} value={r}>
-                      {r}
-                    </option>
-                  ))}
-                </Form.Select>
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Timezone</Form.Label>
-                <Form.Control
-                  type="text"
-                  list="timezone-list-edit"
-                  value={selectedPlayer.timezone}
-                  onChange={(e) =>
-                    setSelectedPlayer({
-                      ...selectedPlayer,
-                      timezone: e.target.value,
-                    })
-                  }
-                />
-                <datalist id="timezone-list-edit">
-                  {timezones.map((tz) => (
-                    <option key={tz} value={tz} />
-                  ))}
-                </datalist>
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Label>Status</Form.Label>
-                <Form.Select
-                  value={selectedPlayer.status}
-                  onChange={(e) =>
-                    setSelectedPlayer({
-                      ...selectedPlayer,
-                      status: e.target.value as
-                        | "Active"
-                        | "Inactive"
-                        | "Eliminated",
-                    })
-                  }
-                >
-                  <option value="Active">Active</option>
-                  <option value="Inactive">Inactive</option>
-                  <option value="Eliminated">Eliminated</option>
-                </Form.Select>
-              </Form.Group>
-              <Form.Group className="mb-3">
-                <Form.Check
-                  type="checkbox"
-                  label="Audition done?"
-                  checked={selectedPlayer.auditionDone}
-                  onChange={(e) =>
-                    setSelectedPlayer({
-                      ...selectedPlayer,
-                      auditionDone: e.target.checked,
-                    })
-                  }
-                />
-              </Form.Group>
-            </Form>
-          )}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowEditModal(false)}>
-            Cancel
-          </Button>
-          <Button
-            variant="primary"
-            onClick={() => {
-              if (selectedPlayer) {
-                handleEditPlayer({
-                  name: selectedPlayer.name,
-                  twitch: selectedPlayer.twitch,
-                  youtube: selectedPlayer.youtube,
-                  discord: selectedPlayer.discord,
-                  prestige: selectedPlayer.prestige,
-                  timezone: selectedPlayer.timezone,
-                  status: selectedPlayer.status,
-                  auditionDone: selectedPlayer.auditionDone,
-                });
-              }
-            }}
-          >
-            Save Changes
-          </Button>
-        </Modal.Footer>
-      </Modal>
+                }}
+                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+              >
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Immune Toggle Confirmation Modal */}
-      <Modal show={showImmunModal} onHide={() => setShowImmunModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Confirm Immune Status</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <p>
-            Are you sure you want to{" "}
-            <strong>
-              {selectedPlayer?.immune ? "remove" : "grant"} immunity
-            </strong>{" "}
-            for <strong>{selectedPlayer?.name}</strong>?
-          </p>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowImmunModal(false)}>
-            Cancel
-          </Button>
-          <Button
-            variant={selectedPlayer?.immune ? "warning" : "success"}
-            onClick={handleToggleImmune}
-          >
-            {selectedPlayer?.immune ? "Remove Immunity" : "Grant Immunity"}
-          </Button>
-        </Modal.Footer>
-      </Modal>
+      {showImmunModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="fixed inset-0 bg-black/50"
+            onClick={() => setShowImmunModal(false)}
+          />
+          <div className="relative z-10 w-full max-w-md rounded-xl bg-card dark:bg-card-dark border border-border dark:border-border-dark shadow-xl mx-4">
+            <div className="flex items-center justify-between border-b border-border dark:border-border-dark p-4">
+              <h3 className="text-lg font-semibold">Confirm Immune Status</h3>
+              <button
+                onClick={() => setShowImmunModal(false)}
+                className="text-gray-400 hover:text-gray-600 text-xl"
+              >
+                Ã—
+              </button>
+            </div>
+            <div className="p-4">
+              <p>
+                Are you sure you want to{" "}
+                <strong>
+                  {selectedPlayer?.immune ? "remove" : "grant"} immunity
+                </strong>{" "}
+                for <strong>{selectedPlayer?.name}</strong>?
+              </p>
+            </div>
+            <div className="flex justify-end gap-2 border-t border-border dark:border-border-dark p-4">
+              <button
+                onClick={() => setShowImmunModal(false)}
+                className="rounded-lg bg-gray-500 px-4 py-2 text-sm font-medium text-white hover:bg-gray-600 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleToggleImmune}
+                className={cn(
+                  "rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors",
+                  selectedPlayer?.immune
+                    ? "bg-yellow-500 hover:bg-yellow-600"
+                    : "bg-green-600 hover:bg-green-700",
+                )}
+              >
+                {selectedPlayer?.immune ? "Remove Immunity" : "Grant Immunity"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Teams management removed; handled per-round */}
-    </Container>
+    </div>
   );
 }

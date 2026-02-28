@@ -1,6 +1,6 @@
 "use client";
 import { ReactNode } from "react";
-import { Alert, Container } from "@mui/material";
+import { FiAlertTriangle } from "react-icons/fi";
 import { useAuth } from "@/hooks/useAuth";
 
 interface AdminAuthGuardProps {
@@ -10,20 +10,9 @@ interface AdminAuthGuardProps {
 
 /**
  * AdminAuthGuard - Wrapper component for admin-only pages
- * 
+ *
  * This component checks if the user has admin privileges and displays
  * the content only if authorized, otherwise shows an access denied message.
- * 
- * @example
- * ```tsx
- * export default function AdminPage() {
- *   return (
- *     <AdminAuthGuard>
- *       <YourAdminContent />
- *     </AdminAuthGuard>
- *   );
- * }
- * ```
  */
 export default function AdminAuthGuard({
   children,
@@ -33,9 +22,12 @@ export default function AdminAuthGuard({
 
   if (!admin) {
     return (
-      <Container maxWidth="xl" sx={{ py: 4 }}>
-        <Alert severity="warning">{message}</Alert>
-      </Container>
+      <div className="mx-auto max-w-7xl px-4 py-8">
+        <div className="flex items-center gap-3 rounded-lg border border-yellow-500/30 bg-yellow-500/10 px-4 py-3 text-yellow-700 dark:text-yellow-400">
+          <FiAlertTriangle className="h-5 w-5 shrink-0" />
+          <span className="text-sm font-medium">{message}</span>
+        </div>
+      </div>
     );
   }
 

@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { Accordion, Form } from "react-bootstrap";
+import { cn } from "@/lib/utils";
+import { FiChevronDown } from "react-icons/fi";
 import GameSettingsAdminEditor from "./GameSettingsAdminEditor";
 
 export default function MatchSettingsEditor({
@@ -10,10 +11,11 @@ export default function MatchSettingsEditor({
 }) {
   const roundId = `round4-match-${matchNumber}`;
   const [players, setPlayers] = useState<Array<{ id: string; name: string }>>(
-    []
+    [],
   );
   const [p1, setP1] = useState<string>("");
   const [p2, setP2] = useState<string>("");
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -37,37 +39,58 @@ export default function MatchSettingsEditor({
   }, [players, p1, p2, matchNumber]);
 
   return (
-    <Accordion className="mb-3">
-      <Accordion.Item eventKey={`match-${matchNumber}`}>
-        <Accordion.Header>{title}</Accordion.Header>
-        <Accordion.Body>
-          <div className="d-flex gap-3 flex-wrap mb-3">
-            <Form.Group>
-              <Form.Label>Player 1</Form.Label>
-              <Form.Select value={p1} onChange={(e) => setP1(e.target.value)}>
+    <div className="rounded-xl border border-border bg-card dark:bg-card-dark dark:border-border-dark shadow-sm mb-3">
+      <button
+        type="button"
+        onClick={() => setOpen((prev) => !prev)}
+        className="w-full flex items-center justify-between px-4 py-3 text-left text-foreground font-medium hover:bg-black/5 dark:hover:bg-white/5 transition-colors rounded-t-xl"
+      >
+        <span>{title}</span>
+        <FiChevronDown
+          className={cn("w-5 h-5 transition-transform", open && "rotate-180")}
+        />
+      </button>
+      {open && (
+        <div className="px-4 pb-4">
+          <div className="flex gap-3 flex-wrap mb-3">
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1">
+                Player 1
+              </label>
+              <select
+                value={p1}
+                onChange={(e) => setP1(e.target.value)}
+                className="rounded-lg border border-border dark:border-border-dark bg-card dark:bg-card-dark text-foreground px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              >
                 <option value="">Select player…</option>
                 {players.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.name}
                   </option>
                 ))}
-              </Form.Select>
-            </Form.Group>
-            <Form.Group>
-              <Form.Label>Player 2</Form.Label>
-              <Form.Select value={p2} onChange={(e) => setP2(e.target.value)}>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1">
+                Player 2
+              </label>
+              <select
+                value={p2}
+                onChange={(e) => setP2(e.target.value)}
+                className="rounded-lg border border-border dark:border-border-dark bg-card dark:bg-card-dark text-foreground px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              >
                 <option value="">Select player…</option>
                 {players.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.name}
                   </option>
                 ))}
-              </Form.Select>
-            </Form.Group>
+              </select>
+            </div>
           </div>
           <GameSettingsAdminEditor roundId={roundId} />
-        </Accordion.Body>
-      </Accordion.Item>
-    </Accordion>
+        </div>
+      )}
+    </div>
   );
 }

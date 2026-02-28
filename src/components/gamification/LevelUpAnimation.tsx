@@ -1,15 +1,15 @@
 "use client";
 
-import { useEffect, useState } from 'react';
-import { Box, Typography, Paper, Fade } from '@mui/material';
-import { Celebration } from '@mui/icons-material';
-import confetti from 'canvas-confetti';
-import { getLevelTitle } from '@/types/gamification';
+import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { FiAward } from "react-icons/fi";
+import confetti from "canvas-confetti";
+import { getLevelTitle } from "@/types/gamification";
 
 interface LevelUpAnimationProps {
   newLevel: number;
   onComplete?: () => void;
-  duration?: number; // in milliseconds
+  duration?: number;
 }
 
 export function LevelUpAnimation({
@@ -18,31 +18,29 @@ export function LevelUpAnimation({
   duration = 3000,
 }: LevelUpAnimationProps) {
   useEffect(() => {
-    // Trigger confetti
     const confettiConfig = {
       particleCount: 100,
       spread: 70,
       origin: { y: 0.6 },
-      colors: ['#FFD700', '#FFA500', '#FF6B6B', '#4CAF50', '#2196F3', '#9C27B0'],
+      colors: [
+        "#FFD700",
+        "#FFA500",
+        "#FF6B6B",
+        "#4CAF50",
+        "#2196F3",
+        "#9C27B0",
+      ],
     };
 
-    // Fire confetti multiple times
     const fireConfetti = () => {
       confetti(confettiConfig);
-      confetti({
-        ...confettiConfig,
-        origin: { x: 0.3, y: 0.6 },
-      });
-      confetti({
-        ...confettiConfig,
-        origin: { x: 0.7, y: 0.6 },
-      });
+      confetti({ ...confettiConfig, origin: { x: 0.3, y: 0.6 } });
+      confetti({ ...confettiConfig, origin: { x: 0.7, y: 0.6 } });
     };
 
     fireConfetti();
     const interval = setInterval(fireConfetti, 500);
 
-    // Cleanup and callback
     const timeout = setTimeout(() => {
       clearInterval(interval);
       if (onComplete) onComplete();
@@ -55,69 +53,27 @@ export function LevelUpAnimation({
   }, [newLevel, onComplete, duration]);
 
   return (
-    <Fade in timeout={500}>
-      <Box
-        sx={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: 'rgba(0, 0, 0, 0.8)',
-          zIndex: 9999,
-          pointerEvents: 'none',
-        }}
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 pointer-events-none"
+    >
+      <motion.div
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: [1, 1.05, 1], opacity: 1 }}
+        transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }}
+        className="max-w-md rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-700 p-12 text-center text-white shadow-2xl"
       >
-        <Paper
-          elevation={24}
-          sx={{
-            p: 6,
-            textAlign: 'center',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            color: 'white',
-            borderRadius: 4,
-            maxWidth: 500,
-            animation: 'pulse 1s ease-in-out infinite',
-            '@keyframes pulse': {
-              '0%, 100%': {
-                transform: 'scale(1)',
-              },
-              '50%': {
-                transform: 'scale(1.05)',
-              },
-            },
-          }}
-        >
-          <Celebration
-            sx={{
-              fontSize: 80,
-              mb: 2,
-              animation: 'rotate 2s linear infinite',
-              '@keyframes rotate': {
-                '0%': {
-                  transform: 'rotate(0deg)',
-                },
-                '100%': {
-                  transform: 'rotate(360deg)',
-                },
-              },
-            }}
-          />
-          <Typography variant="h3" sx={{ fontWeight: 'bold', mb: 2 }}>
-            LEVEL UP!
-          </Typography>
-          <Typography variant="h2" sx={{ fontWeight: 'bold', mb: 1 }}>
-            Level {newLevel}
-          </Typography>
-          <Typography variant="h5" sx={{ opacity: 0.9 }}>
-            {getLevelTitle(newLevel)}
-          </Typography>
-        </Paper>
-      </Box>
-    </Fade>
+        <FiAward
+          className="mx-auto mb-4 h-20 w-20 animate-spin"
+          style={{ animationDuration: "2s" }}
+        />
+        <h2 className="mb-3 text-4xl font-bold">LEVEL UP!</h2>
+        <p className="mb-2 text-5xl font-bold">Level {newLevel}</p>
+        <p className="text-xl opacity-90">{getLevelTitle(newLevel)}</p>
+      </motion.div>
+    </motion.div>
   );
 }
 
@@ -142,8 +98,15 @@ export function useLevelUpAnimation() {
     levelToShow,
     triggerLevelUp,
     handleComplete,
-    LevelUpComponent: showAnimation ? (
-      <LevelUpAnimation newLevel={levelToShow} onComplete={handleComplete} />
-    ) : null,
+    LevelUpComponent: (
+      <AnimatePresence>
+        {showAnimation && (
+          <LevelUpAnimation
+            newLevel={levelToShow}
+            onComplete={handleComplete}
+          />
+        )}
+      </AnimatePresence>
+    ),
   };
 }

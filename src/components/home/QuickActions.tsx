@@ -1,28 +1,14 @@
 "use client";
-import {
-  Card,
-  CardContent,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Typography,
-} from "@mui/material";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import {
-  Person as PersonIcon,
-  EmojiEvents as TrophyIcon,
-  Feedback as FeedbackIcon,
-  LibraryBooks as LibraryIcon,
-  Info as InfoIcon,
-  VideoLibrary as VideoIcon,
-} from "@mui/icons-material";
-import { useTheme } from "@mui/material/styles";
-
-const MotionCard = motion.create(Card);
-const MotionListItem = motion.create(ListItem);
+  FiUser,
+  FiAward,
+  FiPlayCircle,
+  FiMessageCircle,
+  FiBookOpen,
+  FiInfo,
+} from "react-icons/fi";
 
 interface QuickAction {
   icon: React.ReactNode;
@@ -33,38 +19,37 @@ interface QuickAction {
 
 const quickActions: QuickAction[] = [
   {
-    icon: <PersonIcon />,
+    icon: <FiUser size={18} />,
     label: "Your Profile",
     description: "View and edit your profile",
     href: "/profile",
   },
   {
-    icon: <TrophyIcon />,
+    icon: <FiAward size={18} />,
     label: "Leaderboards",
     description: "See tournament standings",
     href: "/phasmotourney-series",
   },
   {
-    icon: <VideoIcon />,
+    icon: <FiPlayCircle size={18} />,
     label: "Recorded Runs",
     description: "Browse match recordings",
-    // Note: Both link to the tournament series page where users can navigate to specific sections
     href: "/phasmotourney-series",
   },
   {
-    icon: <FeedbackIcon />,
+    icon: <FiMessageCircle size={18} />,
     label: "Suggestions",
     description: "Share ideas & feedback",
     href: "/suggestions",
   },
   {
-    icon: <LibraryIcon />,
+    icon: <FiBookOpen size={18} />,
     label: "Resources",
     description: "Guides and documentation",
     href: "/posts",
   },
   {
-    icon: <InfoIcon />,
+    icon: <FiInfo size={18} />,
     label: "About",
     description: "Learn more about us",
     href: "/about",
@@ -72,77 +57,46 @@ const quickActions: QuickAction[] = [
 ];
 
 export default function QuickActions() {
-  const theme = useTheme();
-
   return (
-    <MotionCard
+    <motion.div
       initial={{ opacity: 0, x: 20 }}
       whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5 }}
-      elevation={2}
-      sx={{
-        height: "100%",
-        border: `1px solid ${theme.palette.divider}`,
-      }}
+      className="rounded-xl border border-border dark:border-border-dark bg-card dark:bg-card-dark p-5"
     >
-      <CardContent>
-        <Typography
-          variant="h6"
-          component="h2"
-          gutterBottom
-          sx={{ fontWeight: 600 }}
-        >
-          Quick Actions
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          Navigate to key pages and features
-        </Typography>
+      <h2 className="text-lg font-semibold text-foreground dark:text-foreground-dark mb-1">
+        Quick Actions
+      </h2>
+      <p className="text-sm text-foreground-muted dark:text-foreground-dark-muted mb-4">
+        Navigate to key pages and features
+      </p>
 
-        <List sx={{ p: 0 }}>
-          {quickActions.map((action, index) => (
-            <MotionListItem
-              key={`${action.href}-${index}`}
-              disablePadding
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.3, delay: index * 0.05 }}
+      <div className="space-y-1">
+        {quickActions.map((action, index) => (
+          <motion.div
+            key={`${action.href}-${index}`}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3, delay: index * 0.05 }}
+          >
+            <Link
+              href={action.href}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-primary/5 dark:hover:bg-primary/10 transition-colors no-underline group"
             >
-              <ListItemButton
-                component={Link}
-                href={action.href}
-                sx={{
-                  borderRadius: 1,
-                  mb: 0.5,
-                  "&:hover": {
-                    bgcolor:
-                      theme.palette.mode === "dark"
-                        ? "rgba(171, 47, 177, 0.1)"
-                        : "rgba(171, 47, 177, 0.05)",
-                  },
-                }}
-              >
-                <ListItemIcon
-                  sx={{ color: theme.palette.primary.main, minWidth: 40 }}
-                >
-                  {action.icon}
-                </ListItemIcon>
-                <ListItemText
-                  primary={action.label}
-                  secondary={action.description}
-                  primaryTypographyProps={{
-                    variant: "body2",
-                    fontWeight: 500,
-                  }}
-                  secondaryTypographyProps={{
-                    variant: "caption",
-                  }}
-                />
-              </ListItemButton>
-            </MotionListItem>
-          ))}
-        </List>
-      </CardContent>
-    </MotionCard>
+              <span className="text-primary shrink-0">{action.icon}</span>
+              <div>
+                <p className="text-sm font-medium text-foreground dark:text-foreground-dark group-hover:text-primary transition-colors">
+                  {action.label}
+                </p>
+                <p className="text-xs text-foreground-muted dark:text-foreground-dark-muted">
+                  {action.description}
+                </p>
+              </div>
+            </Link>
+          </motion.div>
+        ))}
+      </div>
+    </motion.div>
   );
 }

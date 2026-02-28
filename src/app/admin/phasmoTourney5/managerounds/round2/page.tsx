@@ -1,15 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import {
-  Alert,
-  Button,
-  Card,
-  Col,
-  Container,
-  Form,
-  Row,
-  Table,
-} from "react-bootstrap";
+import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import GameSettingsAdminEditor from "../../../../../components/tourney/GameSettingsAdminEditor";
 import {
@@ -52,7 +43,7 @@ export default function Round2ManageMoneyPage() {
         setPlayers(
           Array.isArray(json)
             ? json.filter((p: any) => p.status !== "Eliminated")
-            : []
+            : [],
         );
       } catch {}
     })();
@@ -95,33 +86,45 @@ export default function Round2ManageMoneyPage() {
 
   if (!admin) {
     return (
-      <Container className="py-4">
-        <Alert variant="warning">Admin access required.</Alert>
-      </Container>
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="rounded-xl border border-yellow-300 bg-yellow-50 dark:bg-yellow-900/20 dark:border-yellow-700 p-4 text-yellow-800 dark:text-yellow-200">
+          Admin access required.
+        </div>
+      </div>
     );
   }
 
   return (
-    <Container className="py-4">
-      <h1 className="h4 fw-semibold mb-3">Round 2 — Money Round (Admin)</h1>
+    <div className="max-w-7xl mx-auto px-4 py-6">
+      <h1 className="text-lg font-semibold mb-3 text-foreground">
+        Round 2 — Money Round (Admin)
+      </h1>
 
-      {/* Removed initial TODO alert section */}
-
-      <Card className="border-0 shadow-sm mb-4">
-        <Card.Body>
-          <Card.Title as="h2" className="h5 fw-semibold">
+      <div className="rounded-xl border border-border bg-card dark:bg-card-dark dark:border-border-dark shadow-sm mb-4">
+        <div className="p-4">
+          <h2 className="text-base font-semibold text-foreground">
             Record Money Results
-          </Card.Title>
-          <Form onSubmit={submitResult} className="mt-3">
-            <Row className="g-3">
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Officer</Form.Label>
-                  <Form.Control value={officer} disabled />
-                </Form.Group>
-                <Form.Group className="mb-3">
-                  <Form.Label>Player</Form.Label>
-                  <Form.Select
+          </h2>
+          <form onSubmit={submitResult} className="mt-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <div className="mb-3">
+                  <label className="block text-sm font-medium text-foreground mb-1">
+                    Officer
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full rounded-lg border border-border bg-gray-100 dark:bg-gray-800 dark:border-border-dark p-2 text-foreground opacity-60 cursor-not-allowed"
+                    value={officer}
+                    disabled
+                  />
+                </div>
+                <div className="mb-3">
+                  <label className="block text-sm font-medium text-foreground mb-1">
+                    Player
+                  </label>
+                  <select
+                    className="w-full rounded-lg border border-border bg-card dark:bg-card-dark dark:border-border-dark p-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary-500"
                     value={form.playerId}
                     onChange={(e) =>
                       setForm({ ...form, playerId: e.target.value })
@@ -134,107 +137,131 @@ export default function Round2ManageMoneyPage() {
                         {p.name}
                       </option>
                     ))}
-                  </Form.Select>
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Money earned</Form.Label>
-                  <Form.Control
+                  </select>
+                </div>
+              </div>
+              <div>
+                <div className="mb-3">
+                  <label className="block text-sm font-medium text-foreground mb-1">
+                    Money earned
+                  </label>
+                  <input
                     type="number"
                     step="1"
                     min="0"
                     inputMode="numeric"
+                    className="w-full rounded-lg border border-border bg-card dark:bg-card-dark dark:border-border-dark p-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary-500"
                     value={form.money}
                     onChange={(e) =>
                       setForm({ ...form, money: e.target.value })
                     }
                     required
                   />
-                </Form.Group>
-                <Form.Group className="mb-3">
-                  <Form.Label>Notes</Form.Label>
-                  <Form.Control
-                    as="textarea"
+                </div>
+                <div className="mb-3">
+                  <label className="block text-sm font-medium text-foreground mb-1">
+                    Notes
+                  </label>
+                  <textarea
                     rows={3}
+                    className="w-full rounded-lg border border-border bg-card dark:bg-card-dark dark:border-border-dark p-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary-500"
                     value={form.notes}
                     onChange={(e) =>
                       setForm({ ...form, notes: e.target.value })
                     }
                   />
-                </Form.Group>
-              </Col>
-            </Row>
-            <div className="d-flex gap-2 mt-2">
-              <Button type="submit" variant="primary">
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-2 mt-2">
+              <button
+                type="submit"
+                className="px-4 py-2 rounded-lg text-sm font-medium bg-primary-500 text-white hover:bg-primary-600 transition-colors"
+              >
                 Submit
-              </Button>
-              <Button
+              </button>
+              <button
                 type="button"
-                variant="outline-secondary"
+                className="px-4 py-2 rounded-lg text-sm font-medium border border-gray-400 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 onClick={resetForm}
               >
                 Reset
-              </Button>
+              </button>
             </div>
-          </Form>
-        </Card.Body>
-      </Card>
+          </form>
+        </div>
+      </div>
 
-      <Card className="border-0 shadow-sm">
-        <Card.Body>
-          <Card.Title as="h2" className="h5 fw-semibold">
+      <div className="rounded-xl border border-border bg-card dark:bg-card-dark dark:border-border-dark shadow-sm">
+        <div className="p-4">
+          <h2 className="text-base font-semibold text-foreground">
             Results (descending)
-          </Card.Title>
-          <Table responsive size="sm" className="mt-2">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Player</th>
-                <th>Money</th>
-                <th>Officer</th>
-                <th>Time</th>
-                <th>Notes</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sortedResults.map((r, i) => (
-                <tr key={r.id}>
-                  <td>{i + 1}</td>
-                  <td>{r.playerName}</td>
-                  <td>${r.money.toLocaleString()}</td>
-                  <td className="text-muted small">{r.officer}</td>
-                  <td className="text-muted small">
-                    {new Date(r.createdAt).toLocaleString()}
-                  </td>
-                  <td className="text-muted small">{r.notes || "-"}</td>
+          </h2>
+          <div className="overflow-x-auto mt-2">
+            <table className="w-full text-sm text-foreground">
+              <thead>
+                <tr className="border-b border-border dark:border-border-dark">
+                  <th className="text-left p-2">#</th>
+                  <th className="text-left p-2">Player</th>
+                  <th className="text-left p-2">Money</th>
+                  <th className="text-left p-2">Officer</th>
+                  <th className="text-left p-2">Time</th>
+                  <th className="text-left p-2">Notes</th>
                 </tr>
-              ))}
-              {sortedResults.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="text-muted">
-                    No results yet.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </Table>
-          {/* Removed bottom TODO alert */}
-        </Card.Body>
-      </Card>
+              </thead>
+              <tbody>
+                {sortedResults.map((r, i) => (
+                  <tr
+                    key={r.id}
+                    className="border-b border-border/50 dark:border-border-dark/50"
+                  >
+                    <td className="p-2">{i + 1}</td>
+                    <td className="p-2">{r.playerName}</td>
+                    <td className="p-2">${r.money.toLocaleString()}</td>
+                    <td className="p-2 text-muted-foreground text-xs">
+                      {r.officer}
+                    </td>
+                    <td className="p-2 text-muted-foreground text-xs">
+                      {new Date(r.createdAt).toLocaleString()}
+                    </td>
+                    <td className="p-2 text-muted-foreground text-xs">
+                      {r.notes || "-"}
+                    </td>
+                  </tr>
+                ))}
+                {sortedResults.length === 0 && (
+                  <tr>
+                    <td colSpan={6} className="p-2 text-muted-foreground">
+                      No results yet.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
 
-      <section className="mb-4">
-        <div className="d-flex align-items-center justify-content-between">
-          <h2 className="h5 mb-0">Round Settings</h2>
-          <Button
-            variant={showRoundSettings ? "outline-secondary" : "secondary"}
+      <section className="mb-4 mt-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-base font-semibold text-foreground">
+            Round Settings
+          </h2>
+          <button
+            type="button"
+            className={cn(
+              "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+              showRoundSettings
+                ? "border border-gray-400 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                : "bg-gray-500 text-white hover:bg-gray-600",
+            )}
             onClick={() => setShowRoundSettings((v) => !v)}
           >
             {showRoundSettings ? "Hide" : "Show"}
-          </Button>
+          </button>
         </div>
         {showRoundSettings && <GameSettingsAdminEditor roundId="round2" />}
       </section>
-    </Container>
+    </div>
   );
 }

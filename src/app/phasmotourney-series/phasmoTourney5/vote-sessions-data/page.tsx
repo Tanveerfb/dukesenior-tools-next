@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Container, Alert, Table, Badge, Card, Spinner, Stack } from "react-bootstrap";
+import { cn } from "@/lib/utils";
 
 interface Player {
   id: string;
@@ -29,7 +29,9 @@ interface Vote {
 export default function Tourney5VoteSessionsDataPage() {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
-  const [votesBySession, setVotesBySession] = useState<Record<string, Vote[]>>({});
+  const [votesBySession, setVotesBySession] = useState<Record<string, Vote[]>>(
+    {},
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -47,18 +49,22 @@ export default function Tourney5VoteSessionsDataPage() {
         setSessions(sessionsList);
 
         // Load votes for all closed sessions
-        const closedSessions = sessionsList.filter((sess: Session) => sess.closed);
+        const closedSessions = sessionsList.filter(
+          (sess: Session) => sess.closed,
+        );
         const votesData: Record<string, Vote[]> = {};
         await Promise.all(
           closedSessions.map(async (sess: Session) => {
             try {
-              const res = await fetch(`/api/phasmoTourney5/votesessions/${sess.id}/vote`);
+              const res = await fetch(
+                `/api/phasmoTourney5/votesessions/${sess.id}/vote`,
+              );
               const v = await res.json();
               votesData[sess.id] = Array.isArray(v) ? v : [];
             } catch {
               votesData[sess.id] = [];
             }
-          })
+          }),
         );
         setVotesBySession(votesData);
       } catch (e: any) {
@@ -73,7 +79,9 @@ export default function Tourney5VoteSessionsDataPage() {
     return players.find((p) => p.id === playerId)?.name || playerId;
   }
 
-  function computeTally(votes: Vote[]): Array<{ playerId: string; count: number }> {
+  function computeTally(
+    votes: Vote[],
+  ): Array<{ playerId: string; count: number }> {
     const tally: Record<string, number> = {};
     for (const v of votes) {
       tally[v.choicePlayerId] = (tally[v.choicePlayerId] || 0) + 1;
@@ -85,25 +93,46 @@ export default function Tourney5VoteSessionsDataPage() {
 
   if (loading) {
     return (
-      <Container className="py-4">
-        <h1 className="h4 fw-semibold mb-3">
+      <div className="max-w-7xl mx-auto px-4 py-4">
+        <h1 className="text-lg font-semibold mb-3 text-foreground">
           Phasmo Tourney 5 — Vote Sessions Data
         </h1>
-        <div className="text-center py-5">
-          <Spinner animation="border" variant="primary" />
+        <div className="text-center py-10">
+          <svg
+            className="animate-spin h-8 w-8 text-primary-500 mx-auto"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            />
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+            />
+          </svg>
         </div>
-      </Container>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <Container className="py-4">
-        <h1 className="h4 fw-semibold mb-3">
+      <div className="max-w-7xl mx-auto px-4 py-4">
+        <h1 className="text-lg font-semibold mb-3 text-foreground">
           Phasmo Tourney 5 — Vote Sessions Data
         </h1>
-        <Alert variant="danger">{error}</Alert>
-      </Container>
+        <div className="rounded-lg border border-red-300 bg-red-50 dark:bg-red-900/20 dark:border-red-700 p-3 text-red-800 dark:text-red-200">
+          {error}
+        </div>
+      </div>
     );
   }
 
@@ -112,87 +141,119 @@ export default function Tourney5VoteSessionsDataPage() {
     .sort((a, b) => (b.closedAt || b.createdAt) - (a.closedAt || a.createdAt));
 
   return (
-    <Container className="py-4">
-      <h1 className="h4 fw-semibold mb-3">
+    <div className="max-w-7xl mx-auto px-4 py-4">
+      <h1 className="text-lg font-semibold mb-3 text-foreground">
         Phasmo Tourney 5 — Vote Sessions Data
       </h1>
       {closedSessions.length === 0 ? (
-        <Alert variant="info">No closed vote sessions yet.</Alert>
+        <div className="rounded-lg border border-blue-300 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-700 p-3 text-blue-800 dark:text-blue-200">
+          No closed vote sessions yet.
+        </div>
       ) : (
-        <Stack gap={3}>
+        <div className="flex flex-col gap-3">
           {closedSessions.map((session) => {
             const votes = votesBySession[session.id] || [];
             const tally = computeTally(votes);
             const topChoice = tally[0];
             return (
-              <Card key={session.id} className="shadow-sm">
-                <Card.Body>
-                  <Card.Title as="h2" className="h5 mb-2">
-                    {session.name}
-                  </Card.Title>
-                  <div className="d-flex gap-2 mb-3">
-                    <Badge bg={session.type === "vote-out" ? "danger" : "success"}>
-                      {session.type === "vote-out" ? "Vote Out" : "Pick Ally"}
-                    </Badge>
-                    <Badge bg="secondary">
-                      {session.anonymous ? "Anonymous" : "Public"}
-                    </Badge>
-                    <Badge bg="info">{votes.length} votes</Badge>
+              <div
+                key={session.id}
+                className="rounded-xl border border-border bg-card dark:bg-card-dark dark:border-border-dark shadow-sm p-4"
+              >
+                <h2 className="text-base font-semibold mb-2 text-foreground">
+                  {session.name}
+                </h2>
+                <div className="flex gap-2 mb-3 flex-wrap">
+                  <span
+                    className={cn(
+                      "rounded-full text-xs font-medium px-2.5 py-0.5",
+                      session.type === "vote-out"
+                        ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300"
+                        : "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
+                    )}
+                  >
+                    {session.type === "vote-out" ? "Vote Out" : "Pick Ally"}
+                  </span>
+                  <span className="rounded-full text-xs font-medium px-2.5 py-0.5 bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                    {session.anonymous ? "Anonymous" : "Public"}
+                  </span>
+                  <span className="rounded-full text-xs font-medium px-2.5 py-0.5 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                    {votes.length} votes
+                  </span>
+                </div>
+                {votes.length === 0 ? (
+                  <div className="rounded-lg border border-gray-300 bg-gray-50 dark:bg-gray-800 dark:border-gray-600 p-3 text-gray-700 dark:text-gray-300 text-sm">
+                    No votes recorded.
                   </div>
-                  {votes.length === 0 ? (
-                    <Alert variant="secondary" className="mb-0 small">
-                      No votes recorded.
-                    </Alert>
-                  ) : (
-                    <>
-                      {topChoice && (
-                        <div className="mb-3 p-3 border rounded bg-light">
-                          <div className="fw-semibold">
-                            {session.type === "vote-out" ? "Voted Out:" : "Most Selected:"}
-                          </div>
-                          <div className="display-6 text-primary">
-                            {getPlayerName(topChoice.playerId)}
-                          </div>
-                          <div className="text-muted">
-                            {topChoice.count} vote{topChoice.count !== 1 ? "s" : ""}
-                          </div>
+                ) : (
+                  <>
+                    {topChoice && (
+                      <div className="mb-3 p-3 border border-border dark:border-border-dark rounded-lg bg-gray-50 dark:bg-gray-800/50">
+                        <div className="font-semibold text-sm text-foreground">
+                          {session.type === "vote-out"
+                            ? "Voted Out:"
+                            : "Most Selected:"}
                         </div>
-                      )}
-                      <h3 className="h6 mb-2">Vote Breakdown</h3>
-                      <Table size="sm" responsive hover>
+                        <div className="text-3xl font-bold text-primary-500">
+                          {getPlayerName(topChoice.playerId)}
+                        </div>
+                        <div className="text-muted-foreground text-sm">
+                          {topChoice.count} vote
+                          {topChoice.count !== 1 ? "s" : ""}
+                        </div>
+                      </div>
+                    )}
+                    <h3 className="text-sm font-semibold mb-2 text-foreground">
+                      Vote Breakdown
+                    </h3>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm text-left">
                         <thead>
-                          <tr>
-                            <th>Player</th>
-                            <th>Votes</th>
-                            <th>Percentage</th>
+                          <tr className="border-b border-border dark:border-border-dark">
+                            <th className="py-2 pr-4 font-semibold text-foreground">
+                              Player
+                            </th>
+                            <th className="py-2 pr-4 font-semibold text-foreground">
+                              Votes
+                            </th>
+                            <th className="py-2 font-semibold text-foreground">
+                              Percentage
+                            </th>
                           </tr>
                         </thead>
                         <tbody>
                           {tally.map(({ playerId, count }) => (
-                            <tr key={playerId}>
-                              <td className="fw-semibold">
+                            <tr
+                              key={playerId}
+                              className="border-b border-border/50 dark:border-border-dark/50 hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                            >
+                              <td className="py-2 pr-4 font-semibold text-foreground">
                                 {getPlayerName(playerId)}
                               </td>
-                              <td>{count}</td>
-                              <td className="text-muted">
+                              <td className="py-2 pr-4 text-foreground">
+                                {count}
+                              </td>
+                              <td className="py-2 text-muted-foreground">
                                 {((count / votes.length) * 100).toFixed(1)}%
                               </td>
                             </tr>
                           ))}
                         </tbody>
-                      </Table>
-                    </>
-                  )}
-                  <div className="text-muted small mt-2">
-                    Closed on{" "}
-                    {new Date(session.closedAt || session.createdAt).toLocaleString()}
-                  </div>
-                </Card.Body>
-              </Card>
+                      </table>
+                    </div>
+                  </>
+                )}
+                <div className="text-muted-foreground text-sm mt-2">
+                  Closed on{" "}
+                  {new Date(
+                    session.closedAt || session.createdAt,
+                  ).toLocaleString()}
+                </div>
+              </div>
             );
           })}
-        </Stack>
+        </div>
       )}
-    </Container>
+    </div>
   );
 }

@@ -1,0 +1,20 @@
+<svg id="svg-title-dark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 90" width="400" height="90"><style>@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&amp;family=Cinzel:wght@400;700');</style>
+  <defs>
+    <filter id="td-glow" x="-20%" y="-40%" width="140%" height="180%">
+      <feGaussianBlur stdDeviation="2" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <linearGradient id="td-g1" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#A8D8F8"/>
+      <stop offset="50%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#A8D8F8"/>
+    </linearGradient>
+    <linearGradient id="td-g2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#7B3FC4"/>
+      <stop offset="50%" stop-color="#4A9FE8"/>
+      <stop offset="100%" stop-color="#7B3FC4"/>
+    </linearGradient>
+  </defs>
+  <text x="200" y="36" text-anchor="middle" font-family="'Cinzel Decorative', serif" font-size="26" font-weight="700" fill="url(#td-g1)" filter="url(#td-glow)">The Lair of</text>
+  <text x="200" y="76" text-anchor="middle" font-family="'Cinzel Decorative', serif" font-size="30" font-weight="700" fill="url(#td-g2)" filter="url(#td-glow)">Evil Tools</text>
+</svg>

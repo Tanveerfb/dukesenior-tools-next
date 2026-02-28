@@ -1,9 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Alert, Badge, Table } from "react-bootstrap";
 import TourneyPage from "@/components/tourney/TourneyPage";
 import { buildTourneyBreadcrumbs } from "@/lib/navigation/tourneyBreadcrumbs";
 import { getStandingsT3 } from "@/lib/services/phasmoTourney3";
+import { cn } from "@/lib/utils";
 
 export default function T3PlayersPage() {
   const [teams, setTeams] = useState<
@@ -34,7 +34,7 @@ export default function T3PlayersPage() {
       });
       teamList.sort(
         (a, b) =>
-          b.total - a.total || (a.teamID || "").localeCompare(b.teamID || "")
+          b.total - a.total || (a.teamID || "").localeCompare(b.teamID || ""),
       );
       setTeams(teamList);
       setReady(true);
@@ -56,48 +56,65 @@ export default function T3PlayersPage() {
           href: "/phasmotourney-series/phasmotourney3/standings",
         },
       ]}
-      containerProps={{ fluid: "lg", className: "py-3" }}
+      containerProps={{ className: "py-3" }}
     >
       {ready ? (
-        <Table striped hover responsive size="sm">
-          <thead>
-            <tr>
-              <th>Rank</th>
-              <th>Team</th>
-              <th>Members</th>
-              <th>Total Points</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {teams.map((t, i) => (
-              <tr
-                key={t.teamLabel + i}
-                className={t.eliminated ? "opacity-75" : ""}
-              >
-                <td>{t.total >= 0 ? i + 1 : "-"}</td>
-                <td>{t.teamLabel}</td>
-                <td>{t.members}</td>
-                <td>
-                  <Badge bg={t.eliminated ? "secondary" : "primary"}>
-                    {t.total}
-                  </Badge>
-                </td>
-                <td>
-                  {t.eliminated ? (
-                    <Badge bg="danger">Eliminated</Badge>
-                  ) : (
-                    <Badge bg="success">Active</Badge>
-                  )}
-                </td>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-left">
+            <thead className="border-b border-border dark:border-border-dark text-foreground-muted">
+              <tr>
+                <th className="px-3 py-2">Rank</th>
+                <th className="px-3 py-2">Team</th>
+                <th className="px-3 py-2">Members</th>
+                <th className="px-3 py-2">Total Points</th>
+                <th className="px-3 py-2">Status</th>
               </tr>
-            ))}
-          </tbody>
-        </Table>
+            </thead>
+            <tbody className="divide-y divide-border dark:divide-border-dark">
+              {teams.map((t, i) => (
+                <tr
+                  key={t.teamLabel + i}
+                  className={cn(
+                    "hover:bg-surface-100 dark:hover:bg-surface-900 transition-colors",
+                    i % 2 === 0 && "bg-surface-50 dark:bg-surface-900/40",
+                    t.eliminated && "opacity-75",
+                  )}
+                >
+                  <td className="px-3 py-2">{t.total >= 0 ? i + 1 : "-"}</td>
+                  <td className="px-3 py-2">{t.teamLabel}</td>
+                  <td className="px-3 py-2">{t.members}</td>
+                  <td className="px-3 py-2">
+                    <span
+                      className={cn(
+                        "rounded-full text-xs font-medium px-2.5 py-0.5 text-white",
+                        t.eliminated ? "bg-secondary" : "bg-primary",
+                      )}
+                    >
+                      {t.total}
+                    </span>
+                  </td>
+                  <td className="px-3 py-2">
+                    {t.eliminated ? (
+                      <span className="rounded-full text-xs font-medium px-2.5 py-0.5 bg-danger text-white">
+                        Eliminated
+                      </span>
+                    ) : (
+                      <span className="rounded-full text-xs font-medium px-2.5 py-0.5 bg-success text-white">
+                        Active
+                      </span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       ) : (
-        <Alert>Loading teams...</Alert>
+        <div className="rounded-lg border border-info/30 bg-info-50 dark:bg-info/10 px-4 py-3 text-info-600 dark:text-info">
+          Loading teams...
+        </div>
       )}
-      <p className="text-muted small mt-2">
+      <p className="text-foreground-muted text-sm mt-2">
         Negative totals (if present) indicate eliminated teams per historical
         convention.
       </p>

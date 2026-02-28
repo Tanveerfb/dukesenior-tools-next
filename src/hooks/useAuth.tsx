@@ -33,8 +33,12 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-const ADMIN_EMAILS = new Set(["dukesenior22@proton.me", "flareon@abv.bg"]);
-const ADMIN_UIDS = new Set(["GeLWvzA1PxfvGBmvN1niZ2GjHKe2"]);
+const ADMIN_EMAILS = new Set(
+  (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "").split(",").map((s) => s.trim()).filter(Boolean)
+);
+const ADMIN_UIDS = new Set(
+  (process.env.NEXT_PUBLIC_ADMIN_UIDS || "").split(",").map((s) => s.trim()).filter(Boolean)
+);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<any>(null);

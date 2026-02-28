@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Container, Tabs, Tab, Card, Row, Col, Button, Form, Badge, Spinner } from "react-bootstrap";
+import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import UserAvatar from "@/components/user/UserAvatar";
@@ -67,7 +67,7 @@ export default function FriendsPage() {
   const filteredFriends = friends.filter(
     (friend) =>
       friend.displayName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      friend.username.toLowerCase().includes(searchTerm.toLowerCase())
+      friend.username.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   // Handlers
@@ -127,246 +127,336 @@ export default function FriendsPage() {
 
   if (!user) {
     return (
-      <Container className="py-4">
+      <div className="max-w-7xl mx-auto px-4 py-4">
         <p>Please log in to view friends</p>
-      </Container>
+      </div>
     );
   }
 
   return (
-    <Container className="py-4">
-      <h3 className="mb-4">Friends</h3>
+    <div className="max-w-7xl mx-auto px-4 py-4">
+      <h3 className="text-xl font-semibold mb-4">Friends</h3>
 
       {loading ? (
-        <div className="text-center py-5">
-          <Spinner animation="border" />
-          <p className="mt-2">Loading friends...</p>
+        <div className="text-center py-10">
+          <svg
+            className="animate-spin h-6 w-6 mx-auto text-primary-500"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            />
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+            />
+          </svg>
+          <p className="mt-2 text-foreground-secondary">Loading friends...</p>
         </div>
       ) : (
-        <Tabs
-          activeKey={activeTab}
-          onSelect={(k) => k && setActiveTab(k)}
-          className="mb-3"
-        >
-          {/* All Friends Tab */}
-          <Tab eventKey="all" title={`All Friends (${friends.length})`}>
-            <Form.Control
-              type="text"
-              placeholder="Search friends..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="mb-3"
-            />
+        <>
+          {/* Tab buttons */}
+          <div className="flex border-b border-border dark:border-border-dark mb-4 overflow-x-auto">
+            <button
+              onClick={() => setActiveTab("all")}
+              className={cn(
+                "px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap",
+                activeTab === "all"
+                  ? "border-primary-500 text-primary-500"
+                  : "border-transparent text-foreground-secondary hover:text-foreground hover:border-gray-300",
+              )}
+            >
+              All Friends ({friends.length})
+            </button>
+            <button
+              onClick={() => setActiveTab("incoming")}
+              className={cn(
+                "px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap flex items-center gap-1.5",
+                activeTab === "incoming"
+                  ? "border-primary-500 text-primary-500"
+                  : "border-transparent text-foreground-secondary hover:text-foreground hover:border-gray-300",
+              )}
+            >
+              Incoming
+              {incomingRequests.length > 0 && (
+                <span className="rounded-full text-xs font-medium px-2 py-0.5 bg-red-500 text-white">
+                  {incomingRequests.length}
+                </span>
+              )}
+            </button>
+            <button
+              onClick={() => setActiveTab("outgoing")}
+              className={cn(
+                "px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap",
+                activeTab === "outgoing"
+                  ? "border-primary-500 text-primary-500"
+                  : "border-transparent text-foreground-secondary hover:text-foreground hover:border-gray-300",
+              )}
+            >
+              Outgoing ({outgoingRequests.length})
+            </button>
+            <button
+              onClick={() => setActiveTab("blocked")}
+              className={cn(
+                "px-4 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap",
+                activeTab === "blocked"
+                  ? "border-primary-500 text-primary-500"
+                  : "border-transparent text-foreground-secondary hover:text-foreground hover:border-gray-300",
+              )}
+            >
+              Blocked ({blockedUsers.length})
+            </button>
+          </div>
 
-            {filteredFriends.length === 0 ? (
-              <div className="text-center text-muted py-5">
-                {searchTerm ? (
-                  <p>No friends found matching "{searchTerm}"</p>
-                ) : (
-                  <p>You haven't added any friends yet. Find people to connect with!</p>
-                )}
-              </div>
-            ) : (
-              <Row className="g-3">
-                {filteredFriends.map((friend) => (
-                  <Col md={6} lg={4} key={friend.uid}>
-                    <Card>
-                      <Card.Body>
+          {/* All Friends Panel */}
+          {activeTab === "all" && (
+            <div>
+              <input
+                type="text"
+                placeholder="Search friends..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="mb-3 block w-full rounded-lg border border-border dark:border-border-dark bg-background dark:bg-background-dark text-foreground px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500"
+              />
+
+              {filteredFriends.length === 0 ? (
+                <div className="text-center text-foreground-secondary py-10">
+                  {searchTerm ? (
+                    <p>No friends found matching &ldquo;{searchTerm}&rdquo;</p>
+                  ) : (
+                    <p>
+                      You haven&apos;t added any friends yet. Find people to
+                      connect with!
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {filteredFriends.map((friend) => (
+                    <div
+                      key={friend.uid}
+                      className="rounded-xl border border-border bg-card dark:bg-card-dark dark:border-border-dark shadow-sm"
+                    >
+                      <div className="p-4">
                         <div
-                          className="d-flex align-items-center gap-2 mb-3"
-                          style={{ cursor: "pointer" }}
-                          onClick={() => router.push(`/profile/${friend.username}`)}
+                          className="flex items-center gap-2 mb-3 cursor-pointer"
+                          onClick={() =>
+                            router.push(`/profile/${friend.username}`)
+                          }
                         >
                           <UserAvatar user={friend} size="medium" />
-                          <div className="flex-grow-1">
-                            <div>
-                              <strong>{friend.displayName}</strong>
+                          <div className="flex-1 min-w-0">
+                            <div className="font-semibold truncate">
+                              {friend.displayName}
                             </div>
-                            <div className="text-muted small">@{friend.username}</div>
+                            <div className="text-foreground-secondary text-sm">
+                              @{friend.username}
+                            </div>
                           </div>
                         </div>
                         {friend.bio && (
-                          <p className="small text-muted mb-3">{friend.bio.substring(0, 60)}{friend.bio.length > 60 ? '...' : ''}</p>
+                          <p className="text-sm text-foreground-secondary mb-3">
+                            {friend.bio.substring(0, 60)}
+                            {friend.bio.length > 60 ? "..." : ""}
+                          </p>
                         )}
-                        <div className="d-flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="primary"
-                            onClick={() => router.push(`/messages/${friend.username}`)}
-                            className="flex-grow-1"
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() =>
+                              router.push(`/messages/${friend.username}`)
+                            }
+                            className="flex-1 text-sm px-3 py-1.5 rounded-lg bg-primary-500 hover:bg-primary-600 text-white transition-colors"
                           >
                             Message
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline-danger"
-                            onClick={() => handleRemove(friend.uid, friend.username)}
+                          </button>
+                          <button
+                            onClick={() =>
+                              handleRemove(friend.uid, friend.username)
+                            }
+                            className="text-sm px-3 py-1.5 rounded-lg border border-red-500 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                           >
                             Remove
-                          </Button>
+                          </button>
                         </div>
-                        <div className="text-muted small mt-2">
-                          Friends since {new Date(friend.since).toLocaleDateString()}
+                        <div className="text-foreground-secondary text-sm mt-2">
+                          Friends since{" "}
+                          {new Date(friend.since).toLocaleDateString()}
                         </div>
-                      </Card.Body>
-                    </Card>
-                  </Col>
-                ))}
-              </Row>
-            )}
-          </Tab>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
-          {/* Incoming Requests Tab */}
-          <Tab
-            eventKey="incoming"
-            title={
-              <>
-                Incoming{" "}
-                {incomingRequests.length > 0 && (
-                  <Badge bg="danger">{incomingRequests.length}</Badge>
-                )}
-              </>
-            }
-          >
-            {incomingRequests.length === 0 ? (
-              <div className="text-center text-muted py-5">
-                <p>No pending friend requests</p>
-              </div>
-            ) : (
-              <div className="d-flex flex-column gap-3">
-                {incomingRequests.map((request) => (
-                  <Card key={request.id}>
-                    <Card.Body>
-                      <div className="d-flex align-items-center justify-content-between flex-wrap gap-2">
-                        <div
-                          className="d-flex align-items-center gap-2"
-                          style={{ cursor: "pointer" }}
-                          onClick={() => router.push(`/profile/${request.fromUsername}`)}
-                        >
-                          <UserAvatar
-                            user={{
-                              photoURL: request.fromPhotoURL,
-                              displayName: request.fromDisplayName,
-                            }}
-                            size="medium"
-                          />
-                          <div>
-                            <div>
-                              <strong>{request.fromDisplayName}</strong>
-                            </div>
-                            <div className="text-muted small">@{request.fromUsername}</div>
-                          </div>
-                        </div>
-                        <div className="d-flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="success"
-                            onClick={() => handleAccept(request.id)}
+          {/* Incoming Requests Panel */}
+          {activeTab === "incoming" && (
+            <div>
+              {incomingRequests.length === 0 ? (
+                <div className="text-center text-foreground-secondary py-10">
+                  <p>No pending friend requests</p>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  {incomingRequests.map((request) => (
+                    <div
+                      key={request.id}
+                      className="rounded-xl border border-border bg-card dark:bg-card-dark dark:border-border-dark shadow-sm"
+                    >
+                      <div className="p-4">
+                        <div className="flex items-center justify-between flex-wrap gap-2">
+                          <div
+                            className="flex items-center gap-2 cursor-pointer"
+                            onClick={() =>
+                              router.push(`/profile/${request.fromUsername}`)
+                            }
                           >
-                            Accept
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline-danger"
-                            onClick={() => handleDecline(request.id)}
-                          >
-                            Decline
-                          </Button>
-                        </div>
-                      </div>
-                      <div className="text-muted small mt-2">
-                        Sent {new Date(request.createdAt).toLocaleString()}
-                      </div>
-                    </Card.Body>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </Tab>
-
-          {/* Outgoing Requests Tab */}
-          <Tab
-            eventKey="outgoing"
-            title={`Outgoing (${outgoingRequests.length})`}
-          >
-            {outgoingRequests.length === 0 ? (
-              <div className="text-center text-muted py-5">
-                <p>No outgoing friend requests</p>
-              </div>
-            ) : (
-              <div className="d-flex flex-column gap-3">
-                {outgoingRequests.map((request) => (
-                  <Card key={request.id}>
-                    <Card.Body>
-                      <div className="d-flex align-items-center justify-content-between flex-wrap gap-2">
-                        <div
-                          className="d-flex align-items-center gap-2"
-                          style={{ cursor: "pointer" }}
-                          onClick={() => router.push(`/profile/${request.toUsername}`)}
-                        >
-                          <div>
+                            <UserAvatar
+                              user={{
+                                photoURL: request.fromPhotoURL,
+                                displayName: request.fromDisplayName,
+                              }}
+                              size="medium"
+                            />
                             <div>
-                              <strong>@{request.toUsername}</strong>
+                              <div className="font-semibold">
+                                {request.fromDisplayName}
+                              </div>
+                              <div className="text-foreground-secondary text-sm">
+                                @{request.fromUsername}
+                              </div>
                             </div>
-                            <div className="text-muted small">Request pending</div>
+                          </div>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleAccept(request.id)}
+                              className="text-sm px-3 py-1.5 rounded-lg bg-green-600 hover:bg-green-700 text-white transition-colors"
+                            >
+                              Accept
+                            </button>
+                            <button
+                              onClick={() => handleDecline(request.id)}
+                              className="text-sm px-3 py-1.5 rounded-lg border border-red-500 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                            >
+                              Decline
+                            </button>
                           </div>
                         </div>
-                        <Button
-                          size="sm"
-                          variant="outline-secondary"
-                          onClick={() => handleCancel(request.id)}
-                        >
-                          Cancel
-                        </Button>
+                        <div className="text-foreground-secondary text-sm mt-2">
+                          Sent {new Date(request.createdAt).toLocaleString()}
+                        </div>
                       </div>
-                      <div className="text-muted small mt-2">
-                        Sent {new Date(request.createdAt).toLocaleString()}
-                      </div>
-                    </Card.Body>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </Tab>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
-          {/* Blocked Users Tab */}
-          <Tab eventKey="blocked" title={`Blocked (${blockedUsers.length})`}>
-            {blockedUsers.length === 0 ? (
-              <div className="text-center text-muted py-5">
-                <p>You haven't blocked anyone</p>
-              </div>
-            ) : (
-              <div className="d-flex flex-column gap-3">
-                {blockedUsers.map((blocked) => (
-                  <Card key={blocked.blockedUID}>
-                    <Card.Body>
-                      <div className="d-flex align-items-center justify-content-between flex-wrap gap-2">
-                        <div>
-                          <div>
-                            <strong>@{blocked.blockedUsername}</strong>
+          {/* Outgoing Requests Panel */}
+          {activeTab === "outgoing" && (
+            <div>
+              {outgoingRequests.length === 0 ? (
+                <div className="text-center text-foreground-secondary py-10">
+                  <p>No outgoing friend requests</p>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  {outgoingRequests.map((request) => (
+                    <div
+                      key={request.id}
+                      className="rounded-xl border border-border bg-card dark:bg-card-dark dark:border-border-dark shadow-sm"
+                    >
+                      <div className="p-4">
+                        <div className="flex items-center justify-between flex-wrap gap-2">
+                          <div
+                            className="flex items-center gap-2 cursor-pointer"
+                            onClick={() =>
+                              router.push(`/profile/${request.toUsername}`)
+                            }
+                          >
+                            <div>
+                              <div className="font-semibold">
+                                @{request.toUsername}
+                              </div>
+                              <div className="text-foreground-secondary text-sm">
+                                Request pending
+                              </div>
+                            </div>
                           </div>
-                          <div className="text-muted small">
-                            Blocked {new Date(blocked.blockedAt).toLocaleString()}
-                          </div>
+                          <button
+                            onClick={() => handleCancel(request.id)}
+                            className="text-sm px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-foreground-secondary hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                          >
+                            Cancel
+                          </button>
                         </div>
-                        <Button
-                          size="sm"
-                          variant="outline-primary"
-                          onClick={() =>
-                            handleUnblock(blocked.blockedUID, blocked.blockedUsername)
-                          }
-                        >
-                          Unblock
-                        </Button>
+                        <div className="text-foreground-secondary text-sm mt-2">
+                          Sent {new Date(request.createdAt).toLocaleString()}
+                        </div>
                       </div>
-                    </Card.Body>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </Tab>
-        </Tabs>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Blocked Users Panel */}
+          {activeTab === "blocked" && (
+            <div>
+              {blockedUsers.length === 0 ? (
+                <div className="text-center text-foreground-secondary py-10">
+                  <p>You haven&apos;t blocked anyone</p>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  {blockedUsers.map((blocked) => (
+                    <div
+                      key={blocked.blockedUID}
+                      className="rounded-xl border border-border bg-card dark:bg-card-dark dark:border-border-dark shadow-sm"
+                    >
+                      <div className="p-4">
+                        <div className="flex items-center justify-between flex-wrap gap-2">
+                          <div>
+                            <div className="font-semibold">
+                              @{blocked.blockedUsername}
+                            </div>
+                            <div className="text-foreground-secondary text-sm">
+                              Blocked{" "}
+                              {new Date(blocked.blockedAt).toLocaleString()}
+                            </div>
+                          </div>
+                          <button
+                            onClick={() =>
+                              handleUnblock(
+                                blocked.blockedUID,
+                                blocked.blockedUsername,
+                              )
+                            }
+                            className="text-sm px-3 py-1.5 rounded-lg border border-primary-500 text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors"
+                          >
+                            Unblock
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </>
       )}
-    </Container>
+    </div>
   );
 }

@@ -1,6 +1,5 @@
-"use client";
+﻿"use client";
 import { useEffect, useState } from "react";
-import { Card, Form, Button, Table, Stack } from "react-bootstrap";
 import { useAuth } from "@/hooks/useAuth";
 import { useCmsUploads } from "@/hooks/useCmsUploads";
 import {
@@ -117,129 +116,162 @@ export default function TwitchPollResultsCard() {
     });
   }
 
+  const inputClasses =
+    "w-full rounded-lg border border-border dark:border-border-dark bg-card dark:bg-card-dark px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary-500";
+  const selectClasses = inputClasses + " appearance-auto";
+
   return (
-    <Card className="border-0 shadow-sm">
-      <Card.Body>
-        <Card.Title as="h2" className="h5 fw-semibold">
-          Twitch Poll Results
-        </Card.Title>
-        <Form onSubmit={submit} className="mt-3">
-          <Stack direction="horizontal" gap={3} className="flex-wrap">
-            <Form.Group>
-              <Form.Label>Match #</Form.Label>
-              <Form.Control
+    <div className="rounded-xl border border-border bg-card dark:bg-card-dark dark:border-border-dark shadow-sm">
+      <div className="p-4">
+        <h2 className="text-lg font-semibold mb-0">Twitch Poll Results</h2>
+        <form onSubmit={submit} className="mt-3">
+          <div className="flex flex-wrap items-end gap-3">
+            <div>
+              <label className="block text-sm font-medium mb-1 text-foreground">
+                Match #
+              </label>
+              <input
                 type="number"
+                className={inputClasses}
                 value={form.matchNumber}
                 onChange={(e) =>
                   setForm({ ...form, matchNumber: e.target.value })
                 }
                 min="1"
               />
-            </Form.Group>
-            <Form.Group>
-              <Form.Label>Player</Form.Label>
-              <Form.Select
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1 text-foreground">
+                Player
+              </label>
+              <select
+                className={selectClasses}
                 value={form.playerId}
                 onChange={(e) => setForm({ ...form, playerId: e.target.value })}
               >
-                <option value="">Select player…</option>
+                <option value="">Select player...</option>
                 {players.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.name}
                   </option>
                 ))}
-              </Form.Select>
-            </Form.Group>
-            <Form.Group>
-              <Form.Label>Opponent</Form.Label>
-              <Form.Select
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1 text-foreground">
+                Opponent
+              </label>
+              <select
+                className={selectClasses}
                 value={form.opponentId}
                 onChange={(e) =>
                   setForm({ ...form, opponentId: e.target.value })
                 }
               >
-                <option value="">Select opponent…</option>
+                <option value="">Select opponent...</option>
                 {players.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.name}
                   </option>
                 ))}
-              </Form.Select>
-            </Form.Group>
-            <Form.Group className="flex-grow-1">
-              <Form.Label>Poll Summary</Form.Label>
-              <Form.Control
-                as="textarea"
+              </select>
+            </div>
+            <div className="flex-1">
+              <label className="block text-sm font-medium mb-1 text-foreground">
+                Poll Summary
+              </label>
+              <textarea
                 rows={2}
+                className={inputClasses}
                 value={form.pollSummary}
                 onChange={(e) =>
                   setForm({ ...form, pollSummary: e.target.value })
                 }
               />
-            </Form.Group>
-            <Form.Group>
-              <Form.Label>Screenshot</Form.Label>
-              <Form.Control
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1 text-foreground">
+                Screenshot
+              </label>
+              <input
                 type="file"
                 accept="image/*"
+                className={inputClasses}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   const file = e.target.files?.[0] || null;
                   setForm({ ...form, imageFile: file || null });
                 }}
               />
-            </Form.Group>
-            <Button type="submit" variant="primary">
+            </div>
+            <button
+              type="submit"
+              className="bg-primary-500 text-white text-sm px-4 py-2 rounded-lg hover:bg-primary-600 transition-colors"
+            >
               Save
-            </Button>
-          </Stack>
-        </Form>
+            </button>
+          </div>
+        </form>
 
-        <Table responsive size="sm" className="mt-3">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Match</th>
-              <th>Player</th>
-              <th>Opponent</th>
-              <th>Officer</th>
-              <th>Time</th>
-              <th>Poll</th>
-              <th>Image</th>
-            </tr>
-          </thead>
-          <tbody>
-            {records.map((r, i) => (
-              <tr key={r.id}>
-                <td>{i + 1}</td>
-                <td>{r.matchNumber}</td>
-                <td>{r.playerId}</td>
-                <td>{r.opponentId}</td>
-                <td className="text-muted small">{r.officer}</td>
-                <td className="text-muted small">
-                  {new Date(r.createdAt).toLocaleString()}
-                </td>
-                <td className="text-muted small">{r.pollSummary}</td>
-                <td>
-                  {r.imageUrl ? (
-                    <a href={r.imageUrl} target="_blank" rel="noreferrer">
-                      View
-                    </a>
-                  ) : (
-                    "—"
-                  )}
-                </td>
+        <div className="overflow-x-auto mt-3">
+          <table className="w-full border-collapse text-sm">
+            <thead>
+              <tr className="border-b border-border dark:border-border-dark">
+                <th className="text-left py-2 px-2">#</th>
+                <th className="text-left py-2 px-2">Match</th>
+                <th className="text-left py-2 px-2">Player</th>
+                <th className="text-left py-2 px-2">Opponent</th>
+                <th className="text-left py-2 px-2">Officer</th>
+                <th className="text-left py-2 px-2">Time</th>
+                <th className="text-left py-2 px-2">Poll</th>
+                <th className="text-left py-2 px-2">Image</th>
               </tr>
-            ))}
-            {records.length === 0 && (
-              <tr>
-                <td colSpan={8} className="text-muted">
-                  No poll records yet.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </Table>
-      </Card.Body>
-    </Card>
+            </thead>
+            <tbody>
+              {records.map((r, i) => (
+                <tr
+                  key={r.id}
+                  className="border-b border-border dark:border-border-dark"
+                >
+                  <td className="py-2 px-2">{i + 1}</td>
+                  <td className="py-2 px-2">{r.matchNumber}</td>
+                  <td className="py-2 px-2">{r.playerId}</td>
+                  <td className="py-2 px-2">{r.opponentId}</td>
+                  <td className="py-2 px-2 text-foreground-secondary text-xs">
+                    {r.officer}
+                  </td>
+                  <td className="py-2 px-2 text-foreground-secondary text-xs">
+                    {new Date(r.createdAt).toLocaleString()}
+                  </td>
+                  <td className="py-2 px-2 text-foreground-secondary text-xs">
+                    {r.pollSummary}
+                  </td>
+                  <td className="py-2 px-2">
+                    {r.imageUrl ? (
+                      <a
+                        href={r.imageUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-primary-500 hover:underline"
+                      >
+                        View
+                      </a>
+                    ) : (
+                      "\u2014"
+                    )}
+                  </td>
+                </tr>
+              ))}
+              {records.length === 0 && (
+                <tr>
+                  <td colSpan={8} className="py-2 px-2 text-foreground-secondary">
+                    No poll records yet.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   );
 }

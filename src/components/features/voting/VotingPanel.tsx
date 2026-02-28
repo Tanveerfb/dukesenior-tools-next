@@ -1,6 +1,6 @@
 ﻿"use client";
 import { useState } from "react";
-import { Alert, Button, Form, Spinner } from "react-bootstrap";
+import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 
 export interface VotingPanelProps {
@@ -57,52 +57,98 @@ export default function VotingPanel({
   return (
     <div>
       {error && (
-        <Alert variant="danger" className="py-1 small">
+        <div
+          className={cn(
+            "rounded border border-red-400 bg-red-50 px-3 py-1 text-sm text-red-700",
+            "dark:border-red-600 dark:bg-red-950 dark:text-red-300",
+          )}
+        >
           {error}
-        </Alert>
+        </div>
       )}
       {message && (
-        <Alert variant="success" className="py-1 small">
+        <div
+          className={cn(
+            "rounded border border-green-400 bg-green-50 px-3 py-1 text-sm text-green-700",
+            "dark:border-green-600 dark:bg-green-950 dark:text-green-300",
+          )}
+        >
           {message}
-        </Alert>
+        </div>
       )}
       {!user && (
-        <Alert variant="warning" className="py-1 small">
+        <div
+          className={cn(
+            "rounded border border-yellow-400 bg-yellow-50 px-3 py-1 text-sm text-yellow-700",
+            "dark:border-yellow-600 dark:bg-yellow-950 dark:text-yellow-300",
+          )}
+        >
           You must be logged in to vote.
-        </Alert>
+        </div>
       )}
-      <Form>
+      <fieldset>
         {visibleCandidates.map((c) => (
-          <Form.Check
+          <label
             key={c}
-            type="radio"
-            name={`vote-session-${sessionId}`}
-            id={`${sessionId}-${c}`}
-            label={c}
-            value={c}
-            disabled={disabled}
-            onChange={(e) => setChoice(e.currentTarget.value)}
-            className="mb-1"
-          />
+            className={cn(
+              "mb-1 flex cursor-pointer items-center gap-2 text-foreground",
+              disabled && "cursor-not-allowed opacity-50",
+            )}
+          >
+            <input
+              type="radio"
+              name={`vote-session-${sessionId}`}
+              id={`${sessionId}-${c}`}
+              value={c}
+              disabled={disabled}
+              onChange={(e) => setChoice(e.currentTarget.value)}
+              className="accent-primary-500"
+            />
+            {c}
+          </label>
         ))}
-      </Form>
-      <div className="d-flex align-items-center gap-2 mt-2">
-        <Button
-          size="sm"
+      </fieldset>
+      <div className="mt-2 flex items-center gap-2">
+        <button
+          type="button"
           onClick={submit}
           disabled={disabled || submitting || !choice}
+          className={cn(
+            "rounded bg-primary-500 px-3 py-1 text-sm font-medium text-white",
+            "hover:bg-primary-600 disabled:cursor-not-allowed disabled:opacity-50",
+          )}
         >
           {submitting ? (
-            <>
-              <Spinner size="sm" className="me-1" /> Submitting
-            </>
+            <span className="inline-flex items-center gap-1">
+              <svg
+                className="h-4 w-4 animate-spin"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                />
+              </svg>
+              Submitting
+            </span>
           ) : (
             "Submit Vote"
           )}
-        </Button>
+        </button>
       </div>
       {immunePlayerIds.length > 0 && (
-        <p className="text-muted small mt-2 mb-0">
+        <p className="mb-0 mt-2 text-sm text-foreground-secondary">
           Immune (not eligible): {immunePlayerIds.join(", ")}
         </p>
       )}

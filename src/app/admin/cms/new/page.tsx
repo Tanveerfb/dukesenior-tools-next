@@ -1,18 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import {
-  Container,
-  Form,
-  Button,
-  Spinner,
-  Alert,
-  OverlayTrigger,
-  Tooltip,
-  Row,
-  Col,
-} from "react-bootstrap";
+import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
-import Toast from "react-bootstrap/Toast";
 import { createPost, listPosts, updatePost, getPost } from "@/lib/services/cms";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -35,7 +24,7 @@ export default function NewPostPage() {
   const [content, setContent] = useState("");
   const [bannerUrl, setBannerUrl] = useState("");
   const [bannerUploadMode, setBannerUploadMode] = useState<"url" | "upload">(
-    "url"
+    "url",
   );
   const [bannerUploading, setBannerUploading] = useState(false);
   const [allTags, setAllTags] = useState<string[]>([]);
@@ -56,9 +45,11 @@ export default function NewPostPage() {
   }>({});
   const maxImages = 10;
   const [preview, setPreview] = useState(true);
-  const [postStatus, setPostStatus] = useState<'draft' | 'published' | 'scheduled'>('published');
-  const [scheduledDate, setScheduledDate] = useState('');
-  const [scheduledTime, setScheduledTime] = useState('');
+  const [postStatus, setPostStatus] = useState<
+    "draft" | "published" | "scheduled"
+  >("published");
+  const [scheduledDate, setScheduledDate] = useState("");
+  const [scheduledTime, setScheduledTime] = useState("");
 
   useEffect(() => {
     async function init() {
@@ -68,7 +59,7 @@ export default function NewPostPage() {
         const existing = await listPosts(500);
         const tagSet = new Set<string>();
         existing.forEach((p) =>
-          (p.tags || []).forEach((t: string) => tagSet.add(t))
+          (p.tags || []).forEach((t: string) => tagSet.add(t)),
         );
         setAllTags(Array.from(tagSet).sort());
         if (editId) {
@@ -78,10 +69,10 @@ export default function NewPostPage() {
             setContent(post.content || "");
             setBannerUrl(post.bannerUrl || "");
             setSelectedTags(post.tags || []);
-            setPostStatus(post.status || 'published');
+            setPostStatus(post.status || "published");
             if (post.scheduledFor) {
               const d = new Date(post.scheduledFor);
-              setScheduledDate(d.toISOString().split('T')[0]);
+              setScheduledDate(d.toISOString().split("T")[0]);
               setScheduledTime(d.toTimeString().slice(0, 5));
             }
           }
@@ -107,7 +98,7 @@ export default function NewPostPage() {
     .filter(
       (t) =>
         t.toLowerCase().includes(tagQuery.toLowerCase()) &&
-        !selectedTags.includes(t)
+        !selectedTags.includes(t),
     )
     .slice(0, 8);
 
@@ -150,7 +141,7 @@ export default function NewPostPage() {
       e.preventDefault();
       if (filtered.length === 0) return;
       setHighlightedIndex((i) =>
-        Math.min((i < 0 ? -1 : i) + 1, filtered.length - 1)
+        Math.min((i < 0 ? -1 : i) + 1, filtered.length - 1),
       );
       return;
     }
@@ -158,7 +149,7 @@ export default function NewPostPage() {
       e.preventDefault();
       if (filtered.length === 0) return;
       setHighlightedIndex((i) =>
-        Math.max((i < 0 ? filtered.length : i) - 1, 0)
+        Math.max((i < 0 ? filtered.length : i) - 1, 0),
       );
       return;
     }
@@ -166,7 +157,7 @@ export default function NewPostPage() {
 
   function insert(snippet: string) {
     const el = document.getElementById(
-      "cms-editor-area"
+      "cms-editor-area",
     ) as HTMLTextAreaElement | null;
     if (!el) {
       setContent((c) => c + snippet);
@@ -189,7 +180,7 @@ export default function NewPostPage() {
       try {
         if (!(e.ctrlKey || e.metaKey)) return;
         const el = document.getElementById(
-          "cms-editor-area"
+          "cms-editor-area",
         ) as HTMLTextAreaElement | null;
         if (!el) return;
         if (document.activeElement !== el) return; // only when editor is focused
@@ -214,7 +205,7 @@ export default function NewPostPage() {
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [content]);
 
   const toolbar = [
@@ -265,7 +256,7 @@ export default function NewPostPage() {
             },
             ...t,
           ]);
-        }
+        },
       );
       uploadControllers.current.cancelAll = controllers.cancelAll;
       uploadControllers.current.cancel = controllers.cancel;
@@ -281,7 +272,7 @@ export default function NewPostPage() {
     setBannerUploading(true);
     try {
       const { url, cancel } = await uploadBanner(f, (pct) =>
-        setFileProgress((p) => ({ ...p, banner: pct }))
+        setFileProgress((p) => ({ ...p, banner: pct })),
       );
       uploadControllers.current.bannerCancel = cancel;
       setBannerUrl(url);
@@ -339,10 +330,14 @@ export default function NewPostPage() {
   // server-side validate banner before saving
   async function validateBanner(url: string) {
     try {
+      const token = await user?.getIdToken();
       const res = await fetch("/api/admin/validate-banner", {
         method: "POST",
         body: JSON.stringify({ url }),
-        headers: { "content-type": "application/json" },
+        headers: {
+          "content-type": "application/json",
+          ...(token ? { authorization: `Bearer ${token}` } : {}),
+        },
       });
       return await res.json();
     } catch (err) {
@@ -353,10 +348,10 @@ export default function NewPostPage() {
   async function saveWithValidation() {
     if (!user) return;
     if (!title.trim()) return;
-    
+
     // Validate scheduled date/time
     let scheduledFor: number | undefined;
-    if (postStatus === 'scheduled') {
+    if (postStatus === "scheduled") {
       if (!scheduledDate || !scheduledTime) {
         setToasts((t) => [
           {
@@ -382,7 +377,7 @@ export default function NewPostPage() {
       }
       scheduledFor = scheduledDateTime.getTime();
     }
-    
+
     setSaving(true);
     try {
       if (bannerUrl) {
@@ -429,19 +424,40 @@ export default function NewPostPage() {
   // guard: render admin-only message while keeping hooks stable
   if (!admin)
     return (
-      <Container className="py-5">
-        <Alert variant="danger">Admin only</Alert>
-      </Container>
+      <div className="max-w-7xl mx-auto px-4 py-10">
+        <div className="rounded border border-red-400/30 bg-red-50 dark:bg-red-900/30 p-3 text-sm text-red-700 dark:text-red-300">
+          Admin only
+        </div>
+      </div>
     );
   if (loading)
     return (
-      <Container className="py-5 text-center">
-        <Spinner animation="border" />
-      </Container>
+      <div className="max-w-7xl mx-auto px-4 py-10 text-center">
+        <svg
+          className="animate-spin h-8 w-8 text-primary-500 mx-auto"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            className="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="4"
+          />
+          <path
+            className="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+          />
+        </svg>
+      </div>
     );
 
   return (
-    <Container className="py-4">
+    <div className="max-w-7xl mx-auto px-4 py-4">
       {/* Toasts */}
       <div
         aria-live="polite"
@@ -449,117 +465,166 @@ export default function NewPostPage() {
         style={{ position: "fixed", top: 80, right: 20, zIndex: 2000 }}
       >
         {toasts.map((t) => (
-          <Toast
+          <div
             key={t.id}
-            onClose={() => setToasts((ts) => ts.filter((x) => x.id !== t.id))}
-            className="mb-2"
-            bg={t.variant || undefined}
+            className={cn(
+              "mb-2 rounded-xl border shadow-sm min-w-[220px] overflow-hidden",
+              t.variant === "success" &&
+                "border-green-400/30 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300",
+              t.variant === "danger" &&
+                "border-red-400/30 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300",
+              !t.variant &&
+                "border-border bg-card dark:bg-card-dark dark:border-border-dark text-foreground",
+            )}
           >
-            <Toast.Body>{t.text}</Toast.Body>
-          </Toast>
+            <div className="flex items-center justify-between px-3 py-2">
+              <span className="text-sm">{t.text}</span>
+              <button
+                onClick={() =>
+                  setToasts((ts) => ts.filter((x) => x.id !== t.id))
+                }
+                className="ml-2 text-current hover:opacity-70 text-lg leading-none"
+              >
+                ×
+              </button>
+            </div>
+          </div>
         ))}
       </div>
-      <h1 className="mb-3">{editId ? "Edit Post" : "New Post"}</h1>
-      <Row>
-        <Col lg={7}>
-          <Form.Group className="mb-2">
-            <Form.Label>Title</Form.Label>
-            <Form.Control
+      <h1 className="text-2xl font-bold text-foreground mb-3">
+        {editId ? "Edit Post" : "New Post"}
+      </h1>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <div className="lg:col-span-7">
+          <div className="mb-2">
+            <label className="block text-sm font-medium text-foreground mb-1">
+              Title
+            </label>
+            <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Post title"
+              className="w-full rounded border border-border bg-transparent px-3 py-1.5 text-sm text-foreground placeholder:text-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
-          </Form.Group>
+          </div>
 
-          <Form.Group className="mb-3">
-            <Form.Label>Status</Form.Label>
-            <div className="d-flex gap-2 mb-2">
-              <Button
-                size="sm"
-                variant={postStatus === 'draft' ? 'primary' : 'outline-primary'}
-                onClick={() => setPostStatus('draft')}
+          <div className="mb-3">
+            <label className="block text-sm font-medium text-foreground mb-1">
+              Status
+            </label>
+            <div className="flex gap-2 mb-2">
+              <button
+                onClick={() => setPostStatus("draft")}
+                className={cn(
+                  "px-2 py-1 text-xs rounded",
+                  postStatus === "draft"
+                    ? "bg-primary-500 text-white"
+                    : "border border-primary-500 text-primary-500 hover:bg-primary-500/10",
+                )}
               >
                 Draft
-              </Button>
-              <Button
-                size="sm"
-                variant={postStatus === 'published' ? 'success' : 'outline-success'}
-                onClick={() => setPostStatus('published')}
+              </button>
+              <button
+                onClick={() => setPostStatus("published")}
+                className={cn(
+                  "px-2 py-1 text-xs rounded",
+                  postStatus === "published"
+                    ? "bg-green-600 text-white"
+                    : "border border-green-600 text-green-600 hover:bg-green-600/10",
+                )}
               >
                 Published
-              </Button>
-              <Button
-                size="sm"
-                variant={postStatus === 'scheduled' ? 'info' : 'outline-info'}
-                onClick={() => setPostStatus('scheduled')}
+              </button>
+              <button
+                onClick={() => setPostStatus("scheduled")}
+                className={cn(
+                  "px-2 py-1 text-xs rounded",
+                  postStatus === "scheduled"
+                    ? "bg-blue-500 text-white"
+                    : "border border-blue-500 text-blue-500 hover:bg-blue-500/10",
+                )}
               >
                 Scheduled
-              </Button>
+              </button>
             </div>
-            {postStatus === 'scheduled' && (
-              <Row className="mt-2">
-                <Col md={6}>
-                  <Form.Label className="small">Date</Form.Label>
-                  <Form.Control
+            {postStatus === "scheduled" && (
+              <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-xs font-medium text-foreground mb-1">
+                    Date
+                  </label>
+                  <input
                     type="date"
                     value={scheduledDate}
                     onChange={(e) => setScheduledDate(e.target.value)}
-                    min={new Date().toISOString().split('T')[0]}
+                    min={new Date().toISOString().split("T")[0]}
+                    className="w-full rounded border border-border bg-transparent px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary-500"
                   />
-                </Col>
-                <Col md={6}>
-                  <Form.Label className="small">Time</Form.Label>
-                  <Form.Control
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-foreground mb-1">
+                    Time
+                  </label>
+                  <input
                     type="time"
                     value={scheduledTime}
                     onChange={(e) => setScheduledTime(e.target.value)}
+                    className="w-full rounded border border-border bg-transparent px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary-500"
                   />
-                </Col>
-              </Row>
+                </div>
+              </div>
             )}
-          </Form.Group>
+          </div>
 
-          <Form.Group className="mb-3 d-flex align-items-start gap-3">
+          <div className="mb-3 flex items-start gap-3">
             <div style={{ minWidth: 220 }}>
-              <Form.Label>Banner</Form.Label>
-              <div className="d-flex gap-2 mb-2">
-                <Button
-                  size="sm"
-                  variant={
-                    bannerUploadMode === "url" ? "primary" : "outline-primary"
-                  }
+              <label className="block text-sm font-medium text-foreground mb-1">
+                Banner
+              </label>
+              <div className="flex gap-2 mb-2">
+                <button
                   onClick={() => setBannerUploadMode("url")}
+                  className={cn(
+                    "px-2 py-1 text-xs rounded",
+                    bannerUploadMode === "url"
+                      ? "bg-primary-500 text-white"
+                      : "border border-primary-500 text-primary-500 hover:bg-primary-500/10",
+                  )}
                 >
                   Use URL
-                </Button>
-                <Button
-                  size="sm"
-                  variant={
-                    bannerUploadMode === "upload"
-                      ? "primary"
-                      : "outline-primary"
-                  }
+                </button>
+                <button
                   onClick={() => setBannerUploadMode("upload")}
+                  className={cn(
+                    "px-2 py-1 text-xs rounded",
+                    bannerUploadMode === "upload"
+                      ? "bg-primary-500 text-white"
+                      : "border border-primary-500 text-primary-500 hover:bg-primary-500/10",
+                  )}
                 >
                   Upload
-                </Button>
+                </button>
               </div>
               {bannerUploadMode === "url" ? (
-                <Form.Control
+                <input
                   value={bannerUrl}
                   onChange={(e) => setBannerUrl(e.target.value)}
                   placeholder="https://..."
+                  className="w-full rounded border border-border bg-transparent px-3 py-1.5 text-sm text-foreground placeholder:text-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
               ) : (
                 <div>
-                  <Form.Control
+                  <input
                     type="file"
                     accept="image/*"
                     onChange={handleBannerUpload}
                     disabled={bannerUploading}
+                    className="w-full text-sm text-foreground file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:bg-primary-500 file:text-white hover:file:bg-primary-600"
                   />
                   {bannerUploading && (
-                    <div className="mt-2 small text-muted">Uploading...</div>
+                    <div className="mt-2 text-sm text-foreground/60">
+                      Uploading...
+                    </div>
                   )}
                 </div>
               )}
@@ -573,31 +638,36 @@ export default function NewPostPage() {
                 </div>
               )}
             </div>
-          </Form.Group>
+          </div>
 
-          <Form.Group className="mb-3">
-            <Form.Label>Tags</Form.Label>
-            <div className="d-flex gap-2 flex-wrap mb-2">
+          <div className="mb-3">
+            <label className="block text-sm font-medium text-foreground mb-1">
+              Tags
+            </label>
+            <div className="flex gap-2 flex-wrap mb-2">
               {selectedTags.map((t) => (
-                <div
+                <span
                   key={t}
-                  className="badge bg-info d-inline-flex align-items-center gap-2"
-                  style={{ fontSize: "0.85rem", padding: "0.35rem 0.6rem" }}
+                  className="inline-flex items-center gap-1 rounded-full text-xs font-medium px-2.5 py-0.5 bg-blue-500 text-white"
                 >
                   <span>{t}</span>
                   <button
                     type="button"
-                    className="btn-close btn-close-white btn-sm ms-1"
                     onClick={() => removeTag(t)}
                     aria-label={`Remove tag ${t}`}
-                  ></button>
-                </div>
+                    className="hover:text-white/70 text-white ml-1 text-sm leading-none"
+                  >
+                    ×
+                  </button>
+                </span>
               ))}
               {selectedTags.length === 0 && (
-                <span className="text-muted small">No tags selected</span>
+                <span className="text-foreground/60 text-sm">
+                  No tags selected
+                </span>
               )}
             </div>
-            <Form.Control
+            <input
               value={tagQuery}
               placeholder="Type to search or create tag"
               onChange={(e) => {
@@ -609,25 +679,27 @@ export default function NewPostPage() {
               aria-expanded={showTagDropdown}
               aria-haspopup="listbox"
               aria-controls="tag-dropdown-list"
+              className="w-full rounded border border-border bg-transparent px-3 py-1.5 text-sm text-foreground placeholder:text-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
             {showTagDropdown && (filtered.length > 0 || tagQuery.trim()) && (
-              <div className="position-relative">
+              <div className="relative">
                 <div
                   id="tag-dropdown-list"
                   role="listbox"
-                  className="position-absolute w-100 bg-body border rounded shadow-sm mt-1 p-1"
-                  style={{ zIndex: 30, maxHeight: 200, overflowY: "auto" }}
+                  className="absolute w-full bg-card dark:bg-card-dark border border-border dark:border-border-dark rounded shadow-sm mt-1 p-1 z-30"
+                  style={{ maxHeight: 200, overflowY: "auto" }}
                 >
                   {filtered.map((t: string, i: number) => {
                     const highlighted = i === highlightedIndex;
                     return (
                       <button
                         key={t}
-                        className={`dropdown-item small d-flex align-items-center ${
+                        className={cn(
+                          "w-full text-left px-2 py-1 text-sm flex items-center rounded",
                           highlighted
-                            ? "bg-primary text-white"
-                            : "bg-transparent"
-                        }`}
+                            ? "bg-primary-500 text-white"
+                            : "bg-transparent text-foreground hover:bg-foreground/10",
+                        )}
                         type="button"
                         role="option"
                         aria-selected={highlighted}
@@ -635,12 +707,9 @@ export default function NewPostPage() {
                         onMouseLeave={() => setHighlightedIndex(-1)}
                         onClick={() => addTag(t)}
                       >
-                        <div style={{ flex: 1 }}>
+                        <div className="flex-1">
                           {highlightMatch(t, tagQuery)}
                         </div>
-                        <small className="text-muted ms-2">
-                          {/* optional meta */}
-                        </small>
                       </button>
                     );
                   })}
@@ -649,17 +718,19 @@ export default function NewPostPage() {
                     !selectedTags.includes(tagQuery.trim()) && (
                       <button
                         type="button"
-                        className={`dropdown-item small d-flex align-items-center ${
+                        className={cn(
+                          "w-full text-left px-2 py-1 text-sm flex items-center rounded",
                           highlightedIndex === filtered.length
-                            ? "bg-primary text-white"
-                            : ""
-                        }`}
+                            ? "bg-primary-500 text-white"
+                            : "text-foreground hover:bg-foreground/10",
+                        )}
                         onClick={() => addTag(tagQuery.trim())}
                         role="option"
                         aria-selected={highlightedIndex === filtered.length}
                       >
-                        <div style={{ flex: 1 }}>
-                          Add new tag "<strong>{tagQuery.trim()}</strong>"
+                        <div className="flex-1">
+                          Add new tag &quot;<strong>{tagQuery.trim()}</strong>
+                          &quot;
                         </div>
                       </button>
                     )}
@@ -670,23 +741,16 @@ export default function NewPostPage() {
             {Object.keys(fileProgress).length > 0 && (
               <div className="mt-2">
                 {Object.entries(fileProgress).map(([name, pct]) => (
-                  <div
-                    key={name}
-                    className="d-flex align-items-center gap-2 mb-1"
-                  >
-                    <div
-                      style={{
-                        width: 160,
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
+                  <div key={name} className="flex items-center gap-2 mb-1">
+                    <div className="w-40 truncate text-sm text-foreground">
                       {name}
                     </div>
-                    <div style={{ flex: 1 }} className="progress" aria-hidden>
+                    <div
+                      className="flex-1 bg-foreground/10 rounded-full h-3 overflow-hidden"
+                      aria-hidden
+                    >
                       <div
-                        className="progress-bar"
+                        className="bg-primary-500 h-3 rounded-full transition-all text-[10px] text-white text-center leading-3"
                         role="progressbar"
                         style={{ width: `${pct}%` }}
                         aria-valuenow={pct}
@@ -700,90 +764,124 @@ export default function NewPostPage() {
                 ))}
               </div>
             )}
-          </Form.Group>
+          </div>
 
-          <div className="d-flex flex-wrap gap-2 mb-2">
+          <div className="flex flex-wrap gap-2 mb-2">
             {toolbar.map((btn) => (
-              <OverlayTrigger
+              <button
                 key={btn.label}
-                placement="top"
-                overlay={
-                  <Tooltip>
-                    {btn.label} (Ctrl+{btn.key})
-                  </Tooltip>
-                }
+                title={`${btn.label} (Ctrl+${btn.key})`}
+                onClick={() => insert(btn.snippet)}
+                className="px-2 py-1 text-xs rounded bg-gray-500 text-white hover:bg-gray-600"
               >
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  onClick={() => insert(btn.snippet)}
-                >
-                  {btn.label}
-                </Button>
-              </OverlayTrigger>
+                {btn.label}
+              </button>
             ))}
-            <div className="ms-auto d-flex align-items-center gap-2">
-              <Form.Label className="mb-0 small text-nowrap">
+            <div className="ml-auto flex items-center gap-2">
+              <label className="text-sm text-foreground whitespace-nowrap">
                 Images ({uploadsCount}/{maxImages})
-              </Form.Label>
-              <Form.Control
+              </label>
+              <input
                 type="file"
                 multiple
                 accept="image/*"
-                size="sm"
                 onChange={handleUpload}
                 disabled={uploading || uploadsCount >= maxImages}
+                className="text-sm text-foreground file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:bg-primary-500 file:text-white hover:file:bg-primary-600"
                 style={{ maxWidth: 220 }}
               />
-              {uploading && <Spinner size="sm" animation="border" />}
+              {uploading && (
+                <svg
+                  className="animate-spin h-4 w-4 text-primary-500"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                  />
+                </svg>
+              )}
             </div>
           </div>
 
-          <Form.Group className="mb-2">
-            <Form.Label>Content (Markdown)</Form.Label>
-            <Form.Control
+          <div className="mb-2">
+            <label className="block text-sm font-medium text-foreground mb-1">
+              Content (Markdown)
+            </label>
+            <textarea
               id="cms-editor-area"
-              as="textarea"
               rows={18}
               value={content}
               onChange={(e) => setContent(e.target.value)}
               placeholder="Write markdown here..."
+              className="w-full rounded border border-border bg-transparent px-3 py-1.5 text-sm text-foreground placeholder:text-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono"
             />
-          </Form.Group>
-          <div className="small text-muted mb-3">
+          </div>
+          <div className="text-sm text-foreground/60 mb-3">
             <strong>Shortcuts:</strong>{" "}
             {toolbar.map((t) => (
-              <code key={t.key} className="me-2">
+              <code
+                key={t.key}
+                className="mr-2 bg-foreground/10 px-1 rounded text-xs"
+              >
                 Ctrl+{t.key}
               </code>
             ))}{" "}
             | Enter to add tag.
           </div>
-          <div className="d-flex gap-2 mb-4">
-            <Button
+          <div className="flex gap-2 mb-4">
+            <button
               disabled={!title.trim() || saving}
               onClick={saveWithValidation}
+              className={cn(
+                "px-3 py-1.5 rounded bg-primary-500 text-white hover:bg-primary-600 text-sm",
+                (!title.trim() || saving) && "opacity-50 cursor-not-allowed",
+              )}
             >
-              {saving ? "Saving..." : editId ? "Update Post" : postStatus === 'draft' ? "Save Draft" : postStatus === 'scheduled' ? "Schedule Post" : "Publish Post"}
-            </Button>
-            <Button variant="secondary" onClick={() => setPreview((p) => !p)}>
+              {saving
+                ? "Saving..."
+                : editId
+                  ? "Update Post"
+                  : postStatus === "draft"
+                    ? "Save Draft"
+                    : postStatus === "scheduled"
+                      ? "Schedule Post"
+                      : "Publish Post"}
+            </button>
+            <button
+              onClick={() => setPreview((p) => !p)}
+              className="px-3 py-1.5 rounded bg-gray-500 text-white hover:bg-gray-600 text-sm"
+            >
               {preview ? "Hide Preview" : "Show Preview"}
-            </Button>
-            <Button
-              variant="outline-secondary"
+            </button>
+            <button
               onClick={() => router.push("/admin/cms")}
+              className="px-3 py-1.5 rounded border border-gray-500 text-gray-500 hover:bg-gray-500/10 text-sm"
             >
               Back
-            </Button>
+            </button>
           </div>
-        </Col>
-        <Col lg={5} className="mt-3 mt-lg-0">
+        </div>
+        <div className="lg:col-span-5 mt-3 lg:mt-0">
           {preview && (
             <div
-              className="p-3 border rounded bg-dark-subtle"
+              className="p-3 border border-border rounded bg-foreground/5"
               style={{ maxHeight: "80vh", overflowY: "auto" }}
             >
-              <h5>Live Preview</h5>
+              <h5 className="font-semibold text-foreground mb-2">
+                Live Preview
+              </h5>
               {content.trim() ? (
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
@@ -792,14 +890,14 @@ export default function NewPostPage() {
                   {content}
                 </ReactMarkdown>
               ) : (
-                <div className="text-muted small fst-italic">
+                <div className="text-foreground/60 text-sm italic">
                   Start typing...
                 </div>
               )}
             </div>
           )}
-        </Col>
-      </Row>
-    </Container>
+        </div>
+      </div>
+    </div>
   );
 }

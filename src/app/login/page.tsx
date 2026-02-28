@@ -1,6 +1,5 @@
 "use client";
 import { useState, useRef } from "react";
-import { Alert, Button, ButtonGroup, Col, Container, Form, Row } from "react-bootstrap";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 
@@ -15,49 +14,113 @@ export default function LoginPage() {
 
   function changeForm(e: React.MouseEvent) {
     e.preventDefault();
-    setSignupForm(f => !f);
+    setSignupForm((f) => !f);
   }
+
   async function handleForm(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     try {
       const email = emailRef.current!.value;
       const pass = passwordRef.current!.value;
-      if (signupForm) await signup(email, pass); else await login(email, pass);
+      if (signupForm) await signup(email, pass);
+      else await login(email, pass);
       router.push("/");
     } catch (err: any) {
       setError(err.message || "Auth failed");
       setLoading(false);
     }
   }
+
   return (
-    <Container>
-      <Alert className="text-center">{signupForm ? "Create an account with us" : "Enter your details to login to the website"}</Alert>
-      <Form onSubmit={handleForm}>
-        <Container className="mb-3">
-          <Row className="align-items-center">
-            <Col xs="2"><Form.Label>Email: </Form.Label></Col>
-            <Col lg><Form.Control type="email" required placeholder="A valid email address" ref={emailRef} /></Col>
-          </Row>
-        </Container>
-        <Container className="mb-3">
-          <Row className="align-items-center">
-            <Col xs="2"><Form.Label>Password: </Form.Label></Col>
-            <Col lg><Form.Control type="password" required placeholder="Minimum 8 length" minLength={8} ref={passwordRef} /></Col>
-          </Row>
-        </Container>
-        <ButtonGroup className="d-flex mb-3">
-          <Button disabled={loading} type="submit" variant="primary" className="mx-1">{signupForm ? "Create account" : "Login"}</Button>
-          <Button disabled={loading} type="reset" variant="secondary" className="mx-1">Clear</Button>
-        </ButtonGroup>
-      </Form>
-      <Container>
-        <Alert>
-          {signupForm ? (<span>Already have an account with us? <a href="#" onClick={changeForm}>Click here</a></span>) : (<span>Don't have an account yet? <a href="#" onClick={changeForm}>Click here</a></span>)}
-        </Alert>
-      </Container>
-      {error && <Alert variant="danger">{error}</Alert>}
-    </Container>
+    <div className="max-w-3xl mx-auto px-4 py-4">
+      <div className="rounded-lg border border-blue-300 bg-blue-50 text-blue-800 dark:border-blue-700 dark:bg-blue-900/30 dark:text-blue-300 px-4 py-3 text-center mb-4">
+        {signupForm
+          ? "Create an account with us"
+          : "Enter your details to login to the website"}
+      </div>
+
+      <form onSubmit={handleForm}>
+        <div className="mb-3">
+          <div className="flex items-center gap-4">
+            <label className="w-20 text-sm font-medium text-foreground shrink-0">
+              Email:
+            </label>
+            <input
+              type="email"
+              required
+              placeholder="A valid email address"
+              ref={emailRef}
+              className="flex-1 rounded-lg border border-border dark:border-border-dark bg-background dark:bg-background-dark text-foreground px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500"
+            />
+          </div>
+        </div>
+
+        <div className="mb-3">
+          <div className="flex items-center gap-4">
+            <label className="w-20 text-sm font-medium text-foreground shrink-0">
+              Password:
+            </label>
+            <input
+              type="password"
+              required
+              placeholder="Minimum 8 length"
+              minLength={8}
+              ref={passwordRef}
+              className="flex-1 rounded-lg border border-border dark:border-border-dark bg-background dark:bg-background-dark text-foreground px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500"
+            />
+          </div>
+        </div>
+
+        <div className="flex mb-3 gap-2">
+          <button
+            disabled={loading}
+            type="submit"
+            className="flex-1 rounded-lg bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50"
+          >
+            {signupForm ? "Create account" : "Login"}
+          </button>
+          <button
+            disabled={loading}
+            type="reset"
+            className="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-foreground px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50"
+          >
+            Clear
+          </button>
+        </div>
+      </form>
+
+      <div className="rounded-lg border border-blue-300 bg-blue-50 text-blue-800 dark:border-blue-700 dark:bg-blue-900/30 dark:text-blue-300 px-4 py-3 mb-4">
+        {signupForm ? (
+          <span>
+            Already have an account with us?{" "}
+            <a
+              href="#"
+              onClick={changeForm}
+              className="underline font-medium hover:text-blue-600"
+            >
+              Click here
+            </a>
+          </span>
+        ) : (
+          <span>
+            Don&apos;t have an account yet?{" "}
+            <a
+              href="#"
+              onClick={changeForm}
+              className="underline font-medium hover:text-blue-600"
+            >
+              Click here
+            </a>
+          </span>
+        )}
+      </div>
+
+      {error && (
+        <div className="rounded-lg border border-red-300 bg-red-50 text-red-800 dark:border-red-700 dark:bg-red-900/30 dark:text-red-300 px-4 py-3">
+          {error}
+        </div>
+      )}
+    </div>
   );
 }
-

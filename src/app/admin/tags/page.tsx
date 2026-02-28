@@ -1,15 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import {
-  Alert,
-  Badge,
-  Button,
-  ButtonGroup,
-  Container,
-  Form,
-  Modal,
-  Table,
-} from "react-bootstrap";
+import { cn } from "@/lib/utils";
 import type { EffectiveMeta } from "@/types/tags";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -124,179 +115,255 @@ export default function AdminTagsPage() {
   }
 
   return (
-    <Container className="py-3">
-      <h2>Tag Management</h2>
-      <p className="text-muted small">
+    <div className="max-w-7xl mx-auto px-4 py-3">
+      <h2 className="text-2xl font-bold text-foreground">Tag Management</h2>
+      <p className="text-foreground/60 text-sm">
         Early admin interface. Future: dynamic route discovery, registry,
         validation.
       </p>
-      {error && <Alert variant="danger">{error}</Alert>}
-      <Button size="sm" onClick={fetchAll} disabled={loading}>
+      {error && (
+        <div className="rounded border border-red-400/30 bg-red-50 dark:bg-red-900/30 p-3 mb-2 text-sm text-red-700 dark:text-red-300">
+          {error}
+        </div>
+      )}
+      <button
+        onClick={fetchAll}
+        disabled={loading}
+        className={cn(
+          "px-2 py-1 text-xs rounded bg-primary-500 text-white hover:bg-primary-600",
+          loading && "opacity-50 cursor-not-allowed",
+        )}
+      >
         {loading ? "Refreshing..." : "Refresh"}
-      </Button>
-      <Table striped hover size="sm" responsive className="mt-3">
-        <thead>
-          <tr>
-            <th>Path</th>
-            <th>Static Tags</th>
-            <th>Override Tags</th>
-            <th>Mode</th>
-            <th>Effective</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r) => (
-            <tr key={r.path}>
-              <td>{r.path}</td>
-              <td>
-                {r.staticTags?.map((t) => (
-                  <Badge key={t} bg="secondary" className="me-1">
-                    {t}
-                  </Badge>
-                ))}
-              </td>
-              <td>
-                {r.override?.tags?.map((t: string) => (
-                  <Badge key={t} bg="warning" className="me-1 text-dark">
-                    {t}
-                  </Badge>
-                ))}
-              </td>
-              <td>{r.override?.mode || "merge"}</td>
-              <td>
-                {r.effective.map((t) => (
-                  <Badge key={t} bg="dark" className="me-1">
-                    {t}
-                  </Badge>
-                ))}
-              </td>
-              <td>
-                <ButtonGroup size="sm">
-                  <Button variant="primary" onClick={() => openEdit(r)}>
-                    Edit
-                  </Button>
-                  {r.override && (
-                    <Button
-                      variant="outline-danger"
-                      onClick={() => handleDeleteOverride(r.path)}
-                    >
-                      Del Override
-                    </Button>
-                  )}
-                </ButtonGroup>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
+      </button>
 
-      <h4 className="mt-4">Tag Registry</h4>
-      <Table striped hover size="sm" responsive>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Description</th>
-            <th>Color</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {registry.map((r) => (
-            <tr key={r.name}>
-              <td>
-                <Badge style={{ background: r.data.color || "#666" }}>
-                  {r.name}
-                </Badge>
+      <div className="overflow-x-auto mt-3">
+        <table className="w-full text-sm text-foreground border-collapse">
+          <thead>
+            <tr className="border-b border-border">
+              <th className="px-2 py-1.5 text-left font-semibold">Path</th>
+              <th className="px-2 py-1.5 text-left font-semibold">
+                Static Tags
+              </th>
+              <th className="px-2 py-1.5 text-left font-semibold">
+                Override Tags
+              </th>
+              <th className="px-2 py-1.5 text-left font-semibold">Mode</th>
+              <th className="px-2 py-1.5 text-left font-semibold">Effective</th>
+              <th className="px-2 py-1.5"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r) => (
+              <tr
+                key={r.path}
+                className="border-b border-border even:bg-foreground/5 hover:bg-foreground/10"
+              >
+                <td className="px-2 py-1.5">{r.path}</td>
+                <td className="px-2 py-1.5">
+                  {r.staticTags?.map((t) => (
+                    <span
+                      key={t}
+                      className="rounded-full text-xs font-medium px-2.5 py-0.5 bg-gray-500 text-white mr-1"
+                    >
+                      {t}
+                    </span>
+                  ))}
+                </td>
+                <td className="px-2 py-1.5">
+                  {r.override?.tags?.map((t: string) => (
+                    <span
+                      key={t}
+                      className="rounded-full text-xs font-medium px-2.5 py-0.5 bg-yellow-500 text-black mr-1"
+                    >
+                      {t}
+                    </span>
+                  ))}
+                </td>
+                <td className="px-2 py-1.5">{r.override?.mode || "merge"}</td>
+                <td className="px-2 py-1.5">
+                  {r.effective.map((t) => (
+                    <span
+                      key={t}
+                      className="rounded-full text-xs font-medium px-2.5 py-0.5 bg-gray-800 text-white mr-1"
+                    >
+                      {t}
+                    </span>
+                  ))}
+                </td>
+                <td className="px-2 py-1.5">
+                  <div className="flex">
+                    <button
+                      onClick={() => openEdit(r)}
+                      className="px-2 py-1 text-xs rounded-l bg-primary-500 text-white hover:bg-primary-600"
+                    >
+                      Edit
+                    </button>
+                    {r.override && (
+                      <button
+                        onClick={() => handleDeleteOverride(r.path)}
+                        className="px-2 py-1 text-xs rounded-r border border-red-600 text-red-600 hover:bg-red-600/10"
+                      >
+                        Del Override
+                      </button>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <h4 className="mt-4 text-lg font-semibold text-foreground">
+        Tag Registry
+      </h4>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm text-foreground border-collapse">
+          <thead>
+            <tr className="border-b border-border">
+              <th className="px-2 py-1.5 text-left font-semibold">Name</th>
+              <th className="px-2 py-1.5 text-left font-semibold">
+                Description
+              </th>
+              <th className="px-2 py-1.5 text-left font-semibold">Color</th>
+              <th className="px-2 py-1.5"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {registry.map((r) => (
+              <tr
+                key={r.name}
+                className="border-b border-border even:bg-foreground/5 hover:bg-foreground/10"
+              >
+                <td className="px-2 py-1.5">
+                  <span
+                    className="rounded-full text-xs font-medium px-2.5 py-0.5 text-white"
+                    style={{ background: r.data.color || "#666" }}
+                  >
+                    {r.name}
+                  </span>
+                </td>
+                <td className="px-2 py-1.5">{r.data.description || ""}</td>
+                <td className="px-2 py-1.5">{r.data.color || ""}</td>
+                <td className="px-2 py-1.5">
+                  <button
+                    onClick={() => handleRegistryDelete(r.name)}
+                    className="px-2 py-1 text-xs rounded border border-red-600 text-red-600 hover:bg-red-600/10"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+            <tr className="border-b border-border">
+              <td className="px-2 py-1.5">
+                <input
+                  placeholder="Name"
+                  value={regName}
+                  onChange={(e) => setRegName(e.target.value)}
+                  className="w-full rounded border border-border bg-transparent px-2 py-1 text-xs text-foreground placeholder:text-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
               </td>
-              <td>{r.data.description || ""}</td>
-              <td>{r.data.color || ""}</td>
-              <td>
-                <Button
-                  size="sm"
-                  variant="outline-danger"
-                  onClick={() => handleRegistryDelete(r.name)}
+              <td className="px-2 py-1.5">
+                <input
+                  placeholder="Description"
+                  value={regDesc}
+                  onChange={(e) => setRegDesc(e.target.value)}
+                  className="w-full rounded border border-border bg-transparent px-2 py-1 text-xs text-foreground placeholder:text-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              </td>
+              <td className="px-2 py-1.5">
+                <input
+                  placeholder="#color"
+                  value={regColor}
+                  onChange={(e) => setRegColor(e.target.value)}
+                  className="w-full rounded border border-border bg-transparent px-2 py-1 text-xs text-foreground placeholder:text-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              </td>
+              <td className="px-2 py-1.5">
+                <button
+                  onClick={handleRegistryUpsert}
+                  className="px-2 py-1 text-xs rounded bg-primary-500 text-white hover:bg-primary-600"
                 >
-                  Delete
-                </Button>
+                  Save
+                </button>
               </td>
             </tr>
-          ))}
-          <tr>
-            <td>
-              <Form.Control
-                size="sm"
-                placeholder="Name"
-                value={regName}
-                onChange={(e) => setRegName(e.target.value)}
-              />
-            </td>
-            <td>
-              <Form.Control
-                size="sm"
-                placeholder="Description"
-                value={regDesc}
-                onChange={(e) => setRegDesc(e.target.value)}
-              />
-            </td>
-            <td>
-              <Form.Control
-                size="sm"
-                placeholder="#color"
-                value={regColor}
-                onChange={(e) => setRegColor(e.target.value)}
-              />
-            </td>
-            <td>
-              <Button
-                size="sm"
-                variant="primary"
-                onClick={handleRegistryUpsert}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Modal */}
+      {show && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="absolute inset-0 bg-black/50"
+            onClick={() => setShow(false)}
+          />
+          <div className="relative bg-card dark:bg-card-dark border border-border dark:border-border-dark rounded-xl shadow-lg w-full max-w-md mx-4">
+            <div className="flex items-center justify-between p-4 border-b border-border dark:border-border-dark">
+              <h5 className="font-semibold text-foreground">Edit Tags</h5>
+              <button
+                onClick={() => setShow(false)}
+                className="text-foreground/60 hover:text-foreground text-xl leading-none"
+              >
+                ×
+              </button>
+            </div>
+            <div className="p-4 space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  Path
+                </label>
+                <input
+                  value={editPath || ""}
+                  disabled
+                  className="w-full rounded border border-border bg-foreground/5 px-3 py-1.5 text-sm text-foreground/60 cursor-not-allowed"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  Tags (comma separated)
+                </label>
+                <input
+                  value={editTags}
+                  onChange={(e) => setEditTags(e.target.value)}
+                  placeholder="PhasmoTourney4, Bracket"
+                  className="w-full rounded border border-border bg-transparent px-3 py-1.5 text-sm text-foreground placeholder:text-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  Mode
+                </label>
+                <select
+                  value={editMode}
+                  onChange={(e) => setEditMode(e.target.value as any)}
+                  className="w-full rounded border border-border bg-transparent px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary-500"
+                >
+                  <option value="merge">Merge (static + override)</option>
+                  <option value="replace">Replace (override only)</option>
+                </select>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 p-4 border-t border-border dark:border-border-dark">
+              <button
+                onClick={() => setShow(false)}
+                className="px-3 py-1.5 rounded bg-gray-500 text-white hover:bg-gray-600 text-sm"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSave}
+                className="px-3 py-1.5 rounded bg-primary-500 text-white hover:bg-primary-600 text-sm"
               >
                 Save
-              </Button>
-            </td>
-          </tr>
-        </tbody>
-      </Table>
-
-      <Modal show={show} onHide={() => setShow(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Edit Tags</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form.Group className="mb-3">
-            <Form.Label>Path</Form.Label>
-            <Form.Control value={editPath || ""} disabled />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Tags (comma separated)</Form.Label>
-            <Form.Control
-              value={editTags}
-              onChange={(e) => setEditTags(e.target.value)}
-              placeholder="PhasmoTourney4, Bracket"
-            />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Mode</Form.Label>
-            <Form.Select
-              value={editMode}
-              onChange={(e) => setEditMode(e.target.value as any)}
-            >
-              <option value="merge">Merge (static + override)</option>
-              <option value="replace">Replace (override only)</option>
-            </Form.Select>
-          </Form.Group>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShow(false)}>
-            Cancel
-          </Button>
-          <Button variant="primary" onClick={handleSave}>
-            Save
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    </Container>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

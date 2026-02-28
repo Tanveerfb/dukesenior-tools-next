@@ -1,7 +1,21 @@
 "use client";
-import { createContext, useContext, useState, ReactNode, useCallback } from "react";
-import { Snackbar, Alert, AlertTitle, Box } from "@mui/material";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+  useCallback,
+} from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  FiX,
+  FiCheckCircle,
+  FiAlertCircle,
+  FiAlertTriangle,
+  FiInfo,
+} from "react-icons/fi";
+import { cn } from "@/lib/utils";
 
 interface ToastMessage {
   id: string;
@@ -14,7 +28,7 @@ interface ToastContextType {
   showToast: (
     message: string,
     variant?: ToastMessage["variant"],
-    duration?: number
+    duration?: number,
   ) => void;
 }
 
@@ -22,81 +36,102 @@ const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
 let toastCounter = 0;
 
-const MotionBox = motion(Box);
+const variantStyles: Record<string, string> = {
+  success: "bg-success text-white",
+  error: "bg-danger text-white",
+  warning: "bg-warning text-white",
+  info: "bg-info text-white",
+};
+
+const variantIcons = {
+  success: FiCheckCircle,
+  error: FiAlertCircle,
+  warning: FiAlertTriangle,
+  info: FiInfo,
+};
+
+const variantTitles = {
+  success: "Success",
+  error: "Error",
+  warning: "Warning",
+  info: "Info",
+};
+
+function ToastItem({
+  toast,
+  onRemove,
+}: {
+  toast: ToastMessage;
+  onRemove: (id: string) => void;
+}) {
+  const variant = toast.variant || "info";
+  const Icon = variantIcons[variant];
+
+  useEffect(() => {
+    if (toast.duration) {
+      const timer = setTimeout(() => onRemove(toast.id), toast.duration);
+      return () => clearTimeout(timer);
+    }
+  }, [toast.id, toast.duration, onRemove]);
+
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: -20, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
+      transition={{ duration: 0.3 }}
+      className={cn(
+        "flex items-start gap-3 min-w-[300px] max-w-md rounded-lg px-4 py-3 shadow-soft-lg",
+        variantStyles[variant],
+      )}
+    >
+      <Icon className="mt-0.5 shrink-0" size={18} />
+      <div className="flex-1 min-w-0">
+        <p className="font-semibold text-sm">{variantTitles[variant]}</p>
+        <p className="text-sm opacity-90">{toast.message}</p>
+      </div>
+      <button
+        onClick={() => onRemove(toast.id)}
+        className="shrink-0 opacity-70 hover:opacity-100 transition-opacity"
+        aria-label="Close"
+      >
+        <FiX size={16} />
+      </button>
+    </motion.div>
+  );
+}
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
-  const showToast = useCallback((
-    message: string,
-    variant: ToastMessage["variant"] = "info",
-    duration = 3000
-  ) => {
-    const id = `toast-${++toastCounter}`;
-    const newToast: ToastMessage = { id, message, variant, duration };
-    setToasts((prev) => [...prev, newToast]);
-  }, []);
+  const showToast = useCallback(
+    (
+      message: string,
+      variant: ToastMessage["variant"] = "info",
+      duration = 3000,
+    ) => {
+      const id = `toast-${++toastCounter}`;
+      const newToast: ToastMessage = { id, message, variant, duration };
+      setToasts((prev) => [...prev, newToast]);
+    },
+    [],
+  );
 
   const removeToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
-  const handleClose = useCallback((id: string) => (_event?: React.SyntheticEvent | Event, reason?: string) => {
-    if (reason === 'clickaway') return;
-    removeToast(id);
-  }, [removeToast]);
-
-  const variantTitles = {
-    success: "Success",
-    error: "Error",
-    warning: "Warning",
-    info: "Info",
-  };
-
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      <Box
-        sx={{
-          position: "fixed",
-          top: 16,
-          right: 16,
-          zIndex: 9999,
-          display: "flex",
-          flexDirection: "column",
-          gap: 1,
-        }}
-      >
+      <div className="fixed top-4 right-4 z-[9999] flex flex-col gap-2">
         <AnimatePresence>
           {toasts.map((toast) => (
-            <MotionBox
-              key={toast.id}
-              initial={{ opacity: 0, y: -20, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
-              transition={{ duration: 0.3 }}
-            >
-              <Snackbar
-                open={true}
-                autoHideDuration={toast.duration}
-                onClose={handleClose(toast.id)}
-                anchorOrigin={{ vertical: "top", horizontal: "right" }}
-                sx={{ position: "relative", top: 0, right: 0 }}
-              >
-                <Alert
-                  onClose={handleClose(toast.id)}
-                  severity={toast.variant}
-                  variant="filled"
-                  sx={{ width: "100%", minWidth: 300 }}
-                >
-                  <AlertTitle>{variantTitles[toast.variant || "info"]}</AlertTitle>
-                  {toast.message}
-                </Alert>
-              </Snackbar>
-            </MotionBox>
+            <ToastItem key={toast.id} toast={toast} onRemove={removeToast} />
           ))}
         </AnimatePresence>
-      </Box>
+      </div>
     </ToastContext.Provider>
   );
 }

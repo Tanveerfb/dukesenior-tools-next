@@ -1,6 +1,6 @@
 "use client";
 import React, { useRef, useState, useEffect } from "react";
-import { Container, Form, Button, Alert, Spinner } from "react-bootstrap";
+import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage, db } from "@/lib/firebase/client";
@@ -26,7 +26,7 @@ export default function AccountPage() {
     const uname = (username || "").trim();
     if (!/^[A-Za-z0-9_]{3,32}$/.test(uname))
       return setErr(
-        "Invalid username format. Use letters, numbers, underscore (3-32 chars)."
+        "Invalid username format. Use letters, numbers, underscore (3-32 chars).",
       );
     if (
       currentUsername &&
@@ -40,8 +40,8 @@ export default function AccountPage() {
       const token = await (user.getIdToken
         ? user.getIdToken()
         : user.getIdToken?.bind(user)
-        ? user.getIdToken()
-        : null);
+          ? user.getIdToken()
+          : null);
       // If token is a function, call it
       const idToken = typeof token === "function" ? await token() : token;
       if (!idToken) return setErr("Not authenticated");
@@ -77,8 +77,8 @@ export default function AccountPage() {
             typeof d.signInCount === "number"
               ? d.signInCount
               : d.signInCount
-              ? Number(d.signInCount)
-              : null
+                ? Number(d.signInCount)
+                : null,
           );
           // prefer lastSeen or lastSignInAt
           setLastSeen(d.lastSeen || d.lastSignInAt || null);
@@ -117,8 +117,8 @@ export default function AccountPage() {
             typeof d.signInCount === "number"
               ? d.signInCount
               : d.signInCount
-              ? Number(d.signInCount)
-              : null
+                ? Number(d.signInCount)
+                : null,
           );
           setLastSeen(d.lastSeen || d.lastSignInAt || null);
         }
@@ -139,51 +139,105 @@ export default function AccountPage() {
   }, [username]);
 
   return (
-    <Container className="py-4">
-      <h3>Account</h3>
-      {msg && <Alert variant="success">{msg}</Alert>}
-      {err && <Alert variant="danger">{err}</Alert>}
+    <div className="max-w-3xl mx-auto px-4 py-4">
+      <h3 className="text-xl font-semibold mb-4">Account</h3>
+      {msg && (
+        <div className="mb-3 rounded-lg border border-green-300 bg-green-50 text-green-800 dark:border-green-700 dark:bg-green-900/30 dark:text-green-300 px-4 py-3">
+          {msg}
+        </div>
+      )}
+      {err && (
+        <div className="mb-3 rounded-lg border border-red-300 bg-red-50 text-red-800 dark:border-red-700 dark:bg-red-900/30 dark:text-red-300 px-4 py-3">
+          {err}
+        </div>
+      )}
 
-      <Form className="mb-3">
-        <Form.Group className="mb-2">
-          <Form.Label>Upload profile picture</Form.Label>
-          <div className="d-flex gap-2">
-            <Form.Control type="file" accept="image/*" ref={fileRef} />
-            <Button onClick={handleUpload}>Upload</Button>
+      <form className="mb-3">
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-foreground mb-1">
+            Upload profile picture
+          </label>
+          <div className="flex gap-2">
+            <input
+              type="file"
+              accept="image/*"
+              ref={fileRef}
+              className="block w-full text-sm text-foreground file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-primary-500 file:text-white hover:file:bg-primary-600 bg-background dark:bg-background-dark border border-border dark:border-border-dark rounded-lg"
+            />
+            <button
+              type="button"
+              onClick={handleUpload}
+              className="rounded-lg bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 text-sm font-medium transition-colors whitespace-nowrap"
+            >
+              Upload
+            </button>
           </div>
-        </Form.Group>
+        </div>
 
-        <Form.Group className="mb-2">
-          <Form.Label>Reserve username</Form.Label>
-          <div className="d-flex gap-2">
-            <Form.Control
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-foreground mb-1">
+            Reserve username
+          </label>
+          <div className="flex gap-2">
+            <input
+              type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="letters, numbers, underscore (3-32)"
-              isInvalid={username.length > 0 && !valid}
+              className={cn(
+                "block w-full rounded-lg border px-3 py-2 text-sm bg-background dark:bg-background-dark text-foreground",
+                username.length > 0 && !valid
+                  ? "border-red-500 focus:ring-red-500"
+                  : "border-border dark:border-border-dark focus:ring-primary-500",
+              )}
             />
-            <Button onClick={handleReserve} disabled={reserving || !valid}>
+            <button
+              type="button"
+              onClick={handleReserve}
+              disabled={reserving || !valid}
+              className="rounded-lg bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+            >
               {reserving ? (
-                <>
-                  <Spinner animation="border" size="sm" /> Reserve
-                </>
+                <span className="flex items-center gap-2">
+                  <svg
+                    className="animate-spin h-4 w-4"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                    />
+                  </svg>
+                  Reserve
+                </span>
               ) : (
                 "Reserve"
               )}
-            </Button>
+            </button>
           </div>
           {username.length > 0 && !valid && (
-            <div className="small text-danger mt-1">
+            <p className="text-sm text-red-500 mt-1">
               Invalid format — use letters, numbers, underscore (3-32).
-            </div>
+            </p>
           )}
           {currentUsername && (
-            <div className="small text-muted mt-1">
+            <p className="text-sm text-foreground-secondary mt-1">
               Current username: <strong>{currentUsername}</strong>
-            </div>
+            </p>
           )}
           {(signInCount !== null || lastSeen) && (
-            <div className="small text-muted mt-1">
+            <p className="text-sm text-foreground-secondary mt-1">
               {signInCount !== null && (
                 <span>
                   Sign-ins: <strong>{signInCount}</strong>
@@ -196,22 +250,25 @@ export default function AccountPage() {
                   <strong>{new Date(lastSeen).toLocaleString()}</strong>
                 </span>
               )}
-            </div>
+            </p>
           )}
-        </Form.Group>
+        </div>
 
-        <Form.Group className="mb-2">
-          <Form.Label>Password reset</Form.Label>
-          <div className="d-flex gap-2">
-            <Button
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-foreground mb-1">
+            Password reset
+          </label>
+          <div className="flex gap-2">
+            <button
+              type="button"
               onClick={() => resetPassword(user?.email)}
-              variant="secondary"
+              className="rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-foreground px-4 py-2 text-sm font-medium transition-colors"
             >
               Send reset
-            </Button>
+            </button>
           </div>
-        </Form.Group>
-      </Form>
-    </Container>
+        </div>
+      </form>
+    </div>
   );
 }

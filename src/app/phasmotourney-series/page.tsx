@@ -3,10 +3,6 @@
 import InlineLink from "@/components/ui/InlineLink";
 import TourneyPage from "@/components/tourney/TourneyPage";
 import { buildTourneyBreadcrumbs } from "@/lib/navigation/tourneyBreadcrumbs";
-import Card from "react-bootstrap/Card";
-import Col from "react-bootstrap/Col";
-import Row from "react-bootstrap/Row";
-import Stack from "react-bootstrap/Stack";
 
 const SERIES_ITEMS = [
   {
@@ -57,31 +53,30 @@ export default function SeriesIndex() {
       accent="info"
       containerProps={{ className: "py-4" }}
     >
-      <Row className="g-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
         {SERIES_ITEMS.map((item) => (
-          <Col key={item.id} xs={12} sm={6} lg={4} xl={3}>
-            <Card className="h-100 shadow-sm">
-              <Card.Body className="d-flex flex-column justify-content-between gap-3">
-                <Stack gap={1}>
-                  <Card.Title className="h5 mb-0">{item.title}</Card.Title>
-                  <Card.Text className="text-muted small mb-0">
-                    {item.blurb}
-                  </Card.Text>
-                </Stack>
-                <div>
-                  <Card.Link
-                    as={InlineLink}
-                    href={item.href}
-                    className="fw-semibold"
-                  >
-                    View bracket
-                  </Card.Link>
-                </div>
-              </Card.Body>
-            </Card>
-          </Col>
+          <div
+            key={item.id}
+            className="h-full rounded-xl border border-border bg-card shadow-sm dark:bg-card-dark dark:border-border-dark"
+          >
+            <div className="flex flex-col justify-between gap-3 p-5 h-full">
+              <div className="flex flex-col gap-1">
+                <h5 className="text-lg font-semibold mb-0 text-foreground">
+                  {item.title}
+                </h5>
+                <p className="text-foreground-secondary text-sm mb-0">
+                  {item.blurb}
+                </p>
+              </div>
+              <div>
+                <InlineLink href={item.href} className="font-semibold">
+                  View bracket
+                </InlineLink>
+              </div>
+            </div>
+          </div>
         ))}
-      </Row>
+      </div>
     </TourneyPage>
   );
 }

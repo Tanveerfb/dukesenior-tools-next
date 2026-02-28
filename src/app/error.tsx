@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect } from "react";
-import { Box, Container, Typography, Button, Stack } from "@mui/material";
-import { Home as HomeIcon, Refresh as RefreshIcon } from "@mui/icons-material";
+import Link from "next/link";
+import { FiHome, FiRefreshCw } from "react-icons/fi";
 
 export default function Error({
   error,
@@ -12,87 +12,46 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Log the error to an error reporting service
     console.error("Application error:", error);
   }, [error]);
 
   return (
-    <Container maxWidth="md">
-      <Box
-        sx={{
-          py: 8,
-          textAlign: "center",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: 3,
-        }}
-      >
-        <Typography
-          variant="h1"
-          component="h1"
-          sx={{
-            fontSize: { xs: "4rem", md: "6rem" },
-            fontWeight: 700,
-            background: "linear-gradient(45deg, #a63a50, #ab2fb1)",
-            backgroundClip: "text",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-          }}
+    <div className="max-w-2xl mx-auto px-4 py-16 text-center flex flex-col items-center gap-6">
+      <h1 className="text-6xl md:text-8xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+        Oops!
+      </h1>
+
+      <h2 className="text-2xl md:text-3xl font-semibold text-foreground dark:text-foreground-dark">
+        Something went wrong
+      </h2>
+
+      <p className="text-foreground-muted dark:text-foreground-dark-muted max-w-md">
+        We encountered an unexpected error. Don&apos;t worry, our team has been
+        notified and is working on it.
+      </p>
+
+      {error.digest && (
+        <p className="text-xs font-mono text-foreground-muted/60 dark:text-foreground-dark-muted/60">
+          Error ID: {error.digest}
+        </p>
+      )}
+
+      <div className="flex flex-col sm:flex-row gap-3 mt-2">
+        <button
+          onClick={reset}
+          className="inline-flex items-center gap-2 px-6 py-3 text-sm font-medium bg-primary hover:bg-primary-600 text-white rounded-lg transition-all hover:-translate-y-0.5"
         >
-          Oops!
-        </Typography>
-        
-        <Typography variant="h4" component="h2" gutterBottom>
-          Something went wrong
-        </Typography>
-        
-        <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 500 }}>
-          We encountered an unexpected error. Don't worry, our team has been notified
-          and is working on it.
-        </Typography>
-        
-        {error.digest && (
-          <Typography variant="caption" color="text.disabled" sx={{ fontFamily: "monospace" }}>
-            Error ID: {error.digest}
-          </Typography>
-        )}
-        
-        <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ mt: 2 }}>
-          <Button
-            onClick={reset}
-            variant="contained"
-            size="large"
-            startIcon={<RefreshIcon />}
-            sx={{
-              textTransform: "none",
-              px: 4,
-              transition: "transform 0.2s",
-              "&:hover": {
-                transform: "translateY(-2px)",
-              },
-            }}
-          >
-            Try Again
-          </Button>
-          <Button
-            href="/"
-            variant="outlined"
-            size="large"
-            startIcon={<HomeIcon />}
-            sx={{
-              textTransform: "none",
-              px: 4,
-              transition: "transform 0.2s",
-              "&:hover": {
-                transform: "translateY(-2px)",
-              },
-            }}
-          >
-            Return Home
-          </Button>
-        </Stack>
-      </Box>
-    </Container>
+          <FiRefreshCw size={16} />
+          Try Again
+        </button>
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 px-6 py-3 text-sm font-medium border border-border dark:border-border-dark text-foreground dark:text-foreground-dark rounded-lg hover:bg-surface-100 dark:hover:bg-surface-900/50 transition-all hover:-translate-y-0.5 no-underline"
+        >
+          <FiHome size={16} />
+          Return Home
+        </Link>
+      </div>
+    </div>
   );
 }

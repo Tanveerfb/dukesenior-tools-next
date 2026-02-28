@@ -1,12 +1,11 @@
-"use client";
-import React, { useState, useEffect } from "react";
-import Image from "next/image";
-import { Button, Dropdown, Spinner } from "react-bootstrap";
+﻿"use client";
+import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import UserAvatar from "@/components/user/UserAvatar";
 import RoleBadge from "@/components/user/RoleBadge";
 import SocialLinks from "@/components/user/SocialLinks";
+import { cn } from "@/lib/utils";
 import type { UserDoc } from "@/lib/services/users";
 import type { FriendStatus } from "@/types/friends";
 import {
@@ -19,6 +18,32 @@ import {
   blockUser,
   getMutualFriends,
 } from "@/lib/services/friends";
+
+/* tiny inline spinner */
+function Spinner({ className }: { className?: string }) {
+  return (
+    <svg
+      className={cn("animate-spin h-4 w-4", className)}
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+    >
+      <circle
+        className="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="4"
+      />
+      <path
+        className="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+      />
+    </svg>
+  );
+}
 
 interface Props {
   uid?: string;
@@ -59,17 +84,38 @@ export default function ProfileHeader({
   const isOwner = !!(user?.uid && uid && user.uid === uid);
   const router = useRouter();
 
-  // Friend status state
-  const [friendStatus, setFriendStatus] = useState<FriendStatus>('none');
+  const [friendStatus, setFriendStatus] = useState<FriendStatus>("none");
   const [mutualFriendsCount, setMutualFriendsCount] = useState<number>(0);
   const [requestId, setRequestId] = useState<string | undefined>();
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
 
-  function toMillis(v?: any) {
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node)
+      ) {
+        setDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  function toMillis(v?: unknown) {
     if (!v) return null;
     if (typeof v === "number") return v;
-    if (v && typeof v.toMillis === "function") return v.toMillis();
+    if (
+      v &&
+      typeof v === "object" &&
+      "toMillis" in v &&
+      typeof (v as { toMillis: () => number }).toMillis === "function"
+    )
+      return (v as { toMillis: () => number }).toMillis();
     if (typeof v === "string") {
       const p = Date.parse(v);
       if (!Number.isNaN(p)) return p;
@@ -77,9 +123,9 @@ export default function ProfileHeader({
     return null;
   }
 
-  const ms = toMillis(createdAt as any);
+  const ms = toMillis(createdAt as unknown);
   const memberSince = ms ? new Date(ms).toLocaleDateString() : null;
-  const lastSeenMs = toMillis(lastSeen as any) || null;
+  const lastSeenMs = toMillis(lastSeen as unknown) || null;
 
   const userProfile: Partial<UserDoc> = {
     uid,
@@ -89,7 +135,6 @@ export default function ProfileHeader({
     accentColor,
   };
 
-  // Check relationship status on mount
   useEffect(() => {
     if (!user || !uid || isOwner) return;
 
@@ -100,13 +145,12 @@ export default function ProfileHeader({
         setFriendStatus(result.status);
         setRequestId(result.requestId);
 
-        // Get mutual friends count if they are friends
-        if (result.status === 'friends') {
+        if (result.status === "friends") {
           const mutuals = await getMutualFriends(user.uid, uid!);
           setMutualFriendsCount(mutuals.length);
         }
       } catch (error) {
-        console.error('Error checking relationship:', error);
+        console.error("Error checking relationship:", error);
       } finally {
         setLoading(false);
       }
@@ -115,23 +159,24 @@ export default function ProfileHeader({
     checkRelationship();
   }, [user, uid, isOwner]);
 
-  // Handler functions
   const handleSendRequest = async () => {
     if (!user || !uid || !username) return;
     setActionLoading(true);
     try {
       await sendFriendRequest(
         user.uid,
-        user.username || '',
-        user.displayName || user.username || '',
+        user.username || "",
+        user.displayName || user.username || "",
         user.photoURL,
         uid,
         username
       );
-      setFriendStatus('pending_sent');
-      alert('Friend request sent!');
-    } catch (error: any) {
-      alert(error.message || 'Failed to send friend request');
+      setFriendStatus("pending_sent");
+      alert("Friend request sent!");
+    } catch (error: unknown) {
+      const msg =
+        error instanceof Error ? error.message : "Failed to send friend request";
+      alert(msg);
     } finally {
       setActionLoading(false);
     }
@@ -142,16 +187,19 @@ export default function ProfileHeader({
     setActionLoading(true);
     try {
       await acceptFriendRequest(requestId);
-      setFriendStatus('friends');
+      setFriendStatus("friends");
       alert(`You are now friends with @${username}!`);
-      
-      // Refresh mutual friends count
+
       if (user && uid) {
         const mutuals = await getMutualFriends(user.uid, uid);
         setMutualFriendsCount(mutuals.length);
       }
-    } catch (error: any) {
-      alert(error.message || 'Failed to accept friend request');
+    } catch (error: unknown) {
+      const msg =
+        error instanceof Error
+          ? error.message
+          : "Failed to accept friend request";
+      alert(msg);
     } finally {
       setActionLoading(false);
     }
@@ -162,10 +210,14 @@ export default function ProfileHeader({
     setActionLoading(true);
     try {
       await declineFriendRequest(requestId);
-      setFriendStatus('none');
-      alert('Friend request declined');
-    } catch (error: any) {
-      alert(error.message || 'Failed to decline friend request');
+      setFriendStatus("none");
+      alert("Friend request declined");
+    } catch (error: unknown) {
+      const msg =
+        error instanceof Error
+          ? error.message
+          : "Failed to decline friend request";
+      alert(msg);
     } finally {
       setActionLoading(false);
     }
@@ -176,10 +228,14 @@ export default function ProfileHeader({
     setActionLoading(true);
     try {
       await cancelFriendRequest(requestId);
-      setFriendStatus('none');
-      alert('Friend request cancelled');
-    } catch (error: any) {
-      alert(error.message || 'Failed to cancel friend request');
+      setFriendStatus("none");
+      alert("Friend request cancelled");
+    } catch (error: unknown) {
+      const msg =
+        error instanceof Error
+          ? error.message
+          : "Failed to cancel friend request";
+      alert(msg);
     } finally {
       setActionLoading(false);
     }
@@ -191,11 +247,13 @@ export default function ProfileHeader({
     setActionLoading(true);
     try {
       await removeFriend(user.uid, uid);
-      setFriendStatus('none');
+      setFriendStatus("none");
       setMutualFriendsCount(0);
       alert(`Removed @${username} from friends`);
-    } catch (error: any) {
-      alert(error.message || 'Failed to remove friend');
+    } catch (error: unknown) {
+      const msg =
+        error instanceof Error ? error.message : "Failed to remove friend";
+      alert(msg);
     } finally {
       setActionLoading(false);
     }
@@ -203,61 +261,72 @@ export default function ProfileHeader({
 
   const handleBlock = async () => {
     if (!user || !uid || !username) return;
-    if (!confirm(`Block @${username}? This will remove them from your friends and prevent future interactions.`)) return;
+    if (
+      !confirm(
+        `Block @${username}? This will remove them from your friends and prevent future interactions.`
+      )
+    )
+      return;
     setActionLoading(true);
     try {
       await blockUser(user.uid, uid, username);
-      setFriendStatus('blocked');
+      setFriendStatus("blocked");
       setMutualFriendsCount(0);
       alert(`Blocked @${username}`);
-    } catch (error: any) {
-      alert(error.message || 'Failed to block user');
+    } catch (error: unknown) {
+      const msg =
+        error instanceof Error ? error.message : "Failed to block user";
+      alert(msg);
     } finally {
       setActionLoading(false);
     }
   };
 
-  // Fallback gradient for banner
   const bannerStyle = bannerURL
-    ? { backgroundImage: `url(${bannerURL})`, backgroundSize: "cover", backgroundPosition: "center" }
-    : { background: `linear-gradient(135deg, ${accentColor}99, ${accentColor}33)` };
+    ? {
+        backgroundImage: `url(${bannerURL})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }
+    : {
+        background: `linear-gradient(135deg, ${accentColor}99, ${accentColor}33)`,
+      };
 
   return (
-    <div className="card mb-4" style={{ overflow: "hidden" }}>
-      {/* Banner Section */}
+    <div className="rounded-xl border border-border dark:border-border-dark bg-card dark:bg-card-dark shadow mb-4 overflow-hidden">
+      {/* Banner */}
       <div
-        style={{
-          height: 200,
-          width: "100%",
-          position: "relative",
-          borderBottom: `4px solid ${accentColor}`,
-          ...bannerStyle,
-        }}
+        className="h-[200px] w-full relative"
+        style={{ borderBottom: `4px solid ${accentColor}`, ...bannerStyle }}
       />
 
-      <div className="card-body" style={{ marginTop: -48 }}>
-        <div className="d-flex flex-column flex-md-row align-items-start">
+      <div className="px-5 pb-5" style={{ marginTop: -48 }}>
+        <div className="flex flex-col md:flex-row items-start">
           {/* Avatar overlapping banner */}
-          <div className="me-3 mb-3 mb-md-0" style={{ marginTop: -48 }}>
+          <div className="mr-3 mb-3 md:mb-0" style={{ marginTop: -48 }}>
             <UserAvatar user={userProfile} size="xlarge" showStatus />
           </div>
 
-          <div className="flex-grow-1 w-100">
-            <div className="d-flex align-items-start justify-content-between flex-wrap">
+          <div className="flex-grow w-full">
+            <div className="flex items-start justify-between flex-wrap">
               <div className="mb-2">
-                <div className="d-flex align-items-center gap-2 flex-wrap">
-                  <h2 className="mb-0">{displayName || username}</h2>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h2 className="text-2xl font-bold text-foreground dark:text-foreground-dark mb-0">
+                    {displayName || username}
+                  </h2>
                   {roles && roles.length > 0 && (
-                    <div className="d-flex gap-1">
+                    <div className="flex gap-1">
                       {roles.map((role) => (
                         <RoleBadge key={role} role={role} />
                       ))}
                     </div>
                   )}
                 </div>
-                <div className="text-muted">
+                <div className="text-foreground-muted dark:text-foreground-dark-muted">
                   @{username}
-                  {pronouns && <span className="ms-2 small">({pronouns})</span>}
+                  {pronouns && (
+                    <span className="ml-2 text-sm">({pronouns})</span>
+                  )}
                 </div>
                 {socialLinks && (
                   <div className="mt-2">
@@ -265,117 +334,143 @@ export default function ProfileHeader({
                   </div>
                 )}
               </div>
-              <div className="d-flex gap-2 align-items-center">
+
+              {/* Actions */}
+              <div className="flex gap-2 items-center">
                 {isOwner ? (
-                  <>
-                    <Button
-                      variant="outline-primary"
-                      size="sm"
-                      onClick={() => router.push("/profile")}
-                      style={{ 
-                        borderColor: accentColor, 
-                        color: accentColor,
-                        transition: "all 0.2s",
-                      }}
-                      className="profile-edit-btn"
-                    >
-                      Edit Profile
-                    </Button>
-                    <style jsx>{`
-                      .profile-edit-btn:hover {
-                        background: ${accentColor} !important;
-                        color: white !important;
-                        border-color: ${accentColor} !important;
-                      }
-                    `}</style>
-                  </>
+                  <button
+                    onClick={() => router.push("/profile")}
+                    className="px-3 py-1.5 text-sm rounded-lg border-2 font-medium transition-all duration-200 hover:text-white"
+                    style={{
+                      borderColor: accentColor,
+                      color: accentColor,
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = accentColor;
+                      e.currentTarget.style.color = "white";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = "transparent";
+                      e.currentTarget.style.color = accentColor;
+                    }}
+                  >
+                    Edit Profile
+                  </button>
                 ) : loading ? (
-                  <Spinner animation="border" size="sm" />
+                  <Spinner />
                 ) : (
                   <>
-                    {friendStatus === 'none' && (
-                      <Button 
-                        variant="outline-primary" 
-                        size="sm"
+                    {friendStatus === "none" && (
+                      <button
+                        className="px-3 py-1.5 text-sm rounded-lg border border-primary-500 text-primary-500 hover:bg-primary-500 hover:text-white transition-colors disabled:opacity-50"
                         onClick={handleSendRequest}
                         disabled={actionLoading}
                       >
-                        {actionLoading ? <Spinner animation="border" size="sm" /> : 'Add Friend'}
-                      </Button>
+                        {actionLoading ? <Spinner /> : "Add Friend"}
+                      </button>
                     )}
-                    {friendStatus === 'pending_sent' && (
-                      <Button 
-                        variant="outline-secondary" 
-                        size="sm"
+                    {friendStatus === "pending_sent" && (
+                      <button
+                        className="px-3 py-1.5 text-sm rounded-lg border border-border dark:border-border-dark text-foreground-muted dark:text-foreground-dark-muted hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors disabled:opacity-50"
                         onClick={handleCancelRequest}
                         disabled={actionLoading}
                       >
-                        {actionLoading ? <Spinner animation="border" size="sm" /> : 'Request Sent'}
-                      </Button>
+                        {actionLoading ? <Spinner /> : "Request Sent"}
+                      </button>
                     )}
-                    {friendStatus === 'pending_received' && (
+                    {friendStatus === "pending_received" && (
                       <>
-                        <Button 
-                          variant="success" 
-                          size="sm"
+                        <button
+                          className="px-3 py-1.5 text-sm rounded-lg bg-success text-white hover:bg-success-600 transition-colors disabled:opacity-50"
                           onClick={handleAcceptRequest}
                           disabled={actionLoading}
                         >
-                          {actionLoading ? <Spinner animation="border" size="sm" /> : 'Accept Friend'}
-                        </Button>
-                        <Button 
-                          variant="outline-danger" 
-                          size="sm"
+                          {actionLoading ? <Spinner /> : "Accept Friend"}
+                        </button>
+                        <button
+                          className="px-3 py-1.5 text-sm rounded-lg border border-danger text-danger hover:bg-danger hover:text-white transition-colors disabled:opacity-50"
                           onClick={handleDeclineRequest}
                           disabled={actionLoading}
                         >
                           Decline
-                        </Button>
+                        </button>
                       </>
                     )}
-                    {friendStatus === 'friends' && (
+                    {friendStatus === "friends" && (
                       <>
-                        <Button
-                          variant="primary"
-                          size="sm"
-                          onClick={() => router.push(`/messages?username=${username}`)}
-                          style={{ background: accentColor, borderColor: accentColor }}
+                        <button
+                          className="px-3 py-1.5 text-sm rounded-lg text-white transition-colors"
+                          style={{
+                            background: accentColor,
+                            borderColor: accentColor,
+                          }}
+                          onClick={() =>
+                            router.push(`/messages?username=${username}`)
+                          }
                         >
                           Message
-                        </Button>
-                        <Dropdown>
-                          <Dropdown.Toggle size="sm" variant="outline-secondary" disabled={actionLoading}>
-                            •••
-                          </Dropdown.Toggle>
-                          <Dropdown.Menu>
-                            <Dropdown.Item onClick={handleRemoveFriend}>
-                              Remove Friend
-                            </Dropdown.Item>
-                            <Dropdown.Item onClick={handleBlock}>
-                              Block
-                            </Dropdown.Item>
-                          </Dropdown.Menu>
-                        </Dropdown>
+                        </button>
+
+                        {/* Custom dropdown */}
+                        <div className="relative" ref={dropdownRef}>
+                          <button
+                            className="px-2 py-1.5 text-sm rounded-lg border border-border dark:border-border-dark text-foreground-muted dark:text-foreground-dark-muted hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors disabled:opacity-50"
+                            onClick={() => setDropdownOpen((o) => !o)}
+                            disabled={actionLoading}
+                          >
+                            &bull;&bull;&bull;
+                          </button>
+                          {dropdownOpen && (
+                            <div className="absolute right-0 mt-1 w-44 rounded-lg border border-border dark:border-border-dark bg-card dark:bg-card-dark shadow-lg z-50 py-1">
+                              <button
+                                className="w-full text-left px-4 py-2 text-sm text-foreground dark:text-foreground-dark hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                onClick={() => {
+                                  setDropdownOpen(false);
+                                  handleRemoveFriend();
+                                }}
+                              >
+                                Remove Friend
+                              </button>
+                              <button
+                                className="w-full text-left px-4 py-2 text-sm text-danger hover:bg-danger-50 transition-colors"
+                                onClick={() => {
+                                  setDropdownOpen(false);
+                                  handleBlock();
+                                }}
+                              >
+                                Block
+                              </button>
+                            </div>
+                          )}
+                        </div>
                       </>
                     )}
-                    {friendStatus === 'blocked' && (
-                      <span className="text-muted small">Profile unavailable</span>
+                    {friendStatus === "blocked" && (
+                      <span className="text-foreground-muted dark:text-foreground-dark-muted text-sm">
+                        Profile unavailable
+                      </span>
                     )}
                   </>
                 )}
               </div>
             </div>
 
-            {bio ? <p className="mt-3 mb-1">{bio}</p> : null}
+            {bio ? (
+              <p className="mt-3 mb-1 text-foreground dark:text-foreground-dark">
+                {bio}
+              </p>
+            ) : null}
 
-            {/* Mutual friends count */}
-            {!isOwner && friendStatus === 'friends' && mutualFriendsCount > 0 && (
-              <div className="text-muted small mt-2">
-                {mutualFriendsCount} mutual friend{mutualFriendsCount !== 1 ? 's' : ''}
-              </div>
-            )}
+            {!isOwner &&
+              friendStatus === "friends" &&
+              mutualFriendsCount > 0 && (
+                <div className="text-foreground-muted dark:text-foreground-dark-muted text-sm mt-2">
+                  {mutualFriendsCount} mutual friend
+                  {mutualFriendsCount !== 1 ? "s" : ""}
+                </div>
+              )}
 
-            <div className="d-flex gap-3 text-muted mt-2 small flex-wrap">
+            <div className="flex gap-3 text-foreground-muted dark:text-foreground-dark-muted mt-2 text-sm flex-wrap">
               <div>
                 <strong>0</strong> posts
               </div>
@@ -385,8 +480,8 @@ export default function ProfileHeader({
               <div>
                 <strong>0</strong> following
               </div>
-              {location && <div>📍 {location}</div>}
-              {timezone && <div>🕐 {timezone}</div>}
+              {location && <div>{"\ud83d\udccd"} {location}</div>}
+              {timezone && <div>{"\ud83d\udd50"} {timezone}</div>}
               {memberSince && <div>Member since {memberSince}</div>}
               {lastSeenMs && (
                 <div>Last seen {new Date(lastSeenMs).toLocaleString()}</div>

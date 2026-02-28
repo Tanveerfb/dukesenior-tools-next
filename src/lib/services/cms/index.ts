@@ -592,7 +592,7 @@ export async function reactToPostForUserV2(
     const post = await getPost(postId);
     if (post && post.authorUID !== uid) {
       // Don't award XP for reacting to own posts
-      let xpAmount = XP_REWARDS.REACTION_LIKE_RECEIVED; // Default
+      let xpAmount: number = XP_REWARDS.REACTION_LIKE_RECEIVED; // Default
       if (reactionType === "love") xpAmount = XP_REWARDS.REACTION_LOVE_RECEIVED;
       if (reactionType === "insightful")
         xpAmount = XP_REWARDS.REACTION_INSIGHTFUL_RECEIVED;

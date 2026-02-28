@@ -1,16 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import {
-  Container,
-  Alert,
-  Card,
-  Badge,
-  Spinner,
-  Row,
-  Col,
-  Form,
-  Stack,
-} from "react-bootstrap";
+import { cn } from "@/lib/utils";
 import { FaYoutube, FaTwitch } from "react-icons/fa";
 import { listVideoLinks } from "@/lib/services/phasmoTourney5";
 import { formatRoundLabel } from "@/lib/utils";
@@ -63,41 +53,22 @@ function VideoCard({ video }: { video: VideoLink }) {
     video.platform === "youtube" && videoId && !imgError
       ? getYouTubeThumbnail(videoId)
       : video.platform === "twitch" && videoId
-      ? getTwitchThumbnail(videoId)
-      : null;
+        ? getTwitchThumbnail(videoId)
+        : null;
 
   const roundLabel = formatRoundLabel(video.roundId);
 
   return (
-    <Card className="h-100 shadow-sm">
+    <div className="h-full rounded-xl border border-border dark:border-border-dark bg-card dark:bg-card-dark shadow-sm overflow-hidden">
       {thumbnail && (
-        <div
-          style={{
-            position: "relative",
-            paddingTop: "56.25%",
-            backgroundColor: "#f8f9fa",
-          }}
-        >
+        <div className="relative pt-[56.25%] bg-gray-100 dark:bg-gray-800">
           <img
             src={thumbnail}
             alt={video.title}
             onError={() => setImgError(true)}
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-            }}
+            className="absolute inset-0 w-full h-full object-cover"
           />
-          <div
-            style={{
-              position: "absolute",
-              top: "8px",
-              right: "8px",
-            }}
-          >
+          <div className="absolute top-2 right-2">
             {video.platform === "youtube" ? (
               <FaYoutube size={24} color="#FF0000" />
             ) : (
@@ -106,32 +77,38 @@ function VideoCard({ video }: { video: VideoLink }) {
           </div>
         </div>
       )}
-      <Card.Body>
-        <div className="d-flex justify-content-between align-items-start mb-2">
-          <Card.Title as="h3" className="h6 mb-0">
-            {video.title}
-          </Card.Title>
+      <div className="p-4">
+        <div className="flex justify-between items-start mb-2">
+          <h3 className="text-sm font-semibold m-0">{video.title}</h3>
         </div>
-        <Stack direction="horizontal" gap={2} className="mb-2 flex-wrap">
-          <Badge bg="secondary">{roundLabel}</Badge>
-          <Badge
-            bg={video.platform === "youtube" ? "danger" : "primary"}
-            className="text-capitalize"
+        <div className="flex flex-wrap gap-2 mb-2">
+          <span className="rounded-full text-xs font-medium px-2.5 py-0.5 bg-gray-500 text-white">
+            {roundLabel}
+          </span>
+          <span
+            className={cn(
+              "rounded-full text-xs font-medium px-2.5 py-0.5 capitalize",
+              video.platform === "youtube"
+                ? "bg-red-600 text-white"
+                : "bg-primary-500 text-white",
+            )}
           >
             {video.platform}
-          </Badge>
-        </Stack>
-        {video.notes && <p className="text-muted small mb-2">{video.notes}</p>}
+          </span>
+        </div>
+        {video.notes && (
+          <p className="text-foreground/50 text-sm mb-2">{video.notes}</p>
+        )}
         <a
           href={video.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="btn btn-sm btn-outline-primary"
+          className="inline-block rounded-lg border border-primary-500 text-primary-500 hover:bg-primary-500 hover:text-white px-3 py-1 text-sm font-medium transition-colors"
         >
           Watch Video
         </a>
-      </Card.Body>
-    </Card>
+      </div>
+    </div>
   );
 }
 
@@ -157,27 +134,52 @@ export default function Tourney5VideosPage() {
 
   if (loading) {
     return (
-      <Container className="py-4">
-        <h1 className="h4 fw-semibold mb-3">Phasmo Tourney 5 — Videos</h1>
-        <div className="text-center py-5">
-          <Spinner animation="border" variant="primary" />
+      <div className="max-w-7xl mx-auto px-4 py-4">
+        <h1 className="text-lg font-semibold mb-3">
+          Phasmo Tourney 5 — Videos
+        </h1>
+        <div className="text-center py-10">
+          <svg
+            className="animate-spin h-8 w-8 text-primary-500 mx-auto"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            />
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+            />
+          </svg>
         </div>
-      </Container>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <Container className="py-4">
-        <h1 className="h4 fw-semibold mb-3">Phasmo Tourney 5 — Videos</h1>
-        <Alert variant="danger">{error}</Alert>
-      </Container>
+      <div className="max-w-7xl mx-auto px-4 py-4">
+        <h1 className="text-lg font-semibold mb-3">
+          Phasmo Tourney 5 — Videos
+        </h1>
+        <div className="rounded-lg border border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/30 px-4 py-3 text-sm text-red-800 dark:text-red-300">
+          {error}
+        </div>
+      </div>
     );
   }
 
   // Extract available rounds for filter
   const availableRounds = Array.from(
-    new Set(videos.filter((v) => v.roundId).map((v) => v.roundId))
+    new Set(videos.filter((v) => v.roundId).map((v) => v.roundId)),
   ).sort();
 
   // Apply filters
@@ -193,75 +195,74 @@ export default function Tourney5VideosPage() {
   });
 
   return (
-    <Container className="py-4">
-      <h1 className="h4 fw-semibold mb-3">Phasmo Tourney 5 — Videos</h1>
+    <div className="max-w-7xl mx-auto px-4 py-4">
+      <h1 className="text-lg font-semibold mb-3">Phasmo Tourney 5 — Videos</h1>
 
       {videos.length === 0 ? (
-        <Alert variant="info">
+        <div className="rounded-lg border border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/30 px-4 py-3 text-sm text-blue-800 dark:text-blue-300">
           No videos available yet. Check back soon!
-        </Alert>
+        </div>
       ) : (
         <>
           {/* Filters */}
-          <Card className="shadow-sm mb-4">
-            <Card.Body>
-              <Row className="g-3">
-                <Col xs={12} md={6}>
-                  <Form.Group>
-                    <Form.Label className="small fw-semibold">
-                      Filter by Round
-                    </Form.Label>
-                    <Form.Select
-                      value={filterRound}
-                      onChange={(e) => setFilterRound(e.target.value)}
-                      size="sm"
-                    >
-                      <option value="all">All Rounds</option>
-                      <option value="general">General</option>
-                      {availableRounds.map((round) => (
-                        <option key={round} value={round}>
-                          {formatRoundLabel(round)}
-                        </option>
-                      ))}
-                    </Form.Select>
-                  </Form.Group>
-                </Col>
-                <Col xs={12} md={6}>
-                  <Form.Group>
-                    <Form.Label className="small fw-semibold">
-                      Filter by Platform
-                    </Form.Label>
-                    <Form.Select
-                      value={filterPlatform}
-                      onChange={(e) => setFilterPlatform(e.target.value)}
-                      size="sm"
-                    >
-                      <option value="all">All Platforms</option>
-                      <option value="youtube">YouTube</option>
-                      <option value="twitch">Twitch</option>
-                    </Form.Select>
-                  </Form.Group>
-                </Col>
-              </Row>
-            </Card.Body>
-          </Card>
+          <div className="rounded-xl border border-border dark:border-border-dark bg-card dark:bg-card-dark shadow-sm mb-4">
+            <div className="p-4">
+              <div className="grid grid-cols-12 gap-3">
+                <div className="col-span-12 md:col-span-6">
+                  <label className="block text-sm font-semibold mb-1">
+                    Filter by Round
+                  </label>
+                  <select
+                    value={filterRound}
+                    onChange={(e) => setFilterRound(e.target.value)}
+                    className="w-full rounded-lg border border-border dark:border-border-dark bg-card dark:bg-card-dark text-foreground px-3 py-1.5 text-sm"
+                  >
+                    <option value="all">All Rounds</option>
+                    <option value="general">General</option>
+                    {availableRounds.map((round) => (
+                      <option key={round} value={round}>
+                        {formatRoundLabel(round)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="col-span-12 md:col-span-6">
+                  <label className="block text-sm font-semibold mb-1">
+                    Filter by Platform
+                  </label>
+                  <select
+                    value={filterPlatform}
+                    onChange={(e) => setFilterPlatform(e.target.value)}
+                    className="w-full rounded-lg border border-border dark:border-border-dark bg-card dark:bg-card-dark text-foreground px-3 py-1.5 text-sm"
+                  >
+                    <option value="all">All Platforms</option>
+                    <option value="youtube">YouTube</option>
+                    <option value="twitch">Twitch</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
 
           {/* Video Grid */}
           {filteredVideos.length === 0 ? (
-            <Alert variant="info">
+            <div className="rounded-lg border border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/30 px-4 py-3 text-sm text-blue-800 dark:text-blue-300">
               No videos match the selected filters.
-            </Alert>
+            </div>
           ) : (
-            <Row className="g-3">
+            <div className="grid grid-cols-12 gap-3">
               {filteredVideos.map((video) => (
-                <Col key={video.id} xs={12} sm={6} lg={4}>
+                <div
+                  key={video.id}
+                  className="col-span-12 sm:col-span-6 lg:col-span-4"
+                >
                   <VideoCard video={video} />
-                </Col>
+                </div>
               ))}
-            </Row>
+            </div>
           )}
         </>
       )}
-    </Container>
+    </div>
   );
 }

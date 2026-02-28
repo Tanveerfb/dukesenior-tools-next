@@ -1,21 +1,21 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Button, Form, Dropdown, Spinner } from 'react-bootstrap';
-import { FaPaperPlane } from 'react-icons/fa';
-import UserAvatar from '@/components/user/UserAvatar';
-import MessageBubble from './MessageBubble';
-import TypingIndicator from './TypingIndicator';
-import type { DMThread, DMMessage } from '@/types/messages';
-import type { UserDoc } from '@/lib/services/users';
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { FiSend, FiMoreHorizontal } from "react-icons/fi";
+import UserAvatar from "@/components/user/UserAvatar";
+import MessageBubble from "./MessageBubble";
+import TypingIndicator from "./TypingIndicator";
+import type { DMThread, DMMessage } from "@/types/messages";
+import type { UserDoc } from "@/lib/services/users";
 import {
   listenToThread,
   sendMessage,
   markThreadAsRead,
   setTyping,
   listenToTyping,
-} from '@/lib/services/messages';
-import { areFriends, isBlocked } from '@/lib/services/friends';
+} from "@/lib/services/messages";
+import { areFriends, isBlocked } from "@/lib/services/friends";
+import { cn } from "@/lib/utils";
 
 interface Props {
   thread: DMThread;
@@ -33,17 +33,33 @@ export default function ChatWindow({
   onArchive,
 }: Props) {
   const [messages, setMessages] = useState<DMMessage[]>([]);
-  const [messageInput, setMessageInput] = useState('');
+  const [messageInput, setMessageInput] = useState("");
   const [sending, setSending] = useState(false);
   const [loading, setLoading] = useState(true);
   const [typingUsers, setTypingUsers] = useState<string[]>([]);
   const [canMessage, setCanMessage] = useState(true);
   const [blockStatus, setBlockStatus] = useState<string | null>(null);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastScrollHeight = useRef<number>(0);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node)
+      ) {
+        setDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   // Check if users are still friends and not blocked
   useEffect(() => {
@@ -59,19 +75,19 @@ export default function ChatWindow({
 
         if (!friends) {
           setCanMessage(false);
-          setBlockStatus('You are no longer friends with this user');
+          setBlockStatus("You are no longer friends with this user");
         } else if (blocked1) {
           setCanMessage(false);
-          setBlockStatus('You have blocked this user');
+          setBlockStatus("You have blocked this user");
         } else if (blocked2) {
           setCanMessage(false);
-          setBlockStatus('This user has blocked you');
+          setBlockStatus("This user has blocked you");
         } else {
           setCanMessage(true);
           setBlockStatus(null);
         }
       } catch (error) {
-        console.error('Error checking friendship status:', error);
+        console.error("Error checking friendship status:", error);
       }
     }
 
@@ -95,10 +111,14 @@ export default function ChatWindow({
   useEffect(() => {
     if (!thread.id || !currentUser.uid) return;
 
-    const unsubscribe = listenToTyping(thread.id, currentUser.uid, (indicators) => {
-      const typingUserIds = indicators.map((i) => i.uid);
-      setTypingUsers(typingUserIds);
-    });
+    const unsubscribe = listenToTyping(
+      thread.id,
+      currentUser.uid,
+      (indicators) => {
+        const typingUserIds = indicators.map((i) => i.uid);
+        setTypingUsers(typingUserIds);
+      },
+    );
 
     return () => unsubscribe();
   }, [thread.id, currentUser.uid]);
@@ -108,7 +128,7 @@ export default function ChatWindow({
     if (!thread.id || !currentUser.uid) return;
 
     markThreadAsRead(thread.id, currentUser.uid).catch((error) => {
-      console.error('Error marking thread as read:', error);
+      console.error("Error marking thread as read:", error);
     });
   }, [thread.id, currentUser.uid]);
 
@@ -119,7 +139,8 @@ export default function ChatWindow({
 
     // Check if user was near bottom before new messages arrived
     const wasNearBottom =
-      container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+      container.scrollHeight - container.scrollTop - container.clientHeight <
+      100;
 
     if (wasNearBottom || messages.length <= 1) {
       scrollToBottom();
@@ -127,7 +148,7 @@ export default function ChatWindow({
   }, [messages]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   // Handle typing indicator
@@ -136,7 +157,7 @@ export default function ChatWindow({
 
     // Send typing indicator
     setTyping(thread.id, currentUser.uid, true).catch((error) => {
-      console.error('Error setting typing:', error);
+      console.error("Error setting typing:", error);
     });
 
     // Clear previous timeout
@@ -147,7 +168,7 @@ export default function ChatWindow({
     // Set new timeout to clear typing after 3 seconds
     typingTimeoutRef.current = setTimeout(() => {
       setTyping(thread.id, currentUser.uid, false).catch((error) => {
-        console.error('Error clearing typing:', error);
+        console.error("Error clearing typing:", error);
       });
     }, 3000);
   }, [thread.id, currentUser.uid]);
@@ -158,7 +179,7 @@ export default function ChatWindow({
     if (!messageInput.trim() || sending || !canMessage) return;
 
     const content = messageInput.trim();
-    setMessageInput('');
+    setMessageInput("");
     setSending(true);
 
     // Clear typing indicator
@@ -172,8 +193,8 @@ export default function ChatWindow({
     try {
       await sendMessage(thread.id, currentUser.uid, otherUser.uid!, content);
     } catch (error: any) {
-      console.error('Error sending message:', error);
-      alert(error.message || 'Failed to send message');
+      console.error("Error sending message:", error);
+      alert(error.message || "Failed to send message");
       setMessageInput(content); // Restore message on error
     } finally {
       setSending(false);
@@ -181,7 +202,7 @@ export default function ChatWindow({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage(e as any);
     }
@@ -196,57 +217,101 @@ export default function ChatWindow({
   };
 
   // Group messages by date
-  const groupedMessages = messages.reduce((groups, message) => {
-    const date = new Date(message.createdAt).toDateString();
-    if (!groups[date]) {
-      groups[date] = [];
-    }
-    groups[date].push(message);
-    return groups;
-  }, {} as Record<string, DMMessage[]>);
+  const groupedMessages = messages.reduce(
+    (groups, message) => {
+      const date = new Date(message.createdAt).toDateString();
+      if (!groups[date]) {
+        groups[date] = [];
+      }
+      groups[date].push(message);
+      return groups;
+    },
+    {} as Record<string, DMMessage[]>,
+  );
 
   const formatDateSeparator = (dateString: string): string => {
     const date = new Date(dateString);
     const today = new Date().toDateString();
     const yesterday = new Date(Date.now() - 86400000).toDateString();
 
-    if (dateString === today) return 'Today';
-    if (dateString === yesterday) return 'Yesterday';
+    if (dateString === today) return "Today";
+    if (dateString === yesterday) return "Yesterday";
 
-    return date.toLocaleDateString('en-US', {
-      weekday: 'long',
-      month: 'long',
-      day: 'numeric',
-      year: date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined,
+    return date.toLocaleDateString("en-US", {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+      year:
+        date.getFullYear() !== new Date().getFullYear() ? "numeric" : undefined,
     });
   };
 
   return (
-    <div className="h-100 d-flex flex-column">
+    <div className="flex h-full flex-col">
       {/* Header */}
-      <div className="p-3 border-bottom d-flex align-items-center justify-content-between">
-        <div className="d-flex align-items-center">
+      <div className="flex items-center justify-between border-b border-border p-3 dark:border-border-dark">
+        <div className="flex items-center">
           <UserAvatar user={otherUser} size="medium" showStatus />
-          <div className="ms-3">
-            <div className="fw-bold">{otherUser.displayName}</div>
-            <div className="text-muted small">@{otherUser.username}</div>
+          <div className="ml-3">
+            <div className="font-bold text-foreground">
+              {otherUser.displayName}
+            </div>
+            <div className="text-sm text-foreground-secondary">
+              @{otherUser.username}
+            </div>
           </div>
         </div>
 
-        <Dropdown>
-          <Dropdown.Toggle size="sm" variant="outline-secondary">
-            •••
-          </Dropdown.Toggle>
-          <Dropdown.Menu align="end">
-            {onArchive && <Dropdown.Item onClick={onArchive}>Archive</Dropdown.Item>}
-            {onBlock && <Dropdown.Item onClick={onBlock}>Block User</Dropdown.Item>}
-          </Dropdown.Menu>
-        </Dropdown>
+        <div className="relative" ref={dropdownRef}>
+          <button
+            type="button"
+            onClick={() => setDropdownOpen((prev) => !prev)}
+            className={cn(
+              "rounded-md border border-border px-2 py-1 text-sm text-foreground-secondary",
+              "hover:bg-gray-100 dark:border-border-dark dark:hover:bg-gray-800",
+            )}
+          >
+            <FiMoreHorizontal />
+          </button>
+          {dropdownOpen && (
+            <div
+              className={cn(
+                "absolute right-0 z-50 mt-1 min-w-[140px] rounded-md border border-border bg-card py-1 shadow-lg",
+                "dark:border-border-dark dark:bg-card-dark",
+              )}
+            >
+              {onArchive && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onArchive();
+                    setDropdownOpen(false);
+                  }}
+                  className="block w-full px-4 py-2 text-left text-sm text-foreground hover:bg-gray-100 dark:hover:bg-gray-800"
+                >
+                  Archive
+                </button>
+              )}
+              {onBlock && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onBlock();
+                    setDropdownOpen(false);
+                  }}
+                  className="block w-full px-4 py-2 text-left text-sm text-foreground hover:bg-gray-100 dark:hover:bg-gray-800"
+                >
+                  Block User
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Status warning */}
       {blockStatus && (
-        <div className="alert alert-warning m-3 mb-0">
+        <div className="mx-3 mt-3 rounded-md border border-yellow-400 bg-yellow-50 px-4 py-3 text-sm text-yellow-800 dark:border-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-200">
           {blockStatus}
         </div>
       )}
@@ -254,15 +319,33 @@ export default function ChatWindow({
       {/* Messages area */}
       <div
         ref={messagesContainerRef}
-        className="flex-grow-1 overflow-auto p-3"
-        style={{ background: '#fafafa' }}
+        className="flex-1 overflow-auto bg-[#fafafa] p-3 dark:bg-gray-900/50"
       >
         {loading ? (
-          <div className="text-center py-5">
-            <Spinner animation="border" />
+          <div className="flex items-center justify-center py-20">
+            <svg
+              className="h-8 w-8 animate-spin text-foreground-secondary"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+              />
+            </svg>
           </div>
         ) : messages.length === 0 ? (
-          <div className="text-center text-muted py-5">
+          <div className="py-20 text-center text-foreground-secondary">
             No messages yet. Say hi! 👋
           </div>
         ) : (
@@ -270,11 +353,8 @@ export default function ChatWindow({
             {Object.entries(groupedMessages).map(([dateString, msgs]) => (
               <div key={dateString}>
                 {/* Date separator */}
-                <div className="text-center my-3">
-                  <span
-                    className="badge bg-secondary"
-                    style={{ fontSize: '0.75rem', fontWeight: 'normal' }}
-                  >
+                <div className="my-3 text-center">
+                  <span className="rounded-full bg-gray-500 px-3 py-1 text-xs font-normal text-white dark:bg-gray-600">
                     {formatDateSeparator(dateString)}
                   </span>
                 </div>
@@ -286,9 +366,7 @@ export default function ChatWindow({
                     message={message}
                     isOwn={message.from === currentUser.uid}
                     sender={
-                      message.from === currentUser.uid
-                        ? currentUser
-                        : otherUser
+                      message.from === currentUser.uid ? currentUser : otherUser
                     }
                     showAvatar
                   />
@@ -298,7 +376,11 @@ export default function ChatWindow({
 
             {/* Typing indicator */}
             {typingUsers.length > 0 && (
-              <TypingIndicator displayName={otherUser.displayName || otherUser.username || 'User'} />
+              <TypingIndicator
+                displayName={
+                  otherUser.displayName || otherUser.username || "User"
+                }
+              />
             )}
 
             <div ref={messagesEndRef} />
@@ -307,45 +389,72 @@ export default function ChatWindow({
       </div>
 
       {/* Message input */}
-      <div className="p-3 border-top">
-        <Form onSubmit={handleSendMessage}>
-          <div className="d-flex gap-2">
-            <Form.Control
-              as="textarea"
+      <div className="border-t border-border p-3 dark:border-border-dark">
+        <form onSubmit={handleSendMessage}>
+          <div className="flex gap-2">
+            <textarea
               rows={1}
               placeholder={
                 canMessage
-                  ? 'Type a message... (Shift+Enter for new line)'
-                  : 'Cannot send messages'
+                  ? "Type a message... (Shift+Enter for new line)"
+                  : "Cannot send messages"
               }
               value={messageInput}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
               disabled={sending || !canMessage}
-              style={{
-                resize: 'none',
-                maxHeight: 120,
-                overflowY: 'auto',
-              }}
+              className={cn(
+                "flex-1 resize-none overflow-y-auto rounded-md border border-border bg-card px-3 py-2 text-foreground",
+                "placeholder:text-foreground-secondary focus:outline-none focus:ring-2 focus:ring-primary-500",
+                "disabled:cursor-not-allowed disabled:opacity-50",
+                "dark:border-border-dark dark:bg-card-dark",
+              )}
+              style={{ maxHeight: 120 }}
             />
-            <Button
+            <button
               type="submit"
-              variant="primary"
               disabled={!messageInput.trim() || sending || !canMessage}
+              className={cn(
+                "flex items-center justify-center rounded-md px-4 py-2 text-white",
+                "disabled:cursor-not-allowed disabled:opacity-50",
+              )}
               style={{
-                background: currentUser.accentColor || '#5865F2',
-                borderColor: currentUser.accentColor || '#5865F2',
+                background: currentUser.accentColor || "#5865F2",
+                borderColor: currentUser.accentColor || "#5865F2",
               }}
             >
-              {sending ? <Spinner animation="border" size="sm" /> : <FaPaperPlane />}
-            </Button>
+              {sending ? (
+                <svg
+                  className="h-4 w-4 animate-spin text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                  />
+                </svg>
+              ) : (
+                <FiSend />
+              )}
+            </button>
           </div>
-          <div className="text-end mt-1">
-            <small className="text-muted">
+          <div className="mt-1 text-right">
+            <span className="text-xs text-foreground-secondary">
               {messageInput.length} / 2000
-            </small>
+            </span>
           </div>
-        </Form>
+        </form>
       </div>
     </div>
   );

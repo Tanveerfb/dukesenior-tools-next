@@ -1,47 +1,53 @@
-// Bootstrap imports (temporarily kept for existing pages during migration)
-@use "sass:color";
+/* Global styles — Tailwind + Whiteboard / Chalkboard theme */
 
-// Theme variable definitions (must precede bootstrap for customization)
-$primary: #ab2fb1;
-$secondary: #36453b;
-$tertiary: #515751;
-
-// Updated colors for better contrast
-$success: #0f8029;
-$warning: #ffca3a;
-$danger: #a63a50;
-
-$info: #89608e; // Starry Sky Blue
-$dark: #12130f; // Night
-$light: #dcfffd; // Soft Lavender Tint
-$text-color: #0c0909; // Neutral dark for text
-$background-color: #f7f7ff; // Subtle off-white for background
-
-$body-bg: $background-color;
-$body-color: $text-color;
-$link-color: $primary;
-$link-hover-color: color.scale($primary, $lightness: -12%);
-
-// Import Bootstrap (will be removed in future migration phases)
-@import "../../node_modules/bootstrap/scss/bootstrap";
-
-// Tailwind CSS directives
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================
+   CSS Custom Properties (Design Tokens)
+   ============================================ */
+
 :root {
-  --font-scale: 1; // default; ThemeProvider updates at runtime
+  --font-scale: 1;
 
-  // Brand colors (matching MUI theme)
-  --primary: #ab2fb1;
-  --secondary: #36453b;
-  --tertiary: #515751;
+  /* Brand colors */
+  --color-primary: #e89374;
+  --color-secondary: #236fb4;
+  --color-surface: #efeffb;
 
-  // Shadow RGB values for theme-aware shadows
-  --shadow-rgb: 0, 0, 0;
+  /* Whiteboard mode — warm off-white, like a dry-erase board */
+  --color-bg: #f4f1ec;
+  --color-fg: #2b2b2b;
+  --color-fg-muted: #6e6a63;
+  --color-card: #faf8f5;
+  --color-border: #d6d0c4;
 
-  // Spacing tokens
+  /* RGB channels for Tailwind opacity support */
+  --color-bg-rgb: 244 241 236;
+  --color-fg-rgb: 43 43 43;
+  --color-fg-muted-rgb: 110 106 99;
+  --color-card-rgb: 250 248 245;
+  --color-border-rgb: 214 208 196;
+
+  /* Marker accent colors (vivid, like dry-erase markers) */
+  --marker-red: #d9453d;
+  --marker-blue: #2a72b8;
+  --marker-green: #2d9b4e;
+  --marker-orange: #e89374;
+  --marker-purple: #7b5ea7;
+  --marker-black: #2b2b2b;
+
+  /* Status (marker-inspired) */
+  --color-success: #2d9b4e;
+  --color-warning: #d4952b;
+  --color-danger: #d9453d;
+  --color-info: #2a72b8;
+
+  /* Shadows — warm tint, like a board casting soft shadows */
+  --shadow-rgb: 60, 50, 40;
+
+  /* Spacing tokens */
   --space-xs: 0.25rem;
   --space-sm: 0.5rem;
   --space-md: 1rem;
@@ -50,33 +56,90 @@ $link-hover-color: color.scale($primary, $lightness: -12%);
   --space-2xl: 3rem;
   --space-3xl: 4rem;
 
-  // Fluid typography
+  /* Fluid typography */
   --fs-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
   --fs-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
   --fs-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
   --fs-lg: clamp(1.125rem, 1rem + 0.5vw, 1.5rem);
   --fs-xl: clamp(1.5rem, 1.25rem + 1vw, 2.5rem);
   --fs-2xl: clamp(2rem, 1.5rem + 2vw, 4rem);
+
+  /* Board texture (faint dot-grid for whiteboard feel) */
+  --board-texture: radial-gradient(
+    circle,
+    rgba(0, 0, 0, 0.03) 1px,
+    transparent 1px
+  );
+  --board-texture-size: 24px 24px;
 }
 
-// Dark mode adjustments
-[data-bs-theme="dark"] {
+/* Chalkboard mode — dark green-black, chalky textures */
+[data-theme="dark"] {
+  --color-bg: #1a2721;
+  --color-fg: #e4dfd4;
+  --color-fg-muted: #a09888;
+  --color-card: #223029;
+  --color-border: #3a4f41;
   --shadow-rgb: 0, 0, 0;
+
+  /* RGB channels for Tailwind opacity support */
+  --color-bg-rgb: 26 39 33;
+  --color-fg-rgb: 228 223 212;
+  --color-fg-muted-rgb: 160 152 136;
+  --color-card-rgb: 34 48 41;
+  --color-border-rgb: 58 79 65;
+
+  /* Chalk accent colors (softer/pastel versions of markers) */
+  --marker-red: #f2918a;
+  --marker-blue: #7eb8e4;
+  --marker-green: #7dd99b;
+  --marker-orange: #f0b89e;
+  --marker-purple: #c4a6e8;
+  --marker-black: #e4dfd4;
+
+  /* Status (chalk-pastel) */
+  --color-success: #7dd99b;
+  --color-warning: #e8c87a;
+  --color-danger: #f2918a;
+  --color-info: #7eb8e4;
+
+  /* Chalkboard texture (faint chalk-dust noise) */
+  --board-texture: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.015) 1px,
+    transparent 1px
+  );
+  --board-texture-size: 20px 20px;
 }
+
+/* ============================================
+   Base Styles
+   ============================================ */
 
 html {
-  font-size: calc(16px * var(--font-scale, 1));
+  font-size: calc(18px * var(--font-scale, 1));
   transition: font-size 0.15s ease-in-out;
   scroll-behavior: smooth;
 }
 
 body {
-  font-size: 1rem; // keep base context; rem units scale via html font-size
+  font-family: var(--font-permanent-marker), cursive;
+  font-size: 1rem;
+  color: var(--color-fg);
+  background-color: var(--color-bg);
+  background-image: var(--board-texture);
+  background-size: var(--board-texture-size);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition:
+    background-color 0.3s ease-in-out,
+    color 0.3s ease-in-out;
 }
 
-// Optionally scale headings slightly less aggressively (clamp effect)
+/* ============================================
+   Headings — bold marker / chalk style
+   ============================================ */
+
 h1,
 h2,
 h3,
@@ -84,123 +147,48 @@ h4,
 h5,
 h6 {
   line-height: 1.15;
+  letter-spacing: 0.01em;
 }
 
-// ============================================
-// Enhanced UI/UX Improvements
-// ============================================
+/* ============================================
+   Interactive Element Transitions
+   ============================================ */
 
-// Smooth transitions for interactive elements only
 button,
 a,
 input,
 select,
 textarea {
   transition-property:
-    background-color, border-color, box-shadow, transform, opacity;
+    background-color, border-color, box-shadow, transform, opacity, color;
   transition-duration: 0.2s;
   transition-timing-function: ease-in-out;
 }
 
-// Improved link hover states
 a {
-  transition:
-    color 0.2s ease-in-out,
-    opacity 0.2s ease-in-out;
+  color: var(--marker-blue);
+  text-decoration: none;
 
   &:hover {
     opacity: 0.85;
   }
 }
 
-// Enhanced focus states for accessibility
+/* ============================================
+   Accessibility
+   ============================================ */
+
 *:focus-visible {
-  outline: 2px solid var(--primary);
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
   border-radius: 4px;
 }
-
-// Skeleton loader animation
-@keyframes shimmer {
-  0% {
-    background-position: -1000px 0;
-  }
-  100% {
-    background-position: 1000px 0;
-  }
-}
-
-.skeleton {
-  background: linear-gradient(
-    90deg,
-    rgba(0, 0, 0, 0.06) 25%,
-    rgba(0, 0, 0, 0.12) 50%,
-    rgba(0, 0, 0, 0.06) 75%
-  );
-  background-size: 1000px 100%;
-  animation: shimmer 2s infinite;
-  border-radius: 4px;
-}
-
-[data-bs-theme="dark"] .skeleton {
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0.06) 25%,
-    rgba(255, 255, 255, 0.12) 50%,
-    rgba(255, 255, 255, 0.06) 75%
-  );
-  background-size: 1000px 100%;
-}
-
-// Smooth page transitions
-.page-transition-enter {
-  opacity: 0;
-  transform: translateY(20px);
-}
-
-.page-transition-enter-active {
-  opacity: 1;
-  transform: translateY(0);
-  transition:
-    opacity 0.3s,
-    transform 0.3s;
-}
-
-.page-transition-exit {
-  opacity: 1;
-}
-
-.page-transition-exit-active {
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-
-// Better empty state styling
-.empty-state {
-  padding: 3rem 1.5rem;
-  text-align: center;
-  color: rgba(0, 0, 0, 0.6);
-}
-
-[data-bs-theme="dark"] .empty-state {
-  color: rgba(255, 255, 255, 0.6);
-}
-
-.empty-state-icon {
-  font-size: 3rem;
-  opacity: 0.5;
-  margin-bottom: 1rem;
-}
-
-// ============================================
-// Skip to Content Link (Accessibility)
-// ============================================
 
 .skip-to-content {
   position: absolute;
   top: -40px;
   left: 0;
-  background: var(--primary);
+  background: var(--color-primary);
   color: white;
   padding: 0.5rem 1rem;
   z-index: 9999;
@@ -209,4 +197,196 @@ a {
   &:focus {
     top: 0;
   }
+}
+
+/* ============================================
+   Custom Utility Classes
+   ============================================ */
+
+@layer utilities {
+  /* Hand-drawn dashed border (whiteboard feel) */
+  .border-dashed-marker {
+    border-style: dashed;
+    border-width: 2px;
+    border-color: var(--color-border);
+  }
+
+  /* Chalk underline — a squiggly SVG underline for headings */
+  .chalk-underline {
+    display: inline;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 12'%3E%3Cpath d='M2 8 Q 30 2, 60 8 T 120 8 T 180 8 T 200 8' fill='none' stroke='%23e89374' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-position: bottom left;
+    background-repeat: repeat-x;
+    background-size: 120px 8px;
+    padding-bottom: 6px;
+  }
+
+  [data-theme="dark"] .chalk-underline {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 12'%3E%3Cpath d='M2 8 Q 30 2, 60 8 T 120 8 T 180 8 T 200 8' fill='none' stroke='%23f0b89e' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  }
+
+  /* Sticky-note card (light mode) / chalk-card (dark mode) */
+  .card-board {
+    background-color: var(--color-card);
+    border: 2px dashed var(--color-border);
+    border-radius: 6px;
+    box-shadow: 2px 3px 0 rgba(var(--shadow-rgb), 0.08);
+    transition:
+      transform 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+  .card-board:hover {
+    transform: translateY(-2px) rotate(-0.3deg);
+    box-shadow: 3px 5px 0 rgba(var(--shadow-rgb), 0.12);
+  }
+
+  /* Tilted element — slight playful rotation */
+  .tilt-sm {
+    transform: rotate(-0.5deg);
+  }
+  .tilt-md {
+    transform: rotate(-1deg);
+  }
+  .tilt-lg {
+    transform: rotate(-1.5deg);
+  }
+  .-tilt-sm {
+    transform: rotate(0.5deg);
+  }
+  .-tilt-md {
+    transform: rotate(1deg);
+  }
+  .-tilt-lg {
+    transform: rotate(1.5deg);
+  }
+
+  /* Marker highlight — background swoosh behind text */
+  .marker-highlight {
+    background: linear-gradient(
+      104deg,
+      transparent 0.9%,
+      var(--color-primary) 2.4%,
+      rgba(232, 147, 116, 0.25) 5.8%,
+      rgba(232, 147, 116, 0.15) 93%,
+      rgba(232, 147, 116, 0.25) 96%,
+      transparent 98%
+    );
+    padding: 0.05em 0.4em;
+    border-radius: 4px;
+  }
+
+  [data-theme="dark"] .marker-highlight {
+    background: linear-gradient(
+      104deg,
+      transparent 0.9%,
+      rgba(240, 184, 158, 0.35) 2.4%,
+      rgba(240, 184, 158, 0.15) 5.8%,
+      rgba(240, 184, 158, 0.08) 93%,
+      rgba(240, 184, 158, 0.15) 96%,
+      transparent 98%
+    );
+  }
+
+  /* Chalk dust texture overlay — add to any container */
+  .chalk-dust::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.4;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 256px 256px;
+    mix-blend-mode: overlay;
+    border-radius: inherit;
+    z-index: 0;
+  }
+}
+
+@layer components {
+  /* Skeleton loader */
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.06) 25%,
+      rgba(0, 0, 0, 0.12) 50%,
+      rgba(0, 0, 0, 0.06) 75%
+    );
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite;
+    border-radius: 4px;
+  }
+
+  [data-theme="dark"] .skeleton {
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.06) 25%,
+      rgba(255, 255, 255, 0.12) 50%,
+      rgba(255, 255, 255, 0.06) 75%
+    );
+    background-size: 1000px 100%;
+  }
+
+  /* Glass-morphism card effect */
+  .glass {
+    background: rgba(250, 248, 245, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px dashed rgba(214, 208, 196, 0.5);
+  }
+
+  [data-theme="dark"] .glass {
+    background: rgba(34, 48, 41, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px dashed rgba(58, 79, 65, 0.5);
+  }
+}
+
+/* Page transition animations */
+.page-transition-enter {
+  opacity: 0;
+  transform: translateY(20px);
+}
+.page-transition-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 0.3s,
+    transform 0.3s;
+}
+.page-transition-exit {
+  opacity: 1;
+}
+.page-transition-exit-active {
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+/* ============================================
+   Scrollbar Styling
+   ============================================ */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(43, 43, 43, 0.15);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(43, 43, 43, 0.3);
+}
+
+[data-theme="dark"]::-webkit-scrollbar-thumb {
+  background: rgba(228, 223, 212, 0.15);
+}
+
+[data-theme="dark"]::-webkit-scrollbar-thumb:hover {
+  background: rgba(228, 223, 212, 0.25);
 }

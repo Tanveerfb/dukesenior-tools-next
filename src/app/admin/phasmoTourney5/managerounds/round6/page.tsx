@@ -1,17 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import {
-  Alert,
-  Badge,
-  Button,
-  Card,
-  Col,
-  Container,
-  Form,
-  Modal,
-  Row,
-  Table,
-} from "react-bootstrap";
+import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import GameSettingsAdminEditor from "../../../../../components/tourney/GameSettingsAdminEditor";
 import TeamsManager from "../../../../../components/tourney/TeamsManager";
@@ -84,7 +73,7 @@ export default function Round6AdminPage() {
         setPlayers(
           Array.isArray(json)
             ? json.filter((p: any) => p.status !== "Eliminated")
-            : []
+            : [],
         );
       } catch {}
       try {
@@ -170,36 +159,46 @@ export default function Round6AdminPage() {
 
   if (!admin) {
     return (
-      <Container className="py-4">
-        <Alert variant="warning">Admin access required.</Alert>
-      </Container>
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="rounded-xl border border-yellow-300 bg-yellow-50 dark:bg-yellow-900/20 dark:border-yellow-700 p-4 text-yellow-800 dark:text-yellow-200">
+          Admin access required.
+        </div>
+      </div>
     );
   }
 
   return (
-    <Container className="py-4">
-      <h1 className="h4 fw-semibold mb-3">
+    <div className="max-w-7xl mx-auto px-4 py-6">
+      <h1 className="text-lg font-semibold mb-3 text-foreground">
         Round 6 — Pick Your Friend (Admin)
       </h1>
 
       <section className="mb-4">
-        <div className="d-flex align-items-center justify-content-between">
-          <h2 className="h5 mb-0">Round Settings</h2>
-          <Button
-            variant={showRoundSettings ? "outline-secondary" : "secondary"}
+        <div className="flex items-center justify-between">
+          <h2 className="text-base font-semibold text-foreground">
+            Round Settings
+          </h2>
+          <button
+            type="button"
+            className={cn(
+              "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+              showRoundSettings
+                ? "border border-gray-400 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                : "bg-gray-500 text-white hover:bg-gray-600",
+            )}
             onClick={() => setShowRoundSettings((v) => !v)}
           >
             {showRoundSettings ? "Hide" : "Show"}
-          </Button>
+          </button>
         </div>
         {showRoundSettings && <GameSettingsAdminEditor roundId="round6" />}
       </section>
 
-      <Card className="border-0 shadow-sm mb-4">
-        <Card.Body>
-          <Card.Title as="h2" className="h5 fw-semibold">
+      <div className="rounded-xl border border-border bg-card dark:bg-card-dark dark:border-border-dark shadow-sm mb-4">
+        <div className="p-4">
+          <h2 className="text-base font-semibold text-foreground">
             Manage Teams
-          </Card.Title>
+          </h2>
           <TeamsManager
             players={players}
             listTeams={listRound6Teams}
@@ -207,24 +206,34 @@ export default function Round6AdminPage() {
             deleteTeam={deleteRound6Team}
             showMoneyFields={false}
           />
-        </Card.Body>
-      </Card>
+        </div>
+      </div>
 
-      <Card className="border-0 shadow-sm mb-4">
-        <Card.Body>
-          <Card.Title as="h2" className="h5 fw-semibold">
+      <div className="rounded-xl border border-border bg-card dark:bg-card-dark dark:border-border-dark shadow-sm mb-4">
+        <div className="p-4">
+          <h2 className="text-base font-semibold text-foreground">
             Record Team Run Details
-          </Card.Title>
-          <Form onSubmit={submitTeamResult} className="mt-3">
-            <Row className="g-3">
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Officer</Form.Label>
-                  <Form.Control value={officer} disabled />
-                </Form.Group>
-                <Form.Group className="mb-3">
-                  <Form.Label>Team</Form.Label>
-                  <Form.Select
+          </h2>
+          <form onSubmit={submitTeamResult} className="mt-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <div className="mb-3">
+                  <label className="block text-sm font-medium text-foreground mb-1">
+                    Officer
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full rounded-lg border border-border bg-gray-100 dark:bg-gray-800 dark:border-border-dark p-2 text-foreground opacity-60 cursor-not-allowed"
+                    value={officer}
+                    disabled
+                  />
+                </div>
+                <div className="mb-3">
+                  <label className="block text-sm font-medium text-foreground mb-1">
+                    Team
+                  </label>
+                  <select
+                    className="w-full rounded-lg border border-border bg-card dark:bg-card-dark dark:border-border-dark p-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary-500"
                     value={form.teamId}
                     onChange={(e) =>
                       setForm({ ...form, teamId: e.target.value })
@@ -237,60 +246,65 @@ export default function Round6AdminPage() {
                         {t.teamName} (
                         {t.members
                           .map(
-                            (id) => players.find((p) => p.id === id)?.name || id
+                            (id) =>
+                              players.find((p) => p.id === id)?.name || id,
                           )
                           .join(" and ")}
                         )
                       </option>
                     ))}
-                  </Form.Select>
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Notes</Form.Label>
-                  <Form.Control
-                    as="textarea"
+                  </select>
+                </div>
+              </div>
+              <div>
+                <div className="mb-3">
+                  <label className="block text-sm font-medium text-foreground mb-1">
+                    Notes
+                  </label>
+                  <textarea
                     rows={3}
+                    className="w-full rounded-lg border border-border bg-card dark:bg-card-dark dark:border-border-dark p-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary-500"
                     value={form.notes}
                     onChange={(e) =>
                       setForm({ ...form, notes: e.target.value })
                     }
                   />
-                </Form.Group>
-              </Col>
-            </Row>
-            <Row className="g-3">
-              <Col md={12}>
-                <div className="d-flex flex-wrap gap-3">
-                  {[
-                    "ghostPicture",
-                    "bonePicture",
-                    "cursedItemUse",
-                    "objective1",
-                    "objective2",
-                    "objective3",
-                    "perfectGame",
-                    "survived",
-                    "correctGhostType",
-                  ].map((key) => {
-                    const labelMap: Record<string, string> = {
-                      ghostPicture: "Ghost picture",
-                      bonePicture: "Bone picture",
-                      cursedItemUse: "Cursed item use",
-                      objective1: "Objective 1",
-                      objective2: "Objective 2",
-                      objective3: "Objective 3",
-                      perfectGame: "Perfect game",
-                      survived: "Survived",
-                      correctGhostType: "Correct ghost type",
-                    };
-                    return (
-                      <Form.Check
-                        key={key}
-                        type="switch"
+                </div>
+              </div>
+            </div>
+            <div>
+              <div className="flex flex-wrap gap-3">
+                {[
+                  "ghostPicture",
+                  "bonePicture",
+                  "cursedItemUse",
+                  "objective1",
+                  "objective2",
+                  "objective3",
+                  "perfectGame",
+                  "survived",
+                  "correctGhostType",
+                ].map((key) => {
+                  const labelMap: Record<string, string> = {
+                    ghostPicture: "Ghost picture",
+                    bonePicture: "Bone picture",
+                    cursedItemUse: "Cursed item use",
+                    objective1: "Objective 1",
+                    objective2: "Objective 2",
+                    objective3: "Objective 3",
+                    perfectGame: "Perfect game",
+                    survived: "Survived",
+                    correctGhostType: "Correct ghost type",
+                  };
+                  return (
+                    <label
+                      key={key}
+                      className="relative inline-flex items-center cursor-pointer gap-2"
+                    >
+                      <input
+                        type="checkbox"
+                        className="sr-only peer"
                         id={`toggle-${key}`}
-                        label={labelMap[key]}
                         onChange={(e) =>
                           setForm({
                             ...form,
@@ -298,159 +312,196 @@ export default function Round6AdminPage() {
                           } as any)
                         }
                       />
-                    );
-                  })}
-                </div>
-              </Col>
-            </Row>
-            <div className="d-flex gap-2 mt-2">
-              <Button type="submit" variant="primary">
+                      <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer dark:bg-gray-600 peer-checked:bg-primary-500 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full" />
+                      <span className="text-sm text-foreground">
+                        {labelMap[key]}
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="flex gap-2 mt-2">
+              <button
+                type="submit"
+                className="px-4 py-2 rounded-lg text-sm font-medium bg-primary-500 text-white hover:bg-primary-600 transition-colors"
+              >
                 Submit
-              </Button>
-              <Button
+              </button>
+              <button
                 type="button"
-                variant="outline-secondary"
+                className="px-4 py-2 rounded-lg text-sm font-medium border border-gray-400 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 onClick={() => setForm({ teamId: "", money: "", notes: "" })}
               >
                 Reset
-              </Button>
+              </button>
             </div>
-          </Form>
-        </Card.Body>
-      </Card>
+          </form>
+        </div>
+      </div>
 
-      <Card className="border-0 shadow-sm">
-        <Card.Body>
-          <Card.Title as="h2" className="h5 fw-semibold">
+      <div className="rounded-xl border border-border bg-card dark:bg-card-dark dark:border-border-dark shadow-sm">
+        <div className="p-4">
+          <h2 className="text-base font-semibold text-foreground">
             Team Run Summary
-          </Card.Title>
-          <Table responsive size="sm" className="mt-2">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Team</th>
-                <th>Marks</th>
-                <th>Officer</th>
-                <th>Time</th>
-                <th>Notes</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sortedResults.map((r, i) => (
-                <tr key={r.id}>
-                  <td>{i + 1}</td>
-                  <td>{r.teamName}</td>
-                  <td>{(r as any).marks ?? "—"}</td>
-                  <td className="text-muted small">{r.officer}</td>
-                  <td className="text-muted small">
-                    {new Date(r.createdAt).toLocaleString()}
-                  </td>
-                  <td className="text-muted small">{r.notes || "-"}</td>
-                  <td>
-                    <Button
-                      size="sm"
-                      variant="outline-primary"
-                      onClick={() => setViewModal({ show: true, result: r })}
-                      className="me-1"
-                    >
-                      View
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline-danger"
-                      onClick={() => setDeleteModal({ show: true, id: r.id })}
-                    >
-                      Delete
-                    </Button>
-                  </td>
+          </h2>
+          <div className="overflow-x-auto mt-2">
+            <table className="w-full text-sm text-foreground">
+              <thead>
+                <tr className="border-b border-border dark:border-border-dark">
+                  <th className="text-left p-2">#</th>
+                  <th className="text-left p-2">Team</th>
+                  <th className="text-left p-2">Marks</th>
+                  <th className="text-left p-2">Officer</th>
+                  <th className="text-left p-2">Time</th>
+                  <th className="text-left p-2">Notes</th>
+                  <th className="text-left p-2">Actions</th>
                 </tr>
-              ))}
-              {sortedResults.length === 0 && (
-                <tr>
-                  <td colSpan={7} className="text-muted">
-                    No results yet.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </Table>
-        </Card.Body>
-      </Card>
+              </thead>
+              <tbody>
+                {sortedResults.map((r, i) => (
+                  <tr
+                    key={r.id}
+                    className="border-b border-border/50 dark:border-border-dark/50"
+                  >
+                    <td className="p-2">{i + 1}</td>
+                    <td className="p-2">{r.teamName}</td>
+                    <td className="p-2">{(r as any).marks ?? "—"}</td>
+                    <td className="p-2 text-muted-foreground text-xs">
+                      {r.officer}
+                    </td>
+                    <td className="p-2 text-muted-foreground text-xs">
+                      {new Date(r.createdAt).toLocaleString()}
+                    </td>
+                    <td className="p-2 text-muted-foreground text-xs">
+                      {r.notes || "-"}
+                    </td>
+                    <td className="p-2">
+                      <button
+                        type="button"
+                        className="text-sm px-3 py-1.5 rounded-lg border border-primary-500 text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors mr-1"
+                        onClick={() => setViewModal({ show: true, result: r })}
+                      >
+                        View
+                      </button>
+                      <button
+                        type="button"
+                        className="text-sm px-3 py-1.5 rounded-lg border border-red-500 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                        onClick={() => setDeleteModal({ show: true, id: r.id })}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+                {sortedResults.length === 0 && (
+                  <tr>
+                    <td colSpan={7} className="p-2 text-muted-foreground">
+                      No results yet.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
 
       {/* Delete Confirmation Modal */}
-      <Modal
-        show={deleteModal.show}
-        onHide={() => setDeleteModal({ show: false, id: null })}
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>Confirm Delete</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          Are you sure you want to delete this team run result? This action
-          cannot be undone.
-        </Modal.Body>
-        <Modal.Footer>
-          <Button
-            variant="secondary"
-            onClick={() => setDeleteModal({ show: false, id: null })}
-            disabled={deleting}
-          >
-            Cancel
-          </Button>
-          <Button
-            variant="danger"
-            onClick={handleDeleteResult}
-            disabled={deleting}
-          >
-            {deleting ? "Deleting..." : "Delete"}
-          </Button>
-        </Modal.Footer>
-      </Modal>
+      {deleteModal.show && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-card dark:bg-card-dark border border-border dark:border-border-dark rounded-xl shadow-lg w-full max-w-md mx-4">
+            <div className="flex items-center justify-between p-4 border-b border-border dark:border-border-dark">
+              <h3 className="text-lg font-semibold text-foreground">
+                Confirm Delete
+              </h3>
+              <button
+                type="button"
+                onClick={() => setDeleteModal({ show: false, id: null })}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="p-4 text-foreground">
+              Are you sure you want to delete this team run result? This action
+              cannot be undone.
+            </div>
+            <div className="flex justify-end gap-2 p-4 border-t border-border dark:border-border-dark">
+              <button
+                type="button"
+                className="px-4 py-2 rounded-lg text-sm font-medium bg-gray-500 text-white hover:bg-gray-600 transition-colors disabled:opacity-50"
+                onClick={() => setDeleteModal({ show: false, id: null })}
+                disabled={deleting}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="px-4 py-2 rounded-lg text-sm font-medium bg-red-500 text-white hover:bg-red-600 transition-colors disabled:opacity-50"
+                onClick={handleDeleteResult}
+                disabled={deleting}
+              >
+                {deleting ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* View Details Modal */}
-      <Modal
-        show={viewModal.show}
-        onHide={() => setViewModal({ show: false, result: null })}
-        size="lg"
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>Team Run Details</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {viewModal.result && (
-            <div>
-              <p>
-                <strong>Team:</strong> {viewModal.result.teamName}
-              </p>
-              <p>
-                <strong>Marks:</strong>{" "}
-                <Badge bg="success">
-                  {(viewModal.result as any).marks ?? 0}
-                </Badge>
-              </p>
-              <p>
-                <strong>Officer:</strong> {viewModal.result.officer}
-              </p>
-              <p>
-                <strong>Date:</strong>{" "}
-                {new Date(viewModal.result.createdAt).toLocaleString()}
-              </p>
-              <p>
-                <strong>Notes:</strong> {viewModal.result.notes || "None"}
-              </p>
+      {viewModal.show && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-card dark:bg-card-dark border border-border dark:border-border-dark rounded-xl shadow-lg w-full max-w-2xl mx-4">
+            <div className="flex items-center justify-between p-4 border-b border-border dark:border-border-dark">
+              <h3 className="text-lg font-semibold text-foreground">
+                Team Run Details
+              </h3>
+              <button
+                type="button"
+                onClick={() => setViewModal({ show: false, result: null })}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                ✕
+              </button>
             </div>
-          )}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button
-            variant="secondary"
-            onClick={() => setViewModal({ show: false, result: null })}
-          >
-            Close
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    </Container>
+            <div className="p-4">
+              {viewModal.result && (
+                <div className="space-y-2 text-foreground">
+                  <p>
+                    <strong>Team:</strong> {viewModal.result.teamName}
+                  </p>
+                  <p>
+                    <strong>Marks:</strong>{" "}
+                    <span className="rounded-full text-xs font-medium px-2.5 py-0.5 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
+                      {(viewModal.result as any).marks ?? 0}
+                    </span>
+                  </p>
+                  <p>
+                    <strong>Officer:</strong> {viewModal.result.officer}
+                  </p>
+                  <p>
+                    <strong>Date:</strong>{" "}
+                    {new Date(viewModal.result.createdAt).toLocaleString()}
+                  </p>
+                  <p>
+                    <strong>Notes:</strong> {viewModal.result.notes || "None"}
+                  </p>
+                </div>
+              )}
+            </div>
+            <div className="flex justify-end p-4 border-t border-border dark:border-border-dark">
+              <button
+                type="button"
+                className="px-4 py-2 rounded-lg text-sm font-medium bg-gray-500 text-white hover:bg-gray-600 transition-colors"
+                onClick={() => setViewModal({ show: false, result: null })}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

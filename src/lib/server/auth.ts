@@ -1,14 +1,13 @@
 import { headers } from 'next/headers';
 import { verifyIdToken as _verifyIdToken } from '@/lib/firebase/admin';
 
-// Mirror client-side admin logic
-const ADMIN_EMAILS = new Set([
-  'dukesenior22@proton.me',
-  'flareon@abv.bg'
-]);
-const ADMIN_UIDS = new Set([
-  'GeLWvzA1PxfvGBmvN1niZ2GjHKe2'
-]);
+// Server-side admin allowlist — loaded from env so secrets stay out of source
+const ADMIN_EMAILS = new Set(
+  (process.env.ADMIN_EMAILS || process.env.NEXT_PUBLIC_ADMIN_EMAILS || '').split(',').map(s => s.trim()).filter(Boolean)
+);
+const ADMIN_UIDS = new Set(
+  (process.env.ADMIN_UIDS || process.env.NEXT_PUBLIC_ADMIN_UIDS || '').split(',').map(s => s.trim()).filter(Boolean)
+);
 
 export interface AdminAuthResult { admin: boolean; uid?: string; email?: string; tokenValid: boolean; }
 

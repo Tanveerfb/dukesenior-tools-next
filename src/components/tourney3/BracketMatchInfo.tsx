@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Badge } from "react-bootstrap";
+import { cn } from "@/lib/utils";
 import {
   getTeamRedemptionScores,
   getTeamScores,
@@ -69,7 +69,7 @@ export default function BracketMatchInfo({
         setWinner("second");
     }
   }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   useEffect(() => {
     load();
   }, []);
@@ -93,16 +93,22 @@ export default function BracketMatchInfo({
   }
   const renderTeam = (line: string, isWinner: boolean) =>
     isWinner ? (
-      <Badge bg="success" className="fw-semibold" aria-label="Winner team">
+      <span
+        className={cn(
+          "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold",
+          "bg-green-600 text-white",
+        )}
+        aria-label="Winner team"
+      >
         {line}
-      </Badge>
+      </span>
     ) : (
       <span>{line}</span>
     );
   return (
     <>
       {renderTeam(team1Line, winner === "first")}{" "}
-      <span className="fw-bold mx-1">vs</span>{" "}
+      <span className="font-bold mx-1">vs</span>{" "}
       {renderTeam(team2Line, winner === "second")}
     </>
   );

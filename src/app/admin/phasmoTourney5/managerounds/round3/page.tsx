@@ -1,18 +1,7 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
+import { cn } from "@/lib/utils";
 import ImmunityAssigner from "@/components/tourney/ImmunityAssigner";
-import {
-  Alert,
-  Button,
-  Card,
-  Col,
-  Container,
-  Form,
-  Row,
-  Table,
-  Modal,
-  Badge,
-} from "react-bootstrap";
 import { useAuth } from "@/hooks/useAuth";
 import GameSettingsAdminEditor from "../../../../../components/tourney/GameSettingsAdminEditor";
 import {
@@ -79,7 +68,7 @@ export default function Round3AdminPage() {
             ? json
                 .filter((p: any) => p.status !== "Eliminated")
                 .map((p: any) => ({ id: p.id, name: p.name, status: p.status }))
-            : []
+            : [],
         );
       } catch {}
       try {
@@ -139,27 +128,37 @@ export default function Round3AdminPage() {
 
   if (!admin) {
     return (
-      <Container className="py-4">
-        <Alert variant="warning">Admin access required.</Alert>
-      </Container>
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="rounded-xl border border-yellow-300 bg-yellow-50 dark:bg-yellow-900/20 dark:border-yellow-700 p-4 text-yellow-800 dark:text-yellow-200">
+          Admin access required.
+        </div>
+      </div>
     );
   }
 
   return (
-    <Container className="py-4">
-      <h1 className="h4 fw-semibold mb-3">
+    <div className="max-w-7xl mx-auto px-4 py-6">
+      <h1 className="text-lg font-semibold mb-3 text-foreground">
         Round 3 — Teams & Eliminator (Admin)
       </h1>
 
       <section className="mb-4">
-        <div className="d-flex align-items-center justify-content-between">
-          <h2 className="h5 mb-0">Round Settings</h2>
-          <Button
-            variant={showRoundSettings ? "outline-secondary" : "secondary"}
+        <div className="flex items-center justify-between">
+          <h2 className="text-base font-semibold text-foreground">
+            Round Settings
+          </h2>
+          <button
+            type="button"
+            className={cn(
+              "px-4 py-2 rounded-lg text-sm font-medium transition-colors",
+              showRoundSettings
+                ? "border border-gray-400 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                : "bg-gray-500 text-white hover:bg-gray-600",
+            )}
             onClick={() => setShowRoundSettings((v) => !v)}
           >
             {showRoundSettings ? "Hide" : "Show"}
-          </Button>
+          </button>
         </div>
         {showRoundSettings && <GameSettingsAdminEditor roundId="round3" />}
       </section>
@@ -168,46 +167,54 @@ export default function Round3AdminPage() {
         <ImmunityAssigner roundLabel="Round 3" />
       </section>
 
-      <Card className="border-0 shadow-sm mb-4">
-        <Card.Body>
-          <Card.Title as="h2" className="h5 fw-semibold">
+      <div className="rounded-xl border border-border bg-card dark:bg-card-dark dark:border-border-dark shadow-sm mb-4">
+        <div className="p-4">
+          <h2 className="text-base font-semibold text-foreground">
             Manage Teams
-          </Card.Title>
+          </h2>
           <TeamsManager
             players={players}
             listTeams={listTeams}
             upsertTeam={async (p) => {
-              const { upsertTeam } = await import(
-                "@/lib/services/phasmoTourney5"
-              );
+              const { upsertTeam } =
+                await import("@/lib/services/phasmoTourney5");
               return upsertTeam(p);
             }}
             deleteTeam={async (id) => {
-              const { deleteTeam } = await import(
-                "@/lib/services/phasmoTourney5"
-              );
+              const { deleteTeam } =
+                await import("@/lib/services/phasmoTourney5");
               return deleteTeam(id);
             }}
             showMoneyFields={true}
           />
-        </Card.Body>
-      </Card>
+        </div>
+      </div>
 
-      <Card className="border-0 shadow-sm mb-4">
-        <Card.Body>
-          <Card.Title as="h2" className="h5 fw-semibold">
+      <div className="rounded-xl border border-border bg-card dark:bg-card-dark dark:border-border-dark shadow-sm mb-4">
+        <div className="p-4">
+          <h2 className="text-base font-semibold text-foreground">
             Record Team Run Results
-          </Card.Title>
-          <Form onSubmit={submitTeamResult} className="mt-3">
-            <Row className="g-3">
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Officer</Form.Label>
-                  <Form.Control value={officer} disabled />
-                </Form.Group>
-                <Form.Group className="mb-3">
-                  <Form.Label>Team</Form.Label>
-                  <Form.Select
+          </h2>
+          <form onSubmit={submitTeamResult} className="mt-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <div className="mb-3">
+                  <label className="block text-sm font-medium text-foreground mb-1">
+                    Officer
+                  </label>
+                  <input
+                    type="text"
+                    className="w-full rounded-lg border border-border bg-gray-100 dark:bg-gray-800 dark:border-border-dark p-2 text-foreground opacity-60 cursor-not-allowed"
+                    value={officer}
+                    disabled
+                  />
+                </div>
+                <div className="mb-3">
+                  <label className="block text-sm font-medium text-foreground mb-1">
+                    Team
+                  </label>
+                  <select
+                    className="w-full rounded-lg border border-border bg-card dark:bg-card-dark dark:border-border-dark p-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary-500"
                     value={form.teamId}
                     onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                       setForm({ ...form, teamId: e.target.value })
@@ -220,202 +227,242 @@ export default function Round3AdminPage() {
                         {t.teamName} ({t.members.join(" and ")})
                       </option>
                     ))}
-                  </Form.Select>
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Money earned</Form.Label>
-                  <Form.Control
+                  </select>
+                </div>
+              </div>
+              <div>
+                <div className="mb-3">
+                  <label className="block text-sm font-medium text-foreground mb-1">
+                    Money earned
+                  </label>
+                  <input
                     type="number"
                     step="1"
                     min="0"
                     inputMode="numeric"
+                    className="w-full rounded-lg border border-border bg-card dark:bg-card-dark dark:border-border-dark p-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary-500"
                     value={form.money}
                     onChange={(e) =>
                       setForm({ ...form, money: e.target.value })
                     }
                     required
                   />
-                </Form.Group>
-                <Form.Group className="mb-3">
-                  <Form.Label>Notes</Form.Label>
-                  <Form.Control
-                    as="textarea"
+                </div>
+                <div className="mb-3">
+                  <label className="block text-sm font-medium text-foreground mb-1">
+                    Notes
+                  </label>
+                  <textarea
                     rows={3}
+                    className="w-full rounded-lg border border-border bg-card dark:bg-card-dark dark:border-border-dark p-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary-500"
                     value={form.notes}
                     onChange={(e) =>
                       setForm({ ...form, notes: e.target.value })
                     }
                   />
-                </Form.Group>
-              </Col>
-            </Row>
-            <div className="d-flex gap-2 mt-2">
-              <Button type="submit" variant="primary">
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-2 mt-2">
+              <button
+                type="submit"
+                className="px-4 py-2 rounded-lg text-sm font-medium bg-primary-500 text-white hover:bg-primary-600 transition-colors"
+              >
                 Submit
-              </Button>
-              <Button
+              </button>
+              <button
                 type="button"
-                variant="outline-secondary"
+                className="px-4 py-2 rounded-lg text-sm font-medium border border-gray-400 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 onClick={resetForm}
               >
                 Reset
-              </Button>
+              </button>
             </div>
-          </Form>
-        </Card.Body>
-      </Card>
+          </form>
+        </div>
+      </div>
 
-      <Card className="border-0 shadow-sm">
-        <Card.Body>
-          <Card.Title as="h2" className="h5 fw-semibold">
+      <div className="rounded-xl border border-border bg-card dark:bg-card-dark dark:border-border-dark shadow-sm">
+        <div className="p-4">
+          <h2 className="text-base font-semibold text-foreground">
             Team Results (descending)
-          </Card.Title>
-          <Table responsive size="sm" className="mt-2">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Team</th>
-                <th>Money</th>
-                <th>Officer</th>
-                <th>Time</th>
-                <th>Notes</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sortedResults.map((r, i) => (
-                <tr key={r.id}>
-                  <td>{i + 1}</td>
-                  <td>{r.teamName}</td>
-                  <td>${r.money.toLocaleString()}</td>
-                  <td className="text-muted small">{r.officer}</td>
-                  <td className="text-muted small">
-                    {new Date(r.createdAt).toLocaleString()}
-                  </td>
-                  <td className="text-muted small">{r.notes || "-"}</td>
-                  <td>
-                    <Button
-                      size="sm"
-                      variant="outline-info"
-                      onClick={() => setViewModal({ show: true, result: r })}
-                    >
-                      View
-                    </Button>
-                    {admin && (
-                      <Button
-                        size="sm"
-                        variant="outline-danger"
-                        className="ms-2"
-                        onClick={() =>
-                          setDeleteModal({ show: true, resultId: r.id })
-                        }
-                      >
-                        Delete
-                      </Button>
-                    )}
-                  </td>
+          </h2>
+          <div className="overflow-x-auto mt-2">
+            <table className="w-full text-sm text-foreground">
+              <thead>
+                <tr className="border-b border-border dark:border-border-dark">
+                  <th className="text-left p-2">#</th>
+                  <th className="text-left p-2">Team</th>
+                  <th className="text-left p-2">Money</th>
+                  <th className="text-left p-2">Officer</th>
+                  <th className="text-left p-2">Time</th>
+                  <th className="text-left p-2">Notes</th>
+                  <th className="text-left p-2">Actions</th>
                 </tr>
-              ))}
-              {sortedResults.length === 0 && (
-                <tr>
-                  <td colSpan={7} className="text-muted">
-                    No results yet.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </Table>
-        </Card.Body>
-      </Card>
-
-      <Modal
-        show={deleteModal.show}
-        onHide={() => setDeleteModal({ show: false, resultId: null })}
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>Confirm Delete</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          Are you sure you want to delete this team result? This action cannot
-          be undone.
-        </Modal.Body>
-        <Modal.Footer>
-          <Button
-            variant="secondary"
-            onClick={() => setDeleteModal({ show: false, resultId: null })}
-            disabled={deleting}
-          >
-            Cancel
-          </Button>
-          <Button
-            variant="danger"
-            onClick={handleDeleteResult}
-            disabled={deleting}
-          >
-            {deleting ? "Deleting..." : "Delete Result"}
-          </Button>
-        </Modal.Footer>
-      </Modal>
-
-      <Modal
-        show={viewModal.show}
-        onHide={() => setViewModal({ show: false, result: null })}
-        size="lg"
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>Team Result Details</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {viewModal.result && (
-            <Table bordered size="sm">
+              </thead>
               <tbody>
-                <tr>
-                  <td className="fw-semibold">Team</td>
-                  <td>{viewModal.result.teamName}</td>
-                </tr>
-                <tr>
-                  <td className="fw-semibold">Money Earned</td>
-                  <td>
-                    <Badge bg="success" className="fs-6">
-                      ${viewModal.result.money.toLocaleString()}
-                    </Badge>
-                  </td>
-                </tr>
-                <tr>
-                  <td className="fw-semibold">Officer</td>
-                  <td>{viewModal.result.officer}</td>
-                </tr>
-                <tr>
-                  <td className="fw-semibold">Date</td>
-                  <td>
-                    {new Date(viewModal.result.createdAt).toLocaleString()}
-                  </td>
-                </tr>
-                {viewModal.result.notes && (
+                {sortedResults.map((r, i) => (
+                  <tr
+                    key={r.id}
+                    className="border-b border-border/50 dark:border-border-dark/50"
+                  >
+                    <td className="p-2">{i + 1}</td>
+                    <td className="p-2">{r.teamName}</td>
+                    <td className="p-2">${r.money.toLocaleString()}</td>
+                    <td className="p-2 text-muted-foreground text-xs">
+                      {r.officer}
+                    </td>
+                    <td className="p-2 text-muted-foreground text-xs">
+                      {new Date(r.createdAt).toLocaleString()}
+                    </td>
+                    <td className="p-2 text-muted-foreground text-xs">
+                      {r.notes || "-"}
+                    </td>
+                    <td className="p-2">
+                      <button
+                        type="button"
+                        className="text-sm px-3 py-1.5 rounded-lg border border-cyan-500 text-cyan-600 dark:text-cyan-400 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-colors"
+                        onClick={() => setViewModal({ show: true, result: r })}
+                      >
+                        View
+                      </button>
+                      {admin && (
+                        <button
+                          type="button"
+                          className="text-sm px-3 py-1.5 rounded-lg border border-red-500 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors ml-2"
+                          onClick={() =>
+                            setDeleteModal({ show: true, resultId: r.id })
+                          }
+                        >
+                          Delete
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+                {sortedResults.length === 0 && (
                   <tr>
-                    <td className="fw-semibold">Notes</td>
-                    <td>{viewModal.result.notes}</td>
+                    <td colSpan={7} className="p-2 text-muted-foreground">
+                      No results yet.
+                    </td>
                   </tr>
                 )}
               </tbody>
-            </Table>
-          )}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button
-            variant="secondary"
-            onClick={() => setViewModal({ show: false, result: null })}
-          >
-            Close
-          </Button>
-        </Modal.Footer>
-      </Modal>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      {/* Delete Confirmation Modal */}
+      {deleteModal.show && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-card dark:bg-card-dark border border-border dark:border-border-dark rounded-xl shadow-lg w-full max-w-md mx-4">
+            <div className="flex items-center justify-between p-4 border-b border-border dark:border-border-dark">
+              <h3 className="text-lg font-semibold text-foreground">
+                Confirm Delete
+              </h3>
+              <button
+                type="button"
+                onClick={() => setDeleteModal({ show: false, resultId: null })}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="p-4 text-foreground">
+              Are you sure you want to delete this team result? This action
+              cannot be undone.
+            </div>
+            <div className="flex justify-end gap-2 p-4 border-t border-border dark:border-border-dark">
+              <button
+                type="button"
+                className="px-4 py-2 rounded-lg text-sm font-medium bg-gray-500 text-white hover:bg-gray-600 transition-colors disabled:opacity-50"
+                onClick={() => setDeleteModal({ show: false, resultId: null })}
+                disabled={deleting}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="px-4 py-2 rounded-lg text-sm font-medium bg-red-500 text-white hover:bg-red-600 transition-colors disabled:opacity-50"
+                onClick={handleDeleteResult}
+                disabled={deleting}
+              >
+                {deleting ? "Deleting..." : "Delete Result"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* View Details Modal */}
+      {viewModal.show && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-card dark:bg-card-dark border border-border dark:border-border-dark rounded-xl shadow-lg w-full max-w-2xl mx-4">
+            <div className="flex items-center justify-between p-4 border-b border-border dark:border-border-dark">
+              <h3 className="text-lg font-semibold text-foreground">
+                Team Result Details
+              </h3>
+              <button
+                type="button"
+                onClick={() => setViewModal({ show: false, result: null })}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="p-4">
+              {viewModal.result && (
+                <table className="w-full text-sm text-foreground border border-border dark:border-border-dark">
+                  <tbody>
+                    <tr className="border-b border-border dark:border-border-dark">
+                      <td className="p-2 font-semibold">Team</td>
+                      <td className="p-2">{viewModal.result.teamName}</td>
+                    </tr>
+                    <tr className="border-b border-border dark:border-border-dark">
+                      <td className="p-2 font-semibold">Money Earned</td>
+                      <td className="p-2">
+                        <span className="rounded-full text-xs font-medium px-2.5 py-0.5 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
+                          ${viewModal.result.money.toLocaleString()}
+                        </span>
+                      </td>
+                    </tr>
+                    <tr className="border-b border-border dark:border-border-dark">
+                      <td className="p-2 font-semibold">Officer</td>
+                      <td className="p-2">{viewModal.result.officer}</td>
+                    </tr>
+                    <tr className="border-b border-border dark:border-border-dark">
+                      <td className="p-2 font-semibold">Date</td>
+                      <td className="p-2">
+                        {new Date(viewModal.result.createdAt).toLocaleString()}
+                      </td>
+                    </tr>
+                    {viewModal.result.notes && (
+                      <tr className="border-b border-border dark:border-border-dark">
+                        <td className="p-2 font-semibold">Notes</td>
+                        <td className="p-2">{viewModal.result.notes}</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              )}
+            </div>
+            <div className="flex justify-end p-4 border-t border-border dark:border-border-dark">
+              <button
+                type="button"
+                className="px-4 py-2 rounded-lg text-sm font-medium bg-gray-500 text-white hover:bg-gray-600 transition-colors"
+                onClick={() => setViewModal({ show: false, result: null })}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <section className="mt-4">
         <EliminatorCard />
       </section>
-    </Container>
+    </div>
   );
 }

@@ -1,36 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  TextField,
-  List,
-  ListItem,
-  Alert,
-  Box,
-  Stack,
-  IconButton,
-  Typography,
-  Divider,
-  Select,
-  MenuItem,
-  Table,
-  TableHead,
-  TableBody,
-  TableRow,
-  TableCell,
-  FormControl,
-} from "@mui/material";
-import {
-  Add as AddIcon,
-  Delete as DeleteIcon,
-  ArrowUpward as ArrowUpwardIcon,
-  ArrowDownward as ArrowDownwardIcon,
-} from "@mui/icons-material";
+import { FiPlus, FiTrash2, FiArrowUp, FiArrowDown } from "react-icons/fi";
+import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { createChecklist, updateChecklist } from "@/lib/services/houseDuties";
 import {
@@ -164,9 +136,13 @@ export default function EditChecklistModal({
     setPeople(newPeople);
   };
 
-  const handleAssignmentChange = (day: string, dutyId: string, personId: string) => {
+  const handleAssignmentChange = (
+    day: string,
+    dutyId: string,
+    personId: string,
+  ) => {
     const existingIndex = assignments.findIndex(
-      (a) => a.day === day && a.dutyId === dutyId
+      (a) => a.day === day && a.dutyId === dutyId,
     );
 
     if (existingIndex >= 0) {
@@ -181,7 +157,9 @@ export default function EditChecklistModal({
   };
 
   const getAssignment = (day: string, dutyId: string): string => {
-    const assignment = assignments.find((a) => a.day === day && a.dutyId === dutyId);
+    const assignment = assignments.find(
+      (a) => a.day === day && a.dutyId === dutyId,
+    );
     return assignment?.personId || "";
   };
 
@@ -242,247 +220,317 @@ export default function EditChecklistModal({
     }
   };
 
+  if (!show) return null;
+
   return (
-    <Dialog open={show} onClose={onHide} maxWidth="xl" fullWidth>
-      <DialogTitle>
-        {checklist ? "Edit" : "Create"} {isTemplate ? "Template" : "Checklist"}
-      </DialogTitle>
-      <DialogContent>
-        {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
-          </Alert>
-        )}
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+      onClick={onHide}
+    >
+      <div
+        className="w-full max-w-5xl max-h-[90vh] flex flex-col bg-card dark:bg-card-dark rounded-2xl shadow-xl border border-border dark:border-border-dark animate-slide-up"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Dialog Title */}
+        <div className="px-6 py-4 border-b border-border dark:border-border-dark">
+          <h2 className="text-xl font-semibold text-foreground dark:text-foreground-dark">
+            {checklist ? "Edit" : "Create"}{" "}
+            {isTemplate ? "Template" : "Checklist"}
+          </h2>
+        </div>
 
-        {/* Basic Info */}
-        <TextField
-          fullWidth
-          required
-          label="Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          sx={{ mb: 3 }}
-        />
+        {/* Dialog Content */}
+        <div className="flex-1 overflow-y-auto px-6 py-4">
+          {error && (
+            <div className="mb-4 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-800 dark:bg-red-900/30 dark:text-red-300">
+              {error}
+            </div>
+          )}
 
-        <TextField
-          fullWidth
-          label="Description (optional)"
-          multiline
-          rows={2}
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          sx={{ mb: 3 }}
-        />
+          {/* Basic Info */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-foreground dark:text-foreground-dark mb-1">
+              Name <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full rounded-lg border border-border dark:border-border-dark bg-card dark:bg-card-dark px-3 py-2 text-sm text-foreground dark:text-foreground-dark placeholder:text-foreground-muted dark:placeholder:text-foreground-dark-muted focus:outline-none focus:ring-2 focus:ring-primary-400"
+              placeholder="Checklist name"
+            />
+          </div>
 
-        <Divider sx={{ mb: 3 }} />
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-foreground dark:text-foreground-dark mb-1">
+              Description (optional)
+            </label>
+            <textarea
+              rows={2}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full rounded-lg border border-border dark:border-border-dark bg-card dark:bg-card-dark px-3 py-2 text-sm text-foreground dark:text-foreground-dark placeholder:text-foreground-muted dark:placeholder:text-foreground-dark-muted focus:outline-none focus:ring-2 focus:ring-primary-400 resize-vertical"
+              placeholder="Optional description"
+            />
+          </div>
 
-        {/* Duties Section */}
-        <Typography variant="h6" sx={{ mb: 2 }}>
-          Duties
-        </Typography>
-        <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
-          <TextField
-            fullWidth
-            label="Duty name"
-            value={newDutyName}
-            onChange={(e) => setNewDutyName(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                addDuty();
-              }
-            }}
-          />
-          <Button
-            onClick={addDuty}
-            variant="contained"
-            startIcon={<AddIcon />}
-            sx={{ whiteSpace: "nowrap" }}
-          >
-            Add Duty
-          </Button>
-        </Stack>
+          <hr className="mb-6 border-border dark:border-border-dark" />
 
-        {duties.length > 0 && (
-          <List sx={{ mb: 3 }}>
-            {duties.map((duty, index) => (
-              <ListItem
-                key={duty.id}
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  border: "1px solid",
-                  borderColor: "divider",
-                  borderRadius: 1,
-                  mb: 1,
-                  bgcolor: "background.paper",
-                }}
-              >
-                <Typography>{duty.name}</Typography>
-                <Stack direction="row" spacing={1}>
-                  <IconButton
-                    size="small"
-                    onClick={() => moveDuty(index, "up")}
-                    disabled={index === 0}
-                  >
-                    <ArrowUpwardIcon />
-                  </IconButton>
-                  <IconButton
-                    size="small"
-                    onClick={() => moveDuty(index, "down")}
-                    disabled={index === duties.length - 1}
-                  >
-                    <ArrowDownwardIcon />
-                  </IconButton>
-                  <IconButton
-                    size="small"
-                    color="error"
-                    onClick={() => removeDuty(duty.id)}
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-                </Stack>
-              </ListItem>
-            ))}
-          </List>
-        )}
+          {/* Duties Section */}
+          <h3 className="text-lg font-semibold text-foreground dark:text-foreground-dark mb-3">
+            Duties
+          </h3>
+          <div className="flex gap-3 mb-3">
+            <input
+              type="text"
+              value={newDutyName}
+              onChange={(e) => setNewDutyName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  addDuty();
+                }
+              }}
+              className="flex-1 rounded-lg border border-border dark:border-border-dark bg-card dark:bg-card-dark px-3 py-2 text-sm text-foreground dark:text-foreground-dark placeholder:text-foreground-muted dark:placeholder:text-foreground-dark-muted focus:outline-none focus:ring-2 focus:ring-primary-400"
+              placeholder="Duty name"
+            />
+            <button
+              type="button"
+              onClick={addDuty}
+              className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 transition-colors"
+            >
+              <FiPlus size={16} />
+              Add Duty
+            </button>
+          </div>
 
-        <Divider sx={{ mb: 3 }} />
+          {duties.length > 0 && (
+            <div className="mb-6 space-y-2">
+              {duties.map((duty, index) => (
+                <div
+                  key={duty.id}
+                  className="flex items-center justify-between rounded-lg border border-border dark:border-border-dark bg-card dark:bg-card-dark px-4 py-2.5"
+                >
+                  <span className="text-sm text-foreground dark:text-foreground-dark">
+                    {duty.name}
+                  </span>
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => moveDuty(index, "up")}
+                      disabled={index === 0}
+                      className={cn(
+                        "rounded p-1.5 transition-colors",
+                        index === 0
+                          ? "text-foreground-muted/40 dark:text-foreground-dark-muted/40 cursor-not-allowed"
+                          : "text-foreground-muted dark:text-foreground-dark-muted hover:bg-surface-200 dark:hover:bg-surface-900",
+                      )}
+                    >
+                      <FiArrowUp size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => moveDuty(index, "down")}
+                      disabled={index === duties.length - 1}
+                      className={cn(
+                        "rounded p-1.5 transition-colors",
+                        index === duties.length - 1
+                          ? "text-foreground-muted/40 dark:text-foreground-dark-muted/40 cursor-not-allowed"
+                          : "text-foreground-muted dark:text-foreground-dark-muted hover:bg-surface-200 dark:hover:bg-surface-900",
+                      )}
+                    >
+                      <FiArrowDown size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => removeDuty(duty.id)}
+                      className="rounded p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
+                    >
+                      <FiTrash2 size={16} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
 
-        {/* People Section */}
-        <Typography variant="h6" sx={{ mb: 2 }}>
-          People
-        </Typography>
-        <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
-          <TextField
-            fullWidth
-            label="Person name"
-            value={newPersonName}
-            onChange={(e) => setNewPersonName(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                addPerson();
-              }
-            }}
-          />
-          <Button
-            onClick={addPerson}
-            variant="contained"
-            startIcon={<AddIcon />}
-            sx={{ whiteSpace: "nowrap" }}
-          >
-            Add Person
-          </Button>
-        </Stack>
+          <hr className="mb-6 border-border dark:border-border-dark" />
 
-        {people.length > 0 && (
-          <List sx={{ mb: 3 }}>
-            {people.map((person, index) => (
-              <ListItem
-                key={person.id}
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  border: "1px solid",
-                  borderColor: "divider",
-                  borderRadius: 1,
-                  mb: 1,
-                  bgcolor: "background.paper",
-                }}
-              >
-                <Typography>{person.name}</Typography>
-                <Stack direction="row" spacing={1}>
-                  <IconButton
-                    size="small"
-                    onClick={() => movePerson(index, "up")}
-                    disabled={index === 0}
-                  >
-                    <ArrowUpwardIcon />
-                  </IconButton>
-                  <IconButton
-                    size="small"
-                    onClick={() => movePerson(index, "down")}
-                    disabled={index === people.length - 1}
-                  >
-                    <ArrowDownwardIcon />
-                  </IconButton>
-                  <IconButton
-                    size="small"
-                    color="error"
-                    onClick={() => removePerson(person.id)}
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-                </Stack>
-              </ListItem>
-            ))}
-          </List>
-        )}
+          {/* People Section */}
+          <h3 className="text-lg font-semibold text-foreground dark:text-foreground-dark mb-3">
+            People
+          </h3>
+          <div className="flex gap-3 mb-3">
+            <input
+              type="text"
+              value={newPersonName}
+              onChange={(e) => setNewPersonName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  addPerson();
+                }
+              }}
+              className="flex-1 rounded-lg border border-border dark:border-border-dark bg-card dark:bg-card-dark px-3 py-2 text-sm text-foreground dark:text-foreground-dark placeholder:text-foreground-muted dark:placeholder:text-foreground-dark-muted focus:outline-none focus:ring-2 focus:ring-primary-400"
+              placeholder="Person name"
+            />
+            <button
+              type="button"
+              onClick={addPerson}
+              className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg bg-primary-500 px-4 py-2 text-sm font-medium text-white hover:bg-primary-600 transition-colors"
+            >
+              <FiPlus size={16} />
+              Add Person
+            </button>
+          </div>
 
-        <Divider sx={{ mb: 3 }} />
+          {people.length > 0 && (
+            <div className="mb-6 space-y-2">
+              {people.map((person, index) => (
+                <div
+                  key={person.id}
+                  className="flex items-center justify-between rounded-lg border border-border dark:border-border-dark bg-card dark:bg-card-dark px-4 py-2.5"
+                >
+                  <span className="text-sm text-foreground dark:text-foreground-dark">
+                    {person.name}
+                  </span>
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => movePerson(index, "up")}
+                      disabled={index === 0}
+                      className={cn(
+                        "rounded p-1.5 transition-colors",
+                        index === 0
+                          ? "text-foreground-muted/40 dark:text-foreground-dark-muted/40 cursor-not-allowed"
+                          : "text-foreground-muted dark:text-foreground-dark-muted hover:bg-surface-200 dark:hover:bg-surface-900",
+                      )}
+                    >
+                      <FiArrowUp size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => movePerson(index, "down")}
+                      disabled={index === people.length - 1}
+                      className={cn(
+                        "rounded p-1.5 transition-colors",
+                        index === people.length - 1
+                          ? "text-foreground-muted/40 dark:text-foreground-dark-muted/40 cursor-not-allowed"
+                          : "text-foreground-muted dark:text-foreground-dark-muted hover:bg-surface-200 dark:hover:bg-surface-900",
+                      )}
+                    >
+                      <FiArrowDown size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => removePerson(person.id)}
+                      className="rounded p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
+                    >
+                      <FiTrash2 size={16} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
 
-        {/* Assignments Grid */}
-        {duties.length > 0 && people.length > 0 && (
-          <>
-            <Typography variant="h6" sx={{ mb: 2 }}>
-              Weekly Assignments
-            </Typography>
-            <Box sx={{ overflowX: "auto" }}>
-              <Table size="small" sx={{ border: "1px solid", borderColor: "divider" }}>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Duty</TableCell>
-                    {DAYS_OF_WEEK.map((day) => (
-                      <TableCell key={day} align="center">
-                        {day.substring(0, 3)}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {duties.map((duty) => (
-                    <TableRow key={duty.id}>
-                      <TableCell>{duty.name}</TableCell>
+          <hr className="mb-6 border-border dark:border-border-dark" />
+
+          {/* Assignments Grid */}
+          {duties.length > 0 && people.length > 0 && (
+            <>
+              <h3 className="text-lg font-semibold text-foreground dark:text-foreground-dark mb-3">
+                Weekly Assignments
+              </h3>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm border border-border dark:border-border-dark">
+                  <thead>
+                    <tr className="bg-surface-100 dark:bg-surface-900">
+                      <th className="text-left px-3 py-2 font-medium text-foreground dark:text-foreground-dark border-b border-border dark:border-border-dark">
+                        Duty
+                      </th>
                       {DAYS_OF_WEEK.map((day) => (
-                        <TableCell key={day} sx={{ p: 0.5 }}>
-                          <FormControl size="small" fullWidth>
-                            <Select
+                        <th
+                          key={day}
+                          className="text-center px-2 py-2 font-medium text-foreground dark:text-foreground-dark border-b border-border dark:border-border-dark"
+                        >
+                          {day.substring(0, 3)}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {duties.map((duty) => (
+                      <tr
+                        key={duty.id}
+                        className="border-b border-border/50 dark:border-border-dark/50 last:border-0"
+                      >
+                        <td className="px-3 py-1.5 text-foreground dark:text-foreground-dark whitespace-nowrap">
+                          {duty.name}
+                        </td>
+                        {DAYS_OF_WEEK.map((day) => (
+                          <td key={day} className="px-1 py-1">
+                            <select
                               value={getAssignment(day, duty.id)}
                               onChange={(e) =>
-                                handleAssignmentChange(day, duty.id, e.target.value)
+                                handleAssignmentChange(
+                                  day,
+                                  duty.id,
+                                  e.target.value,
+                                )
                               }
-                              displayEmpty
                               aria-label={`Assign person for ${duty.name} on ${day}`}
+                              className="w-full rounded border border-border dark:border-border-dark bg-card dark:bg-card-dark px-1.5 py-1 text-xs text-foreground dark:text-foreground-dark focus:outline-none focus:ring-2 focus:ring-primary-400"
                             >
-                              <MenuItem value="">-</MenuItem>
+                              <option value="">-</option>
                               {people.map((person) => (
-                                <MenuItem key={person.id} value={person.id}>
+                                <option key={person.id} value={person.id}>
                                   {person.name}
-                                </MenuItem>
+                                </option>
                               ))}
-                            </Select>
-                          </FormControl>
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Box>
-          </>
-        )}
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onHide} disabled={saving}>
-          Cancel
-        </Button>
-        <Button onClick={handleSave} variant="contained" disabled={saving}>
-          {saving ? "Saving..." : "Save"}
-        </Button>
-      </DialogActions>
-    </Dialog>
+                            </select>
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Dialog Actions */}
+        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-border dark:border-border-dark">
+          <button
+            type="button"
+            onClick={onHide}
+            disabled={saving}
+            className={cn(
+              "rounded-lg px-4 py-2 text-sm font-medium transition-colors",
+              saving
+                ? "text-foreground-muted/50 dark:text-foreground-dark-muted/50 cursor-not-allowed"
+                : "text-foreground dark:text-foreground-dark hover:bg-surface-200 dark:hover:bg-surface-900",
+            )}
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={saving}
+            className={cn(
+              "rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors",
+              saving
+                ? "bg-primary-400 cursor-not-allowed opacity-60"
+                : "bg-primary-500 hover:bg-primary-600",
+            )}
+          >
+            {saving ? "Saving..." : "Save"}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }

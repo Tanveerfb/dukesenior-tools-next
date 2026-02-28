@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Card, Form, Button, Stack, Alert } from "react-bootstrap";
+import { cn } from "@/lib/utils";
 
 interface Player {
   id: string;
@@ -60,17 +60,20 @@ export default function ImmunityAssigner({
   }
 
   return (
-    <Card className="border-0 shadow-sm">
-      <Card.Body>
-        <Card.Title as="h2" className="h6 fw-semibold">
+    <div className="rounded-xl border border-border bg-card dark:bg-card-dark dark:border-border-dark shadow-sm">
+      <div className="p-4">
+        <h2 className="text-sm font-semibold text-foreground">
           Immunity Assigner{roundLabel ? ` — ${roundLabel}` : ""}
-        </Card.Title>
-        <Stack direction="horizontal" gap={3} className="flex-wrap mt-2">
-          <Form.Group>
-            <Form.Label>Active Player</Form.Label>
-            <Form.Select
+        </h2>
+        <div className="flex flex-row flex-wrap items-end gap-3 mt-2">
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1">
+              Active Player
+            </label>
+            <select
               value={selected}
               onChange={(e) => setSelected(e.target.value)}
+              className="rounded-lg border border-border dark:border-border-dark bg-card dark:bg-card-dark text-foreground px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
               <option value="">Select player…</option>
               {players.map((p) => (
@@ -78,28 +81,42 @@ export default function ImmunityAssigner({
                   {p.name} {p.immune ? "(immune)" : ""}
                 </option>
               ))}
-            </Form.Select>
-          </Form.Group>
-          <Button
-            variant="primary"
+            </select>
+          </div>
+          <button
+            type="button"
             onClick={() => assignImmunity(true)}
             disabled={!selected}
+            className={cn(
+              "rounded-lg px-4 py-2 text-sm font-medium transition-colors",
+              "bg-primary-500 text-white hover:bg-primary-600",
+              "disabled:opacity-50 disabled:cursor-not-allowed",
+            )}
           >
             Assign Immunity
-          </Button>
-          <Button
-            variant="outline-danger"
+          </button>
+          <button
+            type="button"
             onClick={() => assignImmunity(false)}
             disabled={!selected}
+            className={cn(
+              "rounded-lg px-4 py-2 text-sm font-medium transition-colors",
+              "border border-red-500 text-red-500 hover:bg-red-500/10",
+              "disabled:opacity-50 disabled:cursor-not-allowed",
+            )}
           >
             Remove Immunity
-          </Button>
-        </Stack>
-        <Alert variant="light" className="mt-3">
+          </button>
+        </div>
+        <div className="mt-3 rounded-lg border border-border dark:border-border-dark bg-gray-50 dark:bg-white/5 px-4 py-3 text-sm text-foreground-secondary">
           Immunity lasts one turn (until end of next elimination).
-        </Alert>
-        {message && <div className="mt-2 text-muted">{message}</div>}
-      </Card.Body>
-    </Card>
+        </div>
+        {message && (
+          <div className="mt-2 text-sm text-foreground-secondary">
+            {message}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

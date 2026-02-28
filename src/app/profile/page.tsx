@@ -1,30 +1,29 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import {
-  Alert,
-  Badge,
-  Button,
-  Card,
-  Col,
-  Container,
-  Form,
-  Image,
-  Row,
-  Spinner,
-  Stack,
-} from "react-bootstrap";
+import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "@/lib/firebase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { getUserByUID, updateUserProfile, type UserDoc } from "@/lib/services/users";
+import {
+  getUserByUID,
+  updateUserProfile,
+  type UserDoc,
+} from "@/lib/services/users";
 
 type Feedback = {
   variant: "success" | "danger" | "info" | "warning";
   message: string;
 };
 
-type PendingAction = "display" | "password" | "avatar" | "banner" | "profile" | "logout" | null;
+type PendingAction =
+  | "display"
+  | "password"
+  | "avatar"
+  | "banner"
+  | "profile"
+  | "logout"
+  | null;
 
 export default function ProfilePage() {
   const {
@@ -223,10 +222,14 @@ export default function ProfilePage() {
     try {
       // Filter out empty social links
       const socialLinks: Record<string, string> = {};
-      if (discordRef.current?.value) socialLinks.discord = discordRef.current.value;
-      if (twitchRef.current?.value) socialLinks.twitch = twitchRef.current.value;
-      if (twitterRef.current?.value) socialLinks.twitter = twitterRef.current.value;
-      if (youtubeRef.current?.value) socialLinks.youtube = youtubeRef.current.value;
+      if (discordRef.current?.value)
+        socialLinks.discord = discordRef.current.value;
+      if (twitchRef.current?.value)
+        socialLinks.twitch = twitchRef.current.value;
+      if (twitterRef.current?.value)
+        socialLinks.twitter = twitterRef.current.value;
+      if (youtubeRef.current?.value)
+        socialLinks.youtube = youtubeRef.current.value;
 
       const updates: Partial<UserDoc> = {
         bio: bioRef.current?.value || "",
@@ -238,7 +241,10 @@ export default function ProfilePage() {
       };
 
       await updateUserProfile(user.uid, updates);
-      setStatus({ variant: "success", message: "Profile updated successfully." });
+      setStatus({
+        variant: "success",
+        message: "Profile updated successfully.",
+      });
       // Reload profile doc
       const doc = await getUserByUID(user.uid);
       setProfileDoc(doc);
@@ -255,28 +261,52 @@ export default function ProfilePage() {
 
   if (authLoading) {
     return (
-      <Container className="py-5 text-center">
-        <Spinner animation="border" />
-      </Container>
+      <div className="max-w-7xl mx-auto px-4 py-10 text-center">
+        <svg
+          className="animate-spin h-6 w-6 mx-auto text-primary-500"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            className="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="4"
+          />
+          <path
+            className="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+          />
+        </svg>
+      </div>
     );
   }
 
   if (!user) {
     return (
-      <Container className="py-5">
-        <Card className="shadow-sm text-center">
-          <Card.Body>
-            <Card.Title>Sign in to manage your profile</Card.Title>
-            <Card.Text className="text-muted">
+      <div className="max-w-7xl mx-auto px-4 py-10">
+        <div className="rounded-xl border border-border bg-card dark:bg-card-dark dark:border-border-dark shadow-sm text-center">
+          <div className="p-6">
+            <h5 className="text-lg font-semibold mb-2">
+              Sign in to manage your profile
+            </h5>
+            <p className="text-foreground-secondary mb-4">
               Access profile settings, update your details, and manage security
               once you are logged in.
-            </Card.Text>
-            <Button variant="primary" onClick={() => router.push("/login")}>
+            </p>
+            <button
+              onClick={() => router.push("/login")}
+              className="rounded-lg bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 text-sm font-medium transition-colors"
+            >
               Log in
-            </Button>
-          </Card.Body>
-        </Card>
-      </Container>
+            </button>
+          </div>
+        </div>
+      </div>
     );
   }
 
@@ -296,112 +326,189 @@ export default function ProfilePage() {
   const initial = (displayName || emailAddress || "U").charAt(0).toUpperCase();
 
   return (
-    <Container className="py-4">
-      <Stack gap={3} className="mb-3">
+    <div className="max-w-7xl mx-auto px-4 py-4">
+      <div className="flex flex-col gap-3 mb-3">
         {status && (
-          <Alert
-            variant={status.variant}
-            dismissible
-            onClose={() => setStatus(null)}
-            className="mb-0"
+          <div
+            className={cn(
+              "rounded-lg border px-4 py-3",
+              status.variant === "success" &&
+                "border-green-300 bg-green-50 text-green-800 dark:border-green-700 dark:bg-green-900/30 dark:text-green-300",
+              status.variant === "danger" &&
+                "border-red-300 bg-red-50 text-red-800 dark:border-red-700 dark:bg-red-900/30 dark:text-red-300",
+              status.variant === "warning" &&
+                "border-yellow-300 bg-yellow-50 text-yellow-800 dark:border-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300",
+              status.variant === "info" &&
+                "border-blue-300 bg-blue-50 text-blue-800 dark:border-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
+            )}
           >
-            {status.message}
-          </Alert>
+            <div className="flex justify-between items-start">
+              <span>{status.message}</span>
+              <button
+                onClick={() => setStatus(null)}
+                className="ml-2 text-current opacity-70 hover:opacity-100"
+              >
+                &times;
+              </button>
+            </div>
+          </div>
         )}
-      </Stack>
-      <Row className="g-4">
-        <Col lg={5}>
-          <Card className="shadow-sm h-100">
-            <Card.Body>
-              <Stack gap={3}>
-                <Stack
-                  direction="horizontal"
-                  gap={3}
-                  className="align-items-center"
-                >
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <div className="lg:col-span-5">
+          <div className="rounded-xl border border-border bg-card dark:bg-card-dark dark:border-border-dark shadow-sm h-full">
+            <div className="p-4">
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center gap-3">
                   {avatarUrl ? (
-                    <Image
+                    <img
                       src={avatarUrl}
                       alt="Profile picture"
-                      roundedCircle
+                      className="rounded-full object-cover"
                       width={88}
                       height={88}
                     />
                   ) : (
                     <div
-                      className="bg-body-secondary text-secondary d-flex align-items-center justify-content-center rounded-circle"
+                      className="bg-gray-200 dark:bg-gray-700 text-foreground-secondary flex items-center justify-center rounded-full"
                       style={{ width: 88, height: 88, fontSize: "1.75rem" }}
                     >
                       {initial}
                     </div>
                   )}
                   <div>
-                    <h2 className="h5 mb-1">{displayName || "Your profile"}</h2>
-                    <div className="text-muted small">{emailAddress}</div>
-                    <div className="mt-2 d-flex align-items-center gap-2">
-                      <Badge bg={user.emailVerified ? "success" : "warning"}>
+                    <h2 className="text-lg font-semibold mb-1">
+                      {displayName || "Your profile"}
+                    </h2>
+                    <div className="text-foreground-secondary text-sm">
+                      {emailAddress}
+                    </div>
+                    <div className="mt-2 flex items-center gap-2">
+                      <span
+                        className={cn(
+                          "rounded-full text-xs font-medium px-2.5 py-0.5",
+                          user.emailVerified
+                            ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                            : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
+                        )}
+                      >
                         {user.emailVerified
                           ? "Email verified"
                           : "Email not verified"}
-                      </Badge>
+                      </span>
                     </div>
                   </div>
-                </Stack>
+                </div>
 
-                <Form>
-                  <Form.Group className="mb-3" controlId="displayName">
-                    <Form.Label>Display name</Form.Label>
-                    <Stack direction="horizontal" gap={2} className="flex-wrap">
-                      <Form.Control
+                <form>
+                  <div className="mb-3">
+                    <label
+                      htmlFor="displayName"
+                      className="block text-sm font-medium text-foreground mb-1"
+                    >
+                      Display name
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      <input
                         type="text"
+                        id="displayName"
                         ref={displayNameRef}
                         placeholder={displayName || "Add a name"}
                         maxLength={64}
                         aria-label="Display name"
+                        className="flex-1 rounded-lg border border-border dark:border-border-dark bg-background dark:bg-background-dark text-foreground px-3 py-2 text-sm"
                       />
-                      <Button
+                      <button
+                        type="button"
                         onClick={handleDisplayNameUpdate}
                         disabled={pending === "display"}
+                        className="rounded-lg bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50"
                       >
                         {pending === "display" ? (
-                          <Spinner animation="border" size="sm" />
+                          <svg
+                            className="animate-spin h-4 w-4"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            />
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                            />
+                          </svg>
                         ) : (
                           "Save"
                         )}
-                      </Button>
-                    </Stack>
-                    <Form.Text className="text-muted">
+                      </button>
+                    </div>
+                    <p className="text-xs text-foreground-secondary mt-1">
                       This name appears across tools and community features.
-                    </Form.Text>
-                  </Form.Group>
+                    </p>
+                  </div>
 
-                  <Form.Group controlId="avatarUpload">
-                    <Form.Label>Profile picture</Form.Label>
-                    <Stack direction="horizontal" gap={2} className="flex-wrap">
-                      <Form.Control
+                  <div>
+                    <label
+                      htmlFor="avatarUpload"
+                      className="block text-sm font-medium text-foreground mb-1"
+                    >
+                      Profile picture
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      <input
                         type="file"
+                        id="avatarUpload"
                         accept="image/*"
                         ref={fileRef}
+                        className="flex-1 text-sm text-foreground file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-primary-500 file:text-white hover:file:bg-primary-600 bg-background dark:bg-background-dark border border-border dark:border-border-dark rounded-lg"
                       />
-                      <Button
-                        variant="secondary"
+                      <button
+                        type="button"
                         onClick={handleAvatarUpload}
                         disabled={pending === "avatar"}
+                        className="rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-foreground px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50"
                       >
                         {pending === "avatar" ? (
-                          <Spinner animation="border" size="sm" />
+                          <svg
+                            className="animate-spin h-4 w-4"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            />
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                            />
+                          </svg>
                         ) : (
                           "Upload"
                         )}
-                      </Button>
-                    </Stack>
-                    <Form.Text className="text-muted">
+                      </button>
+                    </div>
+                    <p className="text-xs text-foreground-secondary mt-1">
                       Use a square JPG or PNG (2&nbsp;MB max recommended).
-                    </Form.Text>
-                  </Form.Group>
-                </Form>
+                    </p>
+                  </div>
+                </form>
 
-                <div className="pt-2 border-top small text-muted">
+                <div className="pt-2 border-t border-border dark:border-border-dark text-sm text-foreground-secondary">
                   {joinedAt && <div>Joined {joinedAt}</div>}
                   {lastSeen && <div>Last seen {lastSeen}</div>}
                   {!profileDoc?.username && (
@@ -411,243 +518,406 @@ export default function ProfilePage() {
                     </div>
                   )}
                 </div>
-              </Stack>
-            </Card.Body>
-          </Card>
-        </Col>
+              </div>
+            </div>
+          </div>
+        </div>
 
-        <Col lg={7}>
-          <Stack gap={3}>
+        <div className="lg:col-span-7">
+          <div className="flex flex-col gap-3">
             {/* Banner Upload Card */}
-            <Card className="shadow-sm">
-              <Card.Body>
-                <Card.Title className="h6 mb-3">Profile Banner</Card.Title>
+            <div className="rounded-xl border border-border bg-card dark:bg-card-dark dark:border-border-dark shadow-sm">
+              <div className="p-4">
+                <h6 className="text-sm font-semibold mb-3">Profile Banner</h6>
                 {profileDoc?.bannerURL && (
-                  <div className="mb-3" style={{ height: 120, overflow: "hidden", borderRadius: 8 }}>
-                    <Image
+                  <div
+                    className="mb-3 overflow-hidden rounded-lg"
+                    style={{ height: 120 }}
+                  >
+                    <img
                       src={profileDoc.bannerURL}
                       alt="Current banner"
-                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                      className="w-full h-full object-cover"
                     />
                   </div>
                 )}
-                <Form.Group controlId="bannerUpload">
-                  <Form.Label>Upload Banner (1500x500px recommended)</Form.Label>
-                  <Stack direction="horizontal" gap={2} className="flex-wrap">
-                    <Form.Control
+                <div>
+                  <label
+                    htmlFor="bannerUpload"
+                    className="block text-sm font-medium text-foreground mb-1"
+                  >
+                    Upload Banner (1500x500px recommended)
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    <input
                       type="file"
+                      id="bannerUpload"
                       accept="image/*"
                       ref={bannerFileRef}
+                      className="flex-1 text-sm text-foreground file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-primary-500 file:text-white hover:file:bg-primary-600 bg-background dark:bg-background-dark border border-border dark:border-border-dark rounded-lg"
                     />
-                    <Button
-                      variant="secondary"
+                    <button
+                      type="button"
                       onClick={handleBannerUpload}
                       disabled={pending === "banner"}
+                      className="rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-foreground px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50"
                     >
                       {pending === "banner" ? (
-                        <Spinner animation="border" size="sm" />
+                        <svg
+                          className="animate-spin h-4 w-4"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          />
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                          />
+                        </svg>
                       ) : (
                         "Upload Banner"
                       )}
-                    </Button>
-                  </Stack>
-                  <Form.Text className="text-muted">
-                    JPG, PNG, or WebP (5&nbsp;MB max). Will use gradient fallback if not set.
-                  </Form.Text>
-                </Form.Group>
-              </Card.Body>
-            </Card>
+                    </button>
+                  </div>
+                  <p className="text-xs text-foreground-secondary mt-1">
+                    JPG, PNG, or WebP (5&nbsp;MB max). Will use gradient
+                    fallback if not set.
+                  </p>
+                </div>
+              </div>
+            </div>
 
             {/* Profile Details Card */}
-            <Card className="shadow-sm">
-              <Card.Body>
-                <Card.Title className="h6 mb-3">Profile Details</Card.Title>
-                <Form>
-                  <Form.Group className="mb-3" controlId="bio">
-                    <Form.Label>Bio</Form.Label>
-                    <Form.Control
-                      as="textarea"
+            <div className="rounded-xl border border-border bg-card dark:bg-card-dark dark:border-border-dark shadow-sm">
+              <div className="p-4">
+                <h6 className="text-sm font-semibold mb-3">Profile Details</h6>
+                <form>
+                  <div className="mb-3">
+                    <label
+                      htmlFor="bio"
+                      className="block text-sm font-medium text-foreground mb-1"
+                    >
+                      Bio
+                    </label>
+                    <textarea
+                      id="bio"
                       rows={3}
                       ref={bioRef}
                       defaultValue={profileDoc?.bio || ""}
                       placeholder="Tell us about yourself..."
                       maxLength={500}
+                      className="block w-full rounded-lg border border-border dark:border-border-dark bg-background dark:bg-background-dark text-foreground px-3 py-2 text-sm"
                     />
-                  </Form.Group>
+                  </div>
 
-                  <Form.Group className="mb-3" controlId="pronouns">
-                    <Form.Label>Pronouns</Form.Label>
-                    <Form.Control
+                  <div className="mb-3">
+                    <label
+                      htmlFor="pronouns"
+                      className="block text-sm font-medium text-foreground mb-1"
+                    >
+                      Pronouns
+                    </label>
+                    <input
                       type="text"
+                      id="pronouns"
                       ref={pronounsRef}
                       defaultValue={profileDoc?.pronouns || ""}
                       placeholder="e.g., he/him, she/her, they/them"
                       maxLength={50}
+                      className="block w-full rounded-lg border border-border dark:border-border-dark bg-background dark:bg-background-dark text-foreground px-3 py-2 text-sm"
                     />
-                  </Form.Group>
+                  </div>
 
-                  <Row className="mb-3">
-                    <Col md={6}>
-                      <Form.Group controlId="location">
-                        <Form.Label>Location</Form.Label>
-                        <Form.Control
-                          type="text"
-                          ref={locationRef}
-                          defaultValue={profileDoc?.location || ""}
-                          placeholder="e.g., San Francisco, CA"
-                          maxLength={100}
-                        />
-                      </Form.Group>
-                    </Col>
-                    <Col md={6}>
-                      <Form.Group controlId="timezone">
-                        <Form.Label>Timezone</Form.Label>
-                        <Form.Control
-                          type="text"
-                          ref={timezoneRef}
-                          defaultValue={profileDoc?.timezone || ""}
-                          placeholder="e.g., America/Los_Angeles"
-                          maxLength={100}
-                        />
-                      </Form.Group>
-                    </Col>
-                  </Row>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                    <div>
+                      <label
+                        htmlFor="location"
+                        className="block text-sm font-medium text-foreground mb-1"
+                      >
+                        Location
+                      </label>
+                      <input
+                        type="text"
+                        id="location"
+                        ref={locationRef}
+                        defaultValue={profileDoc?.location || ""}
+                        placeholder="e.g., San Francisco, CA"
+                        maxLength={100}
+                        className="block w-full rounded-lg border border-border dark:border-border-dark bg-background dark:bg-background-dark text-foreground px-3 py-2 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label
+                        htmlFor="timezone"
+                        className="block text-sm font-medium text-foreground mb-1"
+                      >
+                        Timezone
+                      </label>
+                      <input
+                        type="text"
+                        id="timezone"
+                        ref={timezoneRef}
+                        defaultValue={profileDoc?.timezone || ""}
+                        placeholder="e.g., America/Los_Angeles"
+                        maxLength={100}
+                        className="block w-full rounded-lg border border-border dark:border-border-dark bg-background dark:bg-background-dark text-foreground px-3 py-2 text-sm"
+                      />
+                    </div>
+                  </div>
 
-                  <Form.Group className="mb-3" controlId="accentColor">
-                    <Form.Label>Accent Color</Form.Label>
-                    <div className="d-flex gap-2 align-items-center">
-                      <Form.Control
+                  <div className="mb-3">
+                    <label
+                      htmlFor="accentColor"
+                      className="block text-sm font-medium text-foreground mb-1"
+                    >
+                      Accent Color
+                    </label>
+                    <div className="flex gap-2 items-center">
+                      <input
                         type="color"
+                        id="accentColor"
                         ref={accentColorRef}
                         defaultValue={profileDoc?.accentColor || "#5865F2"}
+                        className="border border-border dark:border-border-dark rounded"
                         style={{ width: 60, height: 38 }}
                       />
-                      <Form.Text className="text-muted">
+                      <span className="text-xs text-foreground-secondary">
                         Choose a color for your profile borders and badges
-                      </Form.Text>
+                      </span>
                     </div>
-                  </Form.Group>
+                  </div>
 
-                  <Card.Subtitle className="h6 mb-3 mt-4">Social Links</Card.Subtitle>
+                  <h6 className="text-sm font-semibold mb-3 mt-4">
+                    Social Links
+                  </h6>
 
-                  <Form.Group className="mb-3" controlId="discord">
-                    <Form.Label>Discord</Form.Label>
-                    <Form.Control
+                  <div className="mb-3">
+                    <label
+                      htmlFor="discord"
+                      className="block text-sm font-medium text-foreground mb-1"
+                    >
+                      Discord
+                    </label>
+                    <input
                       type="url"
+                      id="discord"
                       ref={discordRef}
                       defaultValue={profileDoc?.socialLinks?.discord || ""}
                       placeholder="https://discord.gg/..."
+                      className="block w-full rounded-lg border border-border dark:border-border-dark bg-background dark:bg-background-dark text-foreground px-3 py-2 text-sm"
                     />
-                  </Form.Group>
+                  </div>
 
-                  <Form.Group className="mb-3" controlId="twitch">
-                    <Form.Label>Twitch</Form.Label>
-                    <Form.Control
+                  <div className="mb-3">
+                    <label
+                      htmlFor="twitch"
+                      className="block text-sm font-medium text-foreground mb-1"
+                    >
+                      Twitch
+                    </label>
+                    <input
                       type="url"
+                      id="twitch"
                       ref={twitchRef}
                       defaultValue={profileDoc?.socialLinks?.twitch || ""}
                       placeholder="https://twitch.tv/..."
+                      className="block w-full rounded-lg border border-border dark:border-border-dark bg-background dark:bg-background-dark text-foreground px-3 py-2 text-sm"
                     />
-                  </Form.Group>
+                  </div>
 
-                  <Form.Group className="mb-3" controlId="twitter">
-                    <Form.Label>Twitter/X</Form.Label>
-                    <Form.Control
+                  <div className="mb-3">
+                    <label
+                      htmlFor="twitter"
+                      className="block text-sm font-medium text-foreground mb-1"
+                    >
+                      Twitter/X
+                    </label>
+                    <input
                       type="url"
+                      id="twitter"
                       ref={twitterRef}
                       defaultValue={profileDoc?.socialLinks?.twitter || ""}
                       placeholder="https://twitter.com/..."
+                      className="block w-full rounded-lg border border-border dark:border-border-dark bg-background dark:bg-background-dark text-foreground px-3 py-2 text-sm"
                     />
-                  </Form.Group>
+                  </div>
 
-                  <Form.Group className="mb-3" controlId="youtube">
-                    <Form.Label>YouTube</Form.Label>
-                    <Form.Control
+                  <div className="mb-3">
+                    <label
+                      htmlFor="youtube"
+                      className="block text-sm font-medium text-foreground mb-1"
+                    >
+                      YouTube
+                    </label>
+                    <input
                       type="url"
+                      id="youtube"
                       ref={youtubeRef}
                       defaultValue={profileDoc?.socialLinks?.youtube || ""}
                       placeholder="https://youtube.com/@..."
+                      className="block w-full rounded-lg border border-border dark:border-border-dark bg-background dark:bg-background-dark text-foreground px-3 py-2 text-sm"
                     />
-                  </Form.Group>
+                  </div>
 
-                  <div className="d-grid">
-                    <Button
-                      variant="primary"
-                      size="lg"
+                  <div>
+                    <button
+                      type="button"
                       onClick={handleProfileUpdate}
                       disabled={pending === "profile"}
+                      className="w-full rounded-lg bg-primary-500 hover:bg-primary-600 text-white px-4 py-3 text-base font-medium transition-colors disabled:opacity-50"
                     >
                       {pending === "profile" ? (
-                        <Spinner animation="border" size="sm" />
+                        <svg
+                          className="animate-spin h-5 w-5 mx-auto"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          />
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                          />
+                        </svg>
                       ) : (
                         "Save Profile Changes"
                       )}
-                    </Button>
+                    </button>
                   </div>
-                </Form>
-              </Card.Body>
-            </Card>
+                </form>
+              </div>
+            </div>
 
-            <Card className="shadow-sm">
-              <Card.Body>
-                <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3">
+            <div className="rounded-xl border border-border bg-card dark:bg-card-dark dark:border-border-dark shadow-sm">
+              <div className="p-4">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
                   <div>
-                    <Card.Title className="h6 mb-1">
+                    <h6 className="text-sm font-semibold mb-1">
                       Account security
-                    </Card.Title>
-                    <Card.Text className="text-muted small mb-0">
+                    </h6>
+                    <p className="text-foreground-secondary text-sm mb-0">
                       Send a password reset link to your email address.
-                    </Card.Text>
+                    </p>
                   </div>
-                  <Button
-                    variant="outline-primary"
+                  <button
+                    type="button"
                     onClick={handlePasswordReset}
                     disabled={pending === "password"}
+                    className="rounded-lg border border-primary-500 text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20 px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50 whitespace-nowrap"
                   >
                     {pending === "password" ? (
-                      <Spinner animation="border" size="sm" />
+                      <svg
+                        className="animate-spin h-4 w-4"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        />
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                        />
+                      </svg>
                     ) : (
                       "Send reset email"
                     )}
-                  </Button>
+                  </button>
                 </div>
                 {passwordStatus && (
-                  <Alert
-                    variant={passwordStatus.variant}
-                    dismissible
-                    onClose={() => setPasswordStatus(null)}
-                    className="mt-3 mb-0"
+                  <div
+                    className={cn(
+                      "mt-3 rounded-lg border px-4 py-3",
+                      passwordStatus.variant === "success" &&
+                        "border-green-300 bg-green-50 text-green-800 dark:border-green-700 dark:bg-green-900/30 dark:text-green-300",
+                      passwordStatus.variant === "danger" &&
+                        "border-red-300 bg-red-50 text-red-800 dark:border-red-700 dark:bg-red-900/30 dark:text-red-300",
+                      passwordStatus.variant === "warning" &&
+                        "border-yellow-300 bg-yellow-50 text-yellow-800 dark:border-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300",
+                    )}
                   >
-                    {passwordStatus.message}
-                  </Alert>
+                    <div className="flex justify-between items-start">
+                      <span>{passwordStatus.message}</span>
+                      <button
+                        onClick={() => setPasswordStatus(null)}
+                        className="ml-2 text-current opacity-70 hover:opacity-100"
+                      >
+                        &times;
+                      </button>
+                    </div>
+                  </div>
                 )}
-              </Card.Body>
-            </Card>
+              </div>
+            </div>
 
-            <Card className="shadow-sm">
-              <Card.Body className="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3">
+            <div className="rounded-xl border border-border bg-card dark:bg-card-dark dark:border-border-dark shadow-sm">
+              <div className="p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
                 <div>
-                  <Card.Title className="h6 mb-1">Sign out</Card.Title>
-                  <Card.Text className="text-muted small mb-0">
+                  <h6 className="text-sm font-semibold mb-1">Sign out</h6>
+                  <p className="text-foreground-secondary text-sm mb-0">
                     Log out of The Lair of Evil on this device.
-                  </Card.Text>
+                  </p>
                 </div>
-                <Button
-                  variant="outline-danger"
+                <button
+                  type="button"
                   onClick={handleLogout}
                   disabled={pending === "logout"}
+                  className="rounded-lg border border-red-500 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50 whitespace-nowrap"
                 >
                   {pending === "logout" ? (
-                    <Spinner animation="border" size="sm" />
+                    <svg
+                      className="animate-spin h-4 w-4"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                      />
+                    </svg>
                   ) : (
                     "Log out"
                   )}
-                </Button>
-              </Card.Body>
-            </Card>
-          </Stack>
-        </Col>
-      </Row>
-    </Container>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

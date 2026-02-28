@@ -1,9 +1,9 @@
 "use client";
 import { useMemo, useState } from "react";
-import { Badge, Card, Col, Form, Modal, Row, Tab, Tabs } from "react-bootstrap";
 import TourneyPage from "@/components/tourney/TourneyPage";
 import { buildTourneyBreadcrumbs } from "@/lib/navigation/tourneyBreadcrumbs";
 import matchesData from "@/data/phasmoTourney4Matches.json";
+import { cn } from "@/lib/utils";
 
 interface MatchJSON {
   match: number;
@@ -31,8 +31,8 @@ function StaticMatchCard({
     (m.score1 > m.score2
       ? m.player1
       : m.score2 > m.score1
-      ? m.player2
-      : undefined);
+        ? m.player2
+        : undefined);
   let summary: string;
   if (m.winner && m.match === 10 && m.bracket === "Playoffs") {
     summary = `Champion: ${m.winner}`;
@@ -44,58 +44,66 @@ function StaticMatchCard({
     summary = "Result pending migration";
   }
   return (
-    <Card
-      className="mb-2 shadow-sm match-card"
+    <div
+      className="mb-2 rounded-xl border border-border bg-card dark:bg-card-dark dark:border-border-dark shadow-sm cursor-pointer hover:ring-2 hover:ring-primary transition-shadow"
       role="button"
       onClick={onClick}
       aria-label={`Match ${m.match} ${m.player1} versus ${m.player2} ${summary}`}
     >
-      <Card.Body className="py-2">
-        <div className="d-flex justify-content-between align-items-start mb-1">
-          <span className="small text-secondary">Match {m.match}</span>
+      <div className="py-2 px-3">
+        <div className="flex justify-between items-start mb-1">
+          <span className="text-sm text-foreground-muted">Match {m.match}</span>
           {m.bracket === "Playoffs" && (
-            <Badge bg="warning" text="dark">
+            <span className="rounded-full text-xs font-medium px-2.5 py-0.5 bg-warning text-gray-900">
               Playoffs
-            </Badge>
+            </span>
           )}
         </div>
-        <div className="d-flex flex-column gap-1">
-          <div className="d-flex justify-content-between align-items-center">
+        <div className="flex flex-col gap-1">
+          <div className="flex justify-between items-center">
             <span
-              className={`fw-semibold ${
-                resolvedWinner === m.player1 && !isTie ? "text-success" : ""
-              }`}
+              className={cn(
+                "font-semibold",
+                resolvedWinner === m.player1 && !isTie && "text-success",
+              )}
             >
               {m.player1}
             </span>
-            <Badge
-              bg={
-                resolvedWinner === m.player1 && !isTie ? "success" : "secondary"
-              }
+            <span
+              className={cn(
+                "rounded-full text-xs font-medium px-2.5 py-0.5 text-white",
+                resolvedWinner === m.player1 && !isTie
+                  ? "bg-success"
+                  : "bg-secondary",
+              )}
             >
               {m.score1}
-            </Badge>
+            </span>
           </div>
-          <div className="d-flex justify-content-between align-items-center">
+          <div className="flex justify-between items-center">
             <span
-              className={`fw-semibold ${
-                resolvedWinner === m.player2 && !isTie ? "text-success" : ""
-              }`}
+              className={cn(
+                "font-semibold",
+                resolvedWinner === m.player2 && !isTie && "text-success",
+              )}
             >
               {m.player2}
             </span>
-            <Badge
-              bg={
-                resolvedWinner === m.player2 && !isTie ? "success" : "secondary"
-              }
+            <span
+              className={cn(
+                "rounded-full text-xs font-medium px-2.5 py-0.5 text-white",
+                resolvedWinner === m.player2 && !isTie
+                  ? "bg-success"
+                  : "bg-secondary",
+              )}
             >
               {m.score2}
-            </Badge>
+            </span>
           </div>
         </div>
-        <div className="mt-2 small text-muted">{summary}</div>
-      </Card.Body>
-    </Card>
+        <div className="mt-2 text-sm text-foreground-muted">{summary}</div>
+      </div>
+    </div>
   );
 }
 
@@ -125,7 +133,7 @@ export default function Tourney4BracketGroupedPage() {
         m.player1.toLowerCase().includes(term) ||
         m.player2.toLowerCase().includes(term) ||
         `${m.match}`.includes(term) ||
-        m.bracket.toLowerCase().includes(term)
+        m.bracket.toLowerCase().includes(term),
     );
   }
 
@@ -137,60 +145,99 @@ export default function Tourney4BracketGroupedPage() {
     { label: "Brackets & Playoffs" },
   ]);
 
+  const tabs = [
+    { key: "b1" as const, label: `Bracket 1 (${b1.length})` },
+    { key: "b2" as const, label: `Bracket 2 (${b2.length})` },
+    { key: "playoffs" as const, label: `Playoffs (${playoffs.length})` },
+  ];
+
   return (
     <TourneyPage
       title="Phasmo Tourney 4"
       subtitle="Browse the full bracket archive, including both pools and the playoff gauntlet."
       breadcrumbs={breadcrumbs}
       badges={[{ label: "Archive" }, { label: "Bracket" }]}
-      containerProps={{ fluid: true, className: "py-3" }}
+      containerProps={{ className: "py-3" }}
       extraHeader={
-        <div className="text-muted small">
+        <div className="text-foreground-muted text-sm">
           Static import from the 2023 sheet. Results kept for historical
           reference.
         </div>
       }
     >
-      <h2 className="h4 mb-3">Brackets & Playoffs</h2>
-      <Form className="mb-3">
-        <Form.Control
+      <h2 className="text-xl font-semibold mb-3">Brackets & Playoffs</h2>
+
+      {/* Search */}
+      <div className="mb-3">
+        <input
+          type="text"
+          className="w-full rounded-lg border border-border dark:border-border-dark bg-card dark:bg-card-dark px-3 py-2 text-sm text-foreground dark:text-foreground-dark placeholder:text-foreground-muted focus:outline-none focus:ring-2 focus:ring-primary"
           placeholder="Search players, match #, stage..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           aria-label="Search matches"
         />
-      </Form>
-      <Tabs
-        activeKey={active}
-        onSelect={(k) => setActive(k as any)}
-        className="mb-3"
-      >
-        <Tab eventKey="b1" title={`Bracket 1 (${b1.length})`} />
-        <Tab eventKey="b2" title={`Bracket 2 (${b2.length})`} />
-        <Tab eventKey="playoffs" title={`Playoffs (${playoffs.length})`} />
-      </Tabs>
-      <Row xs={1} sm={2} md={3} lg={4} xl={5} className="g-2">
+      </div>
+
+      {/* Tabs */}
+      <div className="flex border-b border-border dark:border-border-dark mb-3">
+        {tabs.map((tab) => (
+          <button
+            key={tab.key}
+            className={cn(
+              "px-4 py-2 text-sm font-medium transition-colors -mb-px",
+              active === tab.key
+                ? "border-b-2 border-primary text-primary"
+                : "text-foreground-muted hover:text-foreground dark:hover:text-foreground-dark",
+            )}
+            onClick={() => setActive(tab.key)}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Card grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
         {filtered.map((m) => (
-          <Col key={`${m.bracket}-${m.match}`}>
-            <StaticMatchCard m={m} onClick={() => setModalMatch(m)} />
-          </Col>
+          <StaticMatchCard
+            key={`${m.bracket}-${m.match}`}
+            m={m}
+            onClick={() => setModalMatch(m)}
+          />
         ))}
         {filtered.length === 0 && (
-          <Col>
-            <div className="text-muted fst-italic">No matches found.</div>
-          </Col>
+          <div className="text-foreground-muted italic">No matches found.</div>
         )}
-      </Row>
-      <Modal show={!!modalMatch} onHide={() => setModalMatch(null)} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>
-            Match {modalMatch?.match} – {modalMatch?.player1} vs{" "}
-            {modalMatch?.player2}
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {modalMatch && (
-            <div>
+      </div>
+
+      {/* Modal */}
+      {modalMatch && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          onClick={() => setModalMatch(null)}
+        >
+          {/* Backdrop */}
+          <div className="absolute inset-0 bg-black/50" />
+          {/* Dialog */}
+          <div
+            className="relative z-10 w-full max-w-md mx-4 rounded-xl border border-border bg-card dark:bg-card-dark dark:border-border-dark shadow-soft-lg"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-4 py-3 border-b border-border dark:border-border-dark">
+              <h3 className="text-base font-semibold">
+                Match {modalMatch.match} – {modalMatch.player1} vs{" "}
+                {modalMatch.player2}
+              </h3>
+              <button
+                className="text-foreground-muted hover:text-foreground dark:hover:text-foreground-dark transition-colors text-xl leading-none"
+                onClick={() => setModalMatch(null)}
+                aria-label="Close"
+              >
+                ×
+              </button>
+            </div>
+            <div className="px-4 py-3">
               <p className="mb-1">
                 <strong>Bracket:</strong> {modalMatch.bracket}
               </p>
@@ -198,33 +245,30 @@ export default function Tourney4BracketGroupedPage() {
                 <strong>Scoreline:</strong> {modalMatch.player1}{" "}
                 {modalMatch.score1} – {modalMatch.score2} {modalMatch.player2}
               </p>
-              {modalMatch.score1 === modalMatch.score2 &&
-                !modalMatch.winner && (
-                  <Badge bg="dark" className="me-2">
-                    Tie
-                  </Badge>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {modalMatch.score1 === modalMatch.score2 &&
+                  !modalMatch.winner && (
+                    <span className="rounded-full text-xs font-medium px-2.5 py-0.5 bg-gray-800 text-white">
+                      Tie
+                    </span>
+                  )}
+                {modalMatch.winner && (
+                  <span className="rounded-full text-xs font-medium px-2.5 py-0.5 bg-success text-white">
+                    Winner: {modalMatch.winner}
+                  </span>
                 )}
-              {modalMatch.winner && (
-                <Badge bg="success" className="me-2">
-                  Winner: {modalMatch.winner}
-                </Badge>
-              )}
-              {modalMatch.winner &&
-                modalMatch.match === 10 &&
-                modalMatch.bracket === "Playoffs" && (
-                  <Badge bg="warning" text="dark">
-                    Champion
-                  </Badge>
-                )}
+                {modalMatch.winner &&
+                  modalMatch.match === 10 &&
+                  modalMatch.bracket === "Playoffs" && (
+                    <span className="rounded-full text-xs font-medium px-2.5 py-0.5 bg-warning text-gray-900">
+                      Champion
+                    </span>
+                  )}
+              </div>
             </div>
-          )}
-        </Modal.Body>
-      </Modal>
-      <style jsx global>{`
-        .match-card:hover {
-          outline: 2px solid var(--bs-primary);
-        }
-      `}</style>
+          </div>
+        </div>
+      )}
     </TourneyPage>
   );
 }

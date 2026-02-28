@@ -1,6 +1,5 @@
 "use client";
 import React, { useState } from "react";
-import { Card, Form } from "react-bootstrap";
 import GameSettingsCard from "./GameSettingsCard";
 
 const ROUND_IDS = [
@@ -23,26 +22,26 @@ export default function RoundSettingsViewer({
   const [roundId, setRoundId] =
     useState<(typeof ROUND_IDS)[number]>(initialRoundId);
   return (
-    <Card className="mb-3">
-      <Card.Header className="d-flex align-items-center justify-content-between">
-        <strong>Game Settings</strong>
-        <Form.Select
+    <div className="rounded-xl border border-border bg-card dark:bg-card-dark dark:border-border-dark shadow-sm mb-3">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border dark:border-border-dark">
+        <strong className="text-foreground">Game Settings</strong>
+        <select
           value={roundId}
           onChange={(e) =>
             setRoundId(e.target.value as (typeof ROUND_IDS)[number])
           }
-          style={{ maxWidth: 180 }}
+          className="max-w-[180px] rounded-lg border border-border dark:border-border-dark bg-card dark:bg-card-dark text-foreground px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
         >
           {ROUND_IDS.map((r) => (
             <option key={r} value={r}>
               {r.toUpperCase()}
             </option>
           ))}
-        </Form.Select>
-      </Card.Header>
-      <Card.Body>
+        </select>
+      </div>
+      <div className="p-4">
         <GameSettingsCard roundId={roundId} />
-      </Card.Body>
-    </Card>
+      </div>
+    </div>
   );
 }

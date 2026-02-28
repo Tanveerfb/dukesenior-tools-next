@@ -6,10 +6,7 @@ import { NotificationProvider } from "@/hooks/useNotifications";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
 import { Toaster } from "react-hot-toast";
-import { useState, useMemo } from "react";
-import { ThemeProvider as MuiThemeProvider, CssBaseline } from "@mui/material";
-import { getTheme } from "@/theme/theme";
-import { useTheme as useCustomTheme } from "./ThemeProvider";
+import { useState } from "react";
 
 // Dynamically import ReactQueryDevtools to avoid hydration issues
 const ReactQueryDevtools = dynamic(
@@ -19,19 +16,6 @@ const ReactQueryDevtools = dynamic(
     ),
   { ssr: false },
 );
-
-// Inner component to access theme context
-function MuiThemeWrapper({ children }: { children: React.ReactNode }) {
-  const { theme } = useCustomTheme();
-  const muiTheme = useMemo(() => getTheme(theme as "light" | "dark"), [theme]);
-
-  return (
-    <MuiThemeProvider theme={muiTheme}>
-      <CssBaseline />
-      {children}
-    </MuiThemeProvider>
-  );
-}
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   // Create QueryClient instance in state to avoid creating new instance on every render
@@ -52,26 +36,24 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <MuiThemeWrapper>
-          <AuthProvider>
-            <NotificationProvider>
-              <ToastProvider>{children}</ToastProvider>
-            </NotificationProvider>
-            {/* react-hot-toast for alternative toast notifications */}
-            <Toaster
-              position="top-right"
-              reverseOrder={false}
-              gutter={8}
-              toastOptions={{
-                duration: 3000,
-                style: {
-                  borderRadius: "8px",
-                  fontSize: "14px",
-                },
-              }}
-            />
-          </AuthProvider>
-        </MuiThemeWrapper>
+        <AuthProvider>
+          <NotificationProvider>
+            <ToastProvider>{children}</ToastProvider>
+          </NotificationProvider>
+          {/* react-hot-toast for alternative toast notifications */}
+          <Toaster
+            position="top-right"
+            reverseOrder={false}
+            gutter={8}
+            toastOptions={{
+              duration: 3000,
+              style: {
+                borderRadius: "8px",
+                fontSize: "14px",
+              },
+            }}
+          />
+        </AuthProvider>
       </ThemeProvider>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>

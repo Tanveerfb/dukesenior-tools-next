@@ -1,12 +1,11 @@
 "use client";
-import { Container } from "react-bootstrap";
 import EliminatorCard from "@/components/tourney/EliminatorCard";
 
 export default function ManageEliminatorPage() {
   return (
-    <Container className="py-4">
-      <h1 className="h4 fw-semibold mb-3">Manage Eliminator</h1>
+    <div className="max-w-7xl mx-auto px-4 py-6">
+      <h1 className="text-lg font-semibold mb-3">Manage Eliminator</h1>
       <EliminatorCard />
-    </Container>
+    </div>
   );
 }

@@ -1,15 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import {
-  Container,
-  Alert,
-  Card,
-  Badge,
-  Stack,
-  Spinner,
-  Button,
-  ButtonGroup,
-} from "react-bootstrap";
+import { cn } from "@/lib/utils";
 import { listEliminatorSessions } from "@/lib/services/phasmoTourney5";
 
 interface Player {
@@ -47,6 +38,31 @@ interface RoundEvent {
   details?: any;
 }
 
+function Spinner() {
+  return (
+    <svg
+      className="animate-spin h-8 w-8 text-primary-500 mx-auto"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+    >
+      <circle
+        className="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="4"
+      />
+      <path
+        className="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+      />
+    </svg>
+  );
+}
+
 export default function Tourney5TimelinePage() {
   const [selectedRound, setSelectedRound] = useState<number>(1);
   const [players, setPlayers] = useState<Player[]>([]);
@@ -54,9 +70,9 @@ export default function Tourney5TimelinePage() {
   const [eliminatorSessions, setEliminatorSessions] = useState<
     EliminatorSession[]
   >([]);
-  const [votesBySession, setVotesBySession] = useState<
-    Record<string, Vote[]>
-  >({});
+  const [votesBySession, setVotesBySession] = useState<Record<string, Vote[]>>(
+    {},
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -80,21 +96,21 @@ export default function Tourney5TimelinePage() {
 
         // Load votes for closed sessions
         const closedSessions = sessionsList.filter(
-          (sess: Session) => sess.closed
+          (sess: Session) => sess.closed,
         );
         const votesData: Record<string, Vote[]> = {};
         await Promise.all(
           closedSessions.map(async (sess: Session) => {
             try {
               const res = await fetch(
-                `/api/phasmoTourney5/votesessions/${sess.id}/vote`
+                `/api/phasmoTourney5/votesessions/${sess.id}/vote`,
               );
               const v = await res.json();
               votesData[sess.id] = Array.isArray(v) ? v : [];
             } catch {
               votesData[sess.id] = [];
             }
-          })
+          }),
         );
         setVotesBySession(votesData);
       } catch (e: any) {
@@ -172,124 +188,152 @@ export default function Tourney5TimelinePage() {
 
   if (loading) {
     return (
-      <Container className="py-4">
-        <h1 className="h4 fw-semibold mb-3">Phasmo Tourney 5 — Timeline</h1>
-        <div className="text-center py-5">
-          <Spinner animation="border" variant="primary" />
+      <div className="max-w-7xl mx-auto px-4 py-4">
+        <h1 className="text-lg font-semibold mb-3">
+          Phasmo Tourney 5 — Timeline
+        </h1>
+        <div className="text-center py-10">
+          <Spinner />
         </div>
-      </Container>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <Container className="py-4">
-        <h1 className="h4 fw-semibold mb-3">Phasmo Tourney 5 — Timeline</h1>
-        <Alert variant="danger">{error}</Alert>
-      </Container>
+      <div className="max-w-7xl mx-auto px-4 py-4">
+        <h1 className="text-lg font-semibold mb-3">
+          Phasmo Tourney 5 — Timeline
+        </h1>
+        <div className="rounded-lg border border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/30 px-4 py-3 text-sm text-red-800 dark:text-red-300">
+          {error}
+        </div>
+      </div>
     );
   }
 
   const roundEvents = getRoundEvents(selectedRound);
-  const immunePlayers = players.filter((p) => p.immune && p.status === "Active");
+  const immunePlayers = players.filter(
+    (p) => p.immune && p.status === "Active",
+  );
+
+  const eventBadgeStyles: Record<string, string> = {
+    eliminator: "bg-red-600 text-white",
+    vote: "bg-yellow-500 text-gray-900",
+    immunity: "bg-cyan-500 text-gray-900",
+  };
+
+  const eventLabels: Record<string, string> = {
+    eliminator: "Eliminator Challenge",
+    vote: "Vote Session",
+    immunity: "Immunity",
+  };
 
   return (
-    <Container className="py-4">
-      <h1 className="h4 fw-semibold mb-3">Phasmo Tourney 5 — Timeline</h1>
-      
-      <Card className="shadow-sm mb-4">
-        <Card.Body>
-          <Card.Title as="h2" className="h5 mb-3">
-            Select Round
-          </Card.Title>
-          <ButtonGroup className="flex-wrap">
+    <div className="max-w-7xl mx-auto px-4 py-4">
+      <h1 className="text-lg font-semibold mb-3">
+        Phasmo Tourney 5 — Timeline
+      </h1>
+
+      {/* Select Round Card */}
+      <div className="rounded-xl border border-border dark:border-border-dark bg-card dark:bg-card-dark shadow-sm mb-4">
+        <div className="p-4">
+          <h2 className="text-base font-semibold mb-3">Select Round</h2>
+          <div className="flex flex-wrap">
             {rounds.map((round) => (
-              <Button
+              <button
                 key={round}
-                variant={selectedRound === round ? "primary" : "outline-primary"}
                 onClick={() => setSelectedRound(round)}
+                className={cn(
+                  "px-4 py-2 text-sm font-medium border border-primary-500 transition-colors",
+                  "first:rounded-l-lg last:rounded-r-lg",
+                  selectedRound === round
+                    ? "bg-primary-500 text-white"
+                    : "bg-transparent text-primary-500 hover:bg-primary-500/10",
+                )}
               >
                 Round {round}
-              </Button>
+              </button>
             ))}
-          </ButtonGroup>
-        </Card.Body>
-      </Card>
+          </div>
+        </div>
+      </div>
 
-      <Card className="shadow-sm mb-4">
-        <Card.Body>
-          <Card.Title as="h2" className="h5 mb-3">
+      {/* Immune Players Card */}
+      <div className="rounded-xl border border-border dark:border-border-dark bg-card dark:bg-card-dark shadow-sm mb-4">
+        <div className="p-4">
+          <h2 className="text-base font-semibold mb-3">
             Current Immune Players
-          </Card.Title>
+          </h2>
           {immunePlayers.length === 0 ? (
-            <Alert variant="info" className="mb-0">
+            <div className="rounded-lg border border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/30 px-4 py-3 text-sm text-blue-800 dark:text-blue-300">
               No players are currently immune.
-            </Alert>
+            </div>
           ) : (
-            <div className="d-flex gap-2 flex-wrap">
+            <div className="flex gap-2 flex-wrap">
               {immunePlayers.map((player) => (
-                <Badge key={player.id} bg="warning" text="dark" className="px-3 py-2">
+                <span
+                  key={player.id}
+                  className="rounded-full text-xs font-medium px-3 py-1.5 bg-yellow-500 text-gray-900"
+                >
                   {player.name}
-                </Badge>
+                </span>
               ))}
             </div>
           )}
-        </Card.Body>
-      </Card>
+        </div>
+      </div>
 
-      <Card className="shadow-sm">
-        <Card.Body>
-          <Card.Title as="h2" className="h5 mb-3">
+      {/* Round Events Card */}
+      <div className="rounded-xl border border-border dark:border-border-dark bg-card dark:bg-card-dark shadow-sm">
+        <div className="p-4">
+          <h2 className="text-base font-semibold mb-3">
             Round {selectedRound} Events
-          </Card.Title>
+          </h2>
           {roundEvents.length === 0 ? (
-            <Alert variant="info" className="mb-0">
+            <div className="rounded-lg border border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/30 px-4 py-3 text-sm text-blue-800 dark:text-blue-300">
               No events recorded for Round {selectedRound} yet.
-            </Alert>
+            </div>
           ) : (
-            <Stack gap={3}>
+            <div className="flex flex-col gap-3">
               {roundEvents.map((event, idx) => (
-                <Card key={idx} className="border">
-                  <Card.Body className="p-3">
-                    <div className="d-flex justify-content-between align-items-start mb-2">
-                      <Badge
-                        bg={
-                          event.type === "eliminator"
-                            ? "danger"
-                            : event.type === "vote"
-                            ? "warning"
-                            : "info"
-                        }
-                        text={event.type === "eliminator" ? "light" : "dark"}
-                      >
-                        {event.type === "eliminator"
-                          ? "Eliminator Challenge"
-                          : event.type === "vote"
-                          ? "Vote Session"
-                          : "Immunity"}
-                      </Badge>
-                      <span className="text-muted small">
-                        {new Date(event.timestamp).toLocaleDateString()}
+                <div
+                  key={idx}
+                  className="rounded-xl border border-border dark:border-border-dark p-3"
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <span
+                      className={cn(
+                        "rounded-full text-xs font-medium px-2.5 py-0.5",
+                        eventBadgeStyles[event.type],
+                      )}
+                    >
+                      {eventLabels[event.type]}
+                    </span>
+                    <span className="text-foreground/50 text-sm">
+                      {new Date(event.timestamp).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <div className="mb-1">{event.description}</div>
+                  {event.details && event.type === "eliminator" && (
+                    <div className="text-sm text-foreground/50">
+                      Winner:{" "}
+                      <span className="text-green-600 dark:text-green-400 font-semibold">
+                        {event.details.winner}
                       </span>
                     </div>
-                    <div className="mb-1">{event.description}</div>
-                    {event.details && event.type === "eliminator" && (
-                      <div className="small text-muted">
-                        Winner: <span className="text-success fw-semibold">{event.details.winner}</span>
-                      </div>
-                    )}
-                    {event.details && event.type === "vote" && (
-                      <div className="small text-muted">
-                        Total votes: {event.details.totalVotes}
-                      </div>
-                    )}
-                  </Card.Body>
-                </Card>
+                  )}
+                  {event.details && event.type === "vote" && (
+                    <div className="text-sm text-foreground/50">
+                      Total votes: {event.details.totalVotes}
+                    </div>
+                  )}
+                </div>
               ))}
-            </Stack>
+            </div>
           )}
-        </Card.Body>
-      </Card>
-    </Container>
+        </div>
+      </div>
+    </div>
   );
 }

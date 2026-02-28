@@ -1,6 +1,6 @@
 "use client";
 import { useMemo, useState } from "react";
-import { Card, Col, Form, Row, Button } from "react-bootstrap";
+import { cn } from "@/lib/utils";
 import { addRound7FinaleResult } from "@/lib/services/phasmoTourney5";
 
 interface Player {
@@ -49,7 +49,7 @@ export default function BestOutOfThree(props: {
       else if (row.outcome === "Player 2") acc.p2 += 1;
       return acc;
     },
-    { p1: 0, p2: 0 }
+    { p1: 0, p2: 0 },
   );
   const disableRow3 =
     wins.p1 >= 2 ||
@@ -75,7 +75,7 @@ export default function BestOutOfThree(props: {
           ? row.outcome
           : computeOutcome(
               runs.find((r) => r.id === row.p1RunId),
-              runs.find((r) => r.id === row.p2RunId)
+              runs.find((r) => r.id === row.p2RunId),
             ),
     }));
     try {
@@ -93,60 +93,63 @@ export default function BestOutOfThree(props: {
     }
   }
 
+  const selectClasses =
+    "w-full rounded-lg border border-border dark:border-border-dark bg-card dark:bg-card-dark text-foreground px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500";
+
   return (
-    <Card className="border-0 shadow-sm">
-      <Card.Body>
-        <Card.Title as="h2" className="h5 fw-semibold">
-          Best of Three
-        </Card.Title>
-        <Row className="g-3 mb-3">
-          <Col md={6}>
-            <Form.Group>
-              <Form.Label>Player 1</Form.Label>
-              <Form.Select
-                value={p1}
-                onChange={(e) => {
-                  setP1(e.target.value);
-                  setRowSelections([
-                    { outcome: "Pending" },
-                    { outcome: "Pending" },
-                    { outcome: "Pending" },
-                  ]);
-                }}
-              >
-                <option value="">Select player…</option>
-                {players.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                  </option>
-                ))}
-              </Form.Select>
-            </Form.Group>
-          </Col>
-          <Col md={6}>
-            <Form.Group>
-              <Form.Label>Player 2</Form.Label>
-              <Form.Select
-                value={p2}
-                onChange={(e) => {
-                  setP2(e.target.value);
-                  setRowSelections([
-                    { outcome: "Pending" },
-                    { outcome: "Pending" },
-                    { outcome: "Pending" },
-                  ]);
-                }}
-              >
-                <option value="">Select player…</option>
-                {players.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                  </option>
-                ))}
-              </Form.Select>
-            </Form.Group>
-          </Col>
-        </Row>
+    <div className="rounded-xl border border-border bg-card dark:bg-card-dark dark:border-border-dark shadow-sm">
+      <div className="p-4">
+        <h2 className="text-lg font-semibold text-foreground">Best of Three</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3 mt-3">
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1">
+              Player 1
+            </label>
+            <select
+              value={p1}
+              onChange={(e) => {
+                setP1(e.target.value);
+                setRowSelections([
+                  { outcome: "Pending" },
+                  { outcome: "Pending" },
+                  { outcome: "Pending" },
+                ]);
+              }}
+              className={selectClasses}
+            >
+              <option value="">Select player…</option>
+              {players.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-1">
+              Player 2
+            </label>
+            <select
+              value={p2}
+              onChange={(e) => {
+                setP2(e.target.value);
+                setRowSelections([
+                  { outcome: "Pending" },
+                  { outcome: "Pending" },
+                  { outcome: "Pending" },
+                ]);
+              }}
+              className={selectClasses}
+            >
+              <option value="">Select player…</option>
+              {players.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
 
         {[0, 1, 2].map((idx) => {
           const disabled = idx === 2 && disableRow3;
@@ -155,76 +158,103 @@ export default function BestOutOfThree(props: {
           const r2 = playerRuns.p2.find((r) => r.id === sel.p2RunId);
           const outcome = computeOutcome(r1, r2);
           return (
-            <Row
-              className={`g-3 align-items-end ${idx < 2 ? "mb-2" : ""}`}
+            <div
+              className={cn(
+                "grid grid-cols-1 md:grid-cols-[5fr_5fr_2fr] gap-3 items-end",
+                idx < 2 && "mb-2",
+              )}
               key={idx}
             >
-              <Col md={5}>
-                <Form.Group>
-                  <Form.Label>Round {idx + 1} — Player 1 Run</Form.Label>
-                  <Form.Select
-                    value={sel.p1RunId || ""}
-                    disabled={disabled || !p1}
-                    onChange={(e) => {
-                      const next = [...rowSelections];
-                      next[idx] = {
-                        ...sel,
-                        p1RunId: e.target.value || undefined,
-                      } as any;
-                      setRowSelections(next);
-                    }}
-                  >
-                    <option value="">Select run…</option>
-                    {playerRuns.p1.map((r) => (
-                      <option key={r.id} value={r.id}>
-                        Marks {r.marks} —{" "}
-                        {new Date(r.createdAt).toLocaleString()}
-                      </option>
-                    ))}
-                  </Form.Select>
-                </Form.Group>
-              </Col>
-              <Col md={5}>
-                <Form.Group>
-                  <Form.Label>Round {idx + 1} — Player 2 Run</Form.Label>
-                  <Form.Select
-                    value={sel.p2RunId || ""}
-                    disabled={disabled || !p2}
-                    onChange={(e) => {
-                      const next = [...rowSelections];
-                      next[idx] = {
-                        ...sel,
-                        p2RunId: e.target.value || undefined,
-                      } as any;
-                      setRowSelections(next);
-                    }}
-                  >
-                    <option value="">Select run…</option>
-                    {playerRuns.p2.map((r) => (
-                      <option key={r.id} value={r.id}>
-                        Marks {r.marks} —{" "}
-                        {new Date(r.createdAt).toLocaleString()}
-                      </option>
-                    ))}
-                  </Form.Select>
-                </Form.Group>
-              </Col>
-              <Col md={2}>
-                <Form.Group>
-                  <Form.Label>Outcome</Form.Label>
-                  <Form.Control value={outcome} disabled />
-                </Form.Group>
-              </Col>
-            </Row>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  Round {idx + 1} — Player 1 Run
+                </label>
+                <select
+                  value={sel.p1RunId || ""}
+                  disabled={disabled || !p1}
+                  onChange={(e) => {
+                    const next = [...rowSelections];
+                    next[idx] = {
+                      ...sel,
+                      p1RunId: e.target.value || undefined,
+                    } as any;
+                    setRowSelections(next);
+                  }}
+                  className={cn(
+                    selectClasses,
+                    "disabled:opacity-50 disabled:cursor-not-allowed",
+                  )}
+                >
+                  <option value="">Select run…</option>
+                  {playerRuns.p1.map((r) => (
+                    <option key={r.id} value={r.id}>
+                      Marks {r.marks} — {new Date(r.createdAt).toLocaleString()}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  Round {idx + 1} — Player 2 Run
+                </label>
+                <select
+                  value={sel.p2RunId || ""}
+                  disabled={disabled || !p2}
+                  onChange={(e) => {
+                    const next = [...rowSelections];
+                    next[idx] = {
+                      ...sel,
+                      p2RunId: e.target.value || undefined,
+                    } as any;
+                    setRowSelections(next);
+                  }}
+                  className={cn(
+                    selectClasses,
+                    "disabled:opacity-50 disabled:cursor-not-allowed",
+                  )}
+                >
+                  <option value="">Select run…</option>
+                  {playerRuns.p2.map((r) => (
+                    <option key={r.id} value={r.id}>
+                      Marks {r.marks} — {new Date(r.createdAt).toLocaleString()}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  Outcome
+                </label>
+                <input
+                  value={outcome}
+                  disabled
+                  className={cn(
+                    selectClasses,
+                    "disabled:opacity-50 disabled:cursor-not-allowed",
+                  )}
+                />
+              </div>
+            </div>
           );
         })}
-        <div className="d-flex gap-2 mt-3">
-          <Button variant="primary" onClick={saveResults} disabled={!p1 || !p2}>
+        <div className="flex items-center gap-2 mt-3">
+          <button
+            type="button"
+            onClick={saveResults}
+            disabled={!p1 || !p2}
+            className={cn(
+              "rounded-lg px-4 py-2 text-sm font-medium transition-colors",
+              "bg-primary-500 text-white hover:bg-primary-600",
+              "disabled:opacity-50 disabled:cursor-not-allowed",
+            )}
+          >
             Save Finale Result
-          </Button>
-          <Form.Text className="text-muted">Winner: {finalWinner}</Form.Text>
+          </button>
+          <span className="text-sm text-foreground-secondary">
+            Winner: {finalWinner}
+          </span>
         </div>
-      </Card.Body>
-    </Card>
+      </div>
+    </div>
   );
 }

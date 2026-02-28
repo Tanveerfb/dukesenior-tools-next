@@ -1,7 +1,7 @@
 "use client";
-import { Container, Card, Row, Col, Alert } from "react-bootstrap";
 import { useAuth } from "@/hooks/useAuth";
 import InlineLink from "@/components/ui/InlineLink";
+import { cn } from "@/lib/utils";
 import {
   FaUsers,
   FaVoteYea,
@@ -130,70 +130,55 @@ export default function PhasmoTourney5AdminPage() {
 
   if (!admin) {
     return (
-      <Container className="py-5">
-        <Alert variant="danger">Admin access required</Alert>
-      </Container>
+      <div className="max-w-7xl mx-auto px-4 py-10">
+        <div className="rounded-xl border border-red-300 bg-red-50 text-red-800 dark:border-red-700 dark:bg-red-900/30 dark:text-red-300 px-4 py-3">
+          Admin access required
+        </div>
+      </div>
     );
   }
 
   return (
-    <Container className="py-4">
+    <div className="max-w-7xl mx-auto px-4 py-6">
       <div className="mb-4">
-        <h1 className="mb-2">Phasmo Tourney 5 Admin</h1>
-        <p className="text-muted">
+        <h1 className="mb-2 text-2xl font-bold text-foreground">
+          Phasmo Tourney 5 Admin
+        </h1>
+        <p className="text-gray-500 dark:text-gray-400">
           Manage all aspects of Phasmo Tourney 5 from this central hub
         </p>
       </div>
 
-      <Row className="g-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {adminTools.map((tool) => (
-          <Col key={tool.href} xs={12} sm={6} lg={4}>
-            <Card
-              as={InlineLink}
-              href={tool.href}
-              className="h-100 admin-tool-card"
-              style={{
-                textDecoration: "none",
-                transition: "all 0.2s ease",
-                cursor: "pointer",
-                border: "1px solid rgba(0,0,0,0.125)",
-              }}
-            >
-              <Card.Body className="d-flex flex-column">
-                <div
-                  className="mb-3 d-flex align-items-center justify-content-center"
-                  style={{
-                    width: "48px",
-                    height: "48px",
-                    borderRadius: "8px",
-                    backgroundColor: `${tool.color}20`,
-                    color: tool.color,
-                    fontSize: "24px",
-                  }}
-                >
-                  {tool.icon}
-                </div>
-                <Card.Title className="mb-2" style={{ fontSize: "1.1rem" }}>
-                  {tool.title}
-                </Card.Title>
-                <Card.Text
-                  className="text-muted flex-grow-1"
-                  style={{ fontSize: "0.9rem" }}
-                >
-                  {tool.description}
-                </Card.Text>
-              </Card.Body>
-            </Card>
-          </Col>
+          <InlineLink
+            key={tool.href}
+            href={tool.href}
+            className={cn(
+              "group block h-full rounded-xl border border-border bg-card dark:bg-card-dark dark:border-border-dark shadow-sm",
+              "no-underline transition-all duration-200 hover:-translate-y-1 hover:shadow-lg",
+            )}
+          >
+            <div className="flex flex-col p-4 h-full">
+              <div
+                className="mb-3 flex items-center justify-center w-12 h-12 rounded-lg text-2xl"
+                style={{
+                  backgroundColor: `${tool.color}20`,
+                  color: tool.color,
+                }}
+              >
+                {tool.icon}
+              </div>
+              <h3 className="mb-2 text-[1.1rem] font-semibold text-foreground">
+                {tool.title}
+              </h3>
+              <p className="text-gray-500 dark:text-gray-400 flex-grow text-[0.9rem]">
+                {tool.description}
+              </p>
+            </div>
+          </InlineLink>
         ))}
-      </Row>
-
-      <style jsx global>{`
-        .admin-tool-card:hover {
-          transform: translateY(-4px);
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-        }
-      `}</style>
-    </Container>
+      </div>
+    </div>
   );
 }

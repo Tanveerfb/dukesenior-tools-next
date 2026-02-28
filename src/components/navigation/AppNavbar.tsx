@@ -1,47 +1,7 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import {
-  AppBar,
-  Toolbar,
-  IconButton,
-  Button,
-  Menu,
-  MenuItem,
-  Box,
-  Container,
-  useMediaQuery,
-  useTheme,
-  Drawer,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemText,
-  ListItemIcon,
-  Divider,
-  Collapse,
-  Typography,
-  Avatar,
-  Chip,
-  Badge,
-} from "@mui/material";
-import {
-  Menu as MenuIcon,
-  Search as SearchIcon,
-  LightMode as LightModeIcon,
-  DarkMode as DarkModeIcon,
-  AccountCircle as AccountCircleIcon,
-  ExpandMore as ExpandMoreIcon,
-  ExpandLess as ExpandLessIcon,
-  AdminPanelSettings as AdminIcon,
-  Event as EventIcon,
-  Build as BuildIcon,
-  Newspaper as NewspaperIcon,
-  AutoAwesome as SparklesIcon,
-  HelpOutline as HelpIcon,
-  Notifications as NotificationsIcon,
-} from "@mui/icons-material";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import { useNotifications } from "@/hooks/useNotifications";
@@ -52,6 +12,27 @@ import { classifyEvents } from "@/lib/navigation/classify";
 import SearchModal from "@/components/navigation/SearchModal";
 import KeyboardShortcutsModal from "@/components/ui/KeyboardShortcutsModal";
 import { useHotkeys } from "react-hotkeys-hook";
+import { cn } from "@/lib/utils";
+import {
+  FiMenu,
+  FiX,
+  FiSearch,
+  FiSun,
+  FiMoon,
+  FiUser,
+  FiChevronDown,
+  FiChevronRight,
+  FiShield,
+  FiCalendar,
+  FiTool,
+  FiFileText,
+  FiBell,
+  FiHelpCircle,
+  FiLogOut,
+  FiUsers,
+  FiMessageSquare,
+} from "react-icons/fi";
+import { HiSparkles } from "react-icons/hi2";
 
 type EffectiveMeta = EffectiveMetaType;
 
@@ -73,9 +54,148 @@ function extractTournamentTag(meta: EffectiveMeta) {
   return meta.effective.find((tag) => /^PhasmoTourney\d+$/i.test(tag)) ?? null;
 }
 
+// Dropdown component
+function NavDropdown({
+  label,
+  icon,
+  children,
+  className,
+}: {
+  label: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  return (
+    <div ref={ref} className={cn("relative", className)}>
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-foreground/80 dark:text-foreground-dark/80 hover:text-foreground dark:hover:text-foreground-dark hover:bg-surface-100 dark:hover:bg-surface-900/50 rounded-lg transition-colors"
+      >
+        {icon}
+        {label}
+        <FiChevronDown
+          size={14}
+          className={cn("transition-transform", open && "rotate-180")}
+        />
+      </button>
+      {open && (
+        <div className="absolute left-0 top-full mt-1 min-w-[240px] max-h-[400px] overflow-y-auto bg-card dark:bg-card-dark border border-border dark:border-border-dark rounded-xl shadow-soft-lg z-50 py-1 animate-slide-down">
+          <div onClick={() => setOpen(false)}>{children}</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DropdownItem({
+  href,
+  children,
+  className,
+}: {
+  href: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className={cn(
+        "block px-4 py-2.5 text-sm text-foreground dark:text-foreground-dark hover:bg-surface-100 dark:hover:bg-surface-900/50 transition-colors",
+        className,
+      )}
+    >
+      {children}
+    </Link>
+  );
+}
+
+function DropdownLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="px-4 py-2 text-xs font-semibold uppercase tracking-wider text-foreground-muted dark:text-foreground-dark-muted">
+      {children}
+    </div>
+  );
+}
+
+// Mobile sidebar accordion section
+function MobileSection({
+  label,
+  icon,
+  children,
+  defaultOpen = false,
+}: {
+  label: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+
+  return (
+    <div>
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-foreground dark:text-foreground-dark hover:bg-surface-100 dark:hover:bg-surface-900/50 transition-colors"
+      >
+        <span className="text-foreground-muted dark:text-foreground-dark-muted">
+          {icon}
+        </span>
+        <span className="flex-1 text-left">{label}</span>
+        <FiChevronRight
+          size={14}
+          className={cn(
+            "text-foreground-muted transition-transform",
+            open && "rotate-90",
+          )}
+        />
+      </button>
+      {open && <div className="pl-4">{children}</div>}
+    </div>
+  );
+}
+
+function MobileLink({
+  href,
+  icon,
+  children,
+  onClick,
+}: {
+  href: string;
+  icon?: React.ReactNode;
+  children: React.ReactNode;
+  onClick?: () => void;
+}) {
+  return (
+    <Link
+      href={href}
+      onClick={onClick}
+      className="flex items-center gap-3 px-4 py-2.5 text-sm text-foreground dark:text-foreground-dark hover:bg-surface-100 dark:hover:bg-surface-900/50 transition-colors"
+    >
+      {icon && (
+        <span className="text-foreground-muted dark:text-foreground-dark-muted">
+          {icon}
+        </span>
+      )}
+      {children}
+    </Link>
+  );
+}
+
 export default function AppNavbar() {
-  const muiTheme = useTheme();
-  const isMobile = useMediaQuery(muiTheme.breakpoints.down("md"));
   const { user, logout, admin } = useAuth();
   const { unreadCount } = useNotifications();
   const { theme, toggleTheme } = useCustomTheme();
@@ -83,20 +203,27 @@ export default function AppNavbar() {
   const router = useRouter();
 
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [eventsAnchorEl, setEventsAnchorEl] = useState<null | HTMLElement>(
-    null,
-  );
-  const [toolsAnchorEl, setToolsAnchorEl] = useState<null | HTMLElement>(null);
-  const [adminAnchorEl, setAdminAnchorEl] = useState<null | HTMLElement>(null);
-  const [tourneyAdminsAnchorEl, setTourneyAdminsAnchorEl] =
-    useState<null | HTMLElement>(null);
-  const [userAnchorEl, setUserAnchorEl] = useState<null | HTMLElement>(null);
   const [showSearch, setShowSearch] = useState(false);
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [profileHref, setProfileHref] = useState("/profile");
   const [effective, setEffective] = useState<EffectiveMeta[]>([]);
   const [_loading, setLoading] = useState(true);
-  const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close user menu on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (
+        userMenuRef.current &&
+        !userMenuRef.current.contains(e.target as Node)
+      ) {
+        setUserMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
   // Keyboard shortcuts
   useHotkeys("mod+k", (e) => {
@@ -192,595 +319,387 @@ export default function AppNavbar() {
     [effective],
   );
 
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
-  };
-
-  const handleLogin = () => {
+  const handleLogin = useCallback(() => {
     setMobileOpen(false);
     router.push("/login");
-  };
+  }, [router]);
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     logout();
     setMobileOpen(false);
-    setUserAnchorEl(null);
-  };
+    setUserMenuOpen(false);
+  }, [logout]);
 
-  const toggleSection = (sectionId: string) => {
-    setOpenSections((prev) => ({
-      ...prev,
-      [sectionId]: !prev[sectionId],
-    }));
-  };
-
-  const drawer = (
-    <Box sx={{ width: 280 }}>
-      <Box sx={{ p: 2, display: "flex", alignItems: "center", gap: 1 }}>
-        <SparklesIcon color="primary" />
-        <Typography variant="h6" fontWeight="bold">
-          The Lair of Evil
-        </Typography>
-      </Box>
-      <Divider />
-      <List>
-        {/* Admin Section */}
-        {admin && (
-          <>
-            <ListItem disablePadding>
-              <ListItemButton onClick={() => toggleSection("admin")}>
-                <ListItemIcon>
-                  <AdminIcon />
-                </ListItemIcon>
-                <ListItemText primary="Admin" />
-                {openSections.admin ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-              </ListItemButton>
-            </ListItem>
-            <Collapse in={openSections.admin} timeout="auto" unmountOnExit>
-              <List component="div" disablePadding>
-                <ListItemButton
-                  sx={{ pl: 4 }}
-                  component={Link}
-                  href="/admin/cms"
-                >
-                  <ListItemText primary="CMS Admin" />
-                </ListItemButton>
-                <ListItemButton
-                  sx={{ pl: 4 }}
-                  component={Link}
-                  href="/admin/suggestions"
-                >
-                  <ListItemText primary="Suggestions" />
-                </ListItemButton>
-                <ListItemButton
-                  sx={{ pl: 4 }}
-                  component={Link}
-                  href="/admin/tags"
-                >
-                  <ListItemText primary="Tags Management" />
-                </ListItemButton>
-                <ListItemButton
-                  sx={{ pl: 4 }}
-                  component={Link}
-                  href="/admin/notifications"
-                >
-                  <ListItemText primary="Send Notifications" />
-                </ListItemButton>
-              </List>
-            </Collapse>
-            <Divider />
-          </>
-        )}
-
-        {/* Tourney Admins Section */}
-        {admin && (
-          <>
-            <ListItem disablePadding>
-              <ListItemButton onClick={() => toggleSection("tourneyAdmins")}>
-                <ListItemIcon>
-                  <EventIcon />
-                </ListItemIcon>
-                <ListItemText primary="Tourney Admins" />
-                {openSections.tourneyAdmins ? (
-                  <ExpandLessIcon />
-                ) : (
-                  <ExpandMoreIcon />
-                )}
-              </ListItemButton>
-            </ListItem>
-            <Collapse
-              in={openSections.tourneyAdmins}
-              timeout="auto"
-              unmountOnExit
-            >
-              <List component="div" disablePadding>
-                <ListItemButton
-                  sx={{ pl: 4 }}
-                  component={Link}
-                  href="/admin/phasmoTourney5"
-                >
-                  <ListItemText primary="Phasmo Tourney 5" />
-                </ListItemButton>
-              </List>
-            </Collapse>
-            <Divider />
-          </>
-        )}
-
-        {/* Events Section */}
-        <ListItem disablePadding>
-          <ListItemButton onClick={() => toggleSection("events")}>
-            <ListItemIcon>
-              <EventIcon />
-            </ListItemIcon>
-            <ListItemText primary="Events" />
-            {openSections.events ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-          </ListItemButton>
-        </ListItem>
-        <Collapse in={openSections.events} timeout="auto" unmountOnExit>
-          <List component="div" disablePadding>
-            {eventSections.current.map((section) => (
-              <Box key={section.key}>
-                <ListItemButton
-                  sx={{ pl: 4 }}
-                  onClick={() => toggleSection(`current-${section.key}`)}
-                >
-                  <ListItemText primary={section.key} />
-                  {openSections[`current-${section.key}`] ? (
-                    <ExpandLessIcon />
-                  ) : (
-                    <ExpandMoreIcon />
-                  )}
-                </ListItemButton>
-                <Collapse
-                  in={openSections[`current-${section.key}`]}
-                  timeout="auto"
-                  unmountOnExit
-                >
-                  {section.routes.map(({ meta, label, href }) => (
-                    <ListItemButton
-                      key={meta.path}
-                      sx={{ pl: 6 }}
-                      component={Link}
-                      href={href}
-                    >
-                      <ListItemText primary={label} />
-                    </ListItemButton>
-                  ))}
-                </Collapse>
-              </Box>
-            ))}
-          </List>
-        </Collapse>
-
-        {/* Tools Section */}
-        <ListItem disablePadding>
-          <ListItemButton onClick={() => toggleSection("tools")}>
-            <ListItemIcon>
-              <BuildIcon />
-            </ListItemIcon>
-            <ListItemText primary="Tools" />
-            {openSections.tools ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-          </ListItemButton>
-        </ListItem>
-        <Collapse in={openSections.tools} timeout="auto" unmountOnExit>
-          <List component="div" disablePadding>
-            <ListItemButton
-              sx={{ pl: 4 }}
-              component={Link}
-              href="/notifications"
-            >
-              <ListItemText primary="To-Do List" />
-            </ListItemButton>
-            {tools.map((meta) => (
-              <ListItemButton
-                key={meta.path}
-                sx={{ pl: 4 }}
-                component={Link}
-                href={mapHref(meta.path)}
-              >
-                <ListItemText primary={meta.title || meta.path} />
-              </ListItemButton>
-            ))}
-          </List>
-        </Collapse>
-
-        {/* Community Updates */}
-        <ListItem disablePadding>
-          <ListItemButton component={Link} href="/posts">
-            <ListItemIcon>
-              <NewspaperIcon />
-            </ListItemIcon>
-            <ListItemText primary="Community Updates" />
-          </ListItemButton>
-        </ListItem>
-
-        {/* Friends - Only show when logged in */}
-        {user && (
-          <ListItem disablePadding>
-            <ListItemButton component={Link} href="/friends">
-              <ListItemIcon>
-                <AccountCircleIcon />
-              </ListItemIcon>
-              <ListItemText primary="Friends" />
-            </ListItemButton>
-          </ListItem>
-        )}
-
-        {/* Messages - Only show when logged in */}
-        {user && (
-          <ListItem disablePadding>
-            <ListItemButton component={Link} href="/messages">
-              <ListItemIcon>
-                <NewspaperIcon />
-              </ListItemIcon>
-              <ListItemText primary="Messages" />
-            </ListItemButton>
-          </ListItem>
-        )}
-      </List>
-
-      <Divider />
-
-      {/* User Section */}
-      <Box sx={{ p: 2 }}>
-        {user ? (
-          <>
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="body2" fontWeight="bold">
-                {user.displayName || "User"}
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                {user.email}
-              </Typography>
-            </Box>
-            <Button
-              fullWidth
-              variant="outlined"
-              component={Link}
-              href={profileHref}
-              sx={{ mb: 1 }}
-            >
-              Profile
-            </Button>
-            <Button
-              fullWidth
-              variant="outlined"
-              color="error"
-              onClick={handleLogout}
-            >
-              Logout
-            </Button>
-          </>
-        ) : (
-          <Button fullWidth variant="contained" onClick={handleLogin}>
-            Log in
-          </Button>
-        )}
-      </Box>
-    </Box>
-  );
+  const closeMobile = useCallback(() => setMobileOpen(false), []);
 
   return (
     <>
-      <AppBar
-        position="sticky"
-        elevation={0}
-        sx={{ borderBottom: 1, borderColor: "divider" }}
-      >
-        <Container maxWidth="xl">
-          <Toolbar disableGutters>
-            {/* Mobile Menu Icon */}
-            {isMobile && (
-              <IconButton
-                color="inherit"
-                aria-label="open drawer"
-                edge="start"
-                onClick={handleDrawerToggle}
-                sx={{ mr: 2 }}
+      {/* Navbar */}
+      <nav className="sticky top-0 z-40 border-b-2 border-dashed border-border dark:border-border-dark bg-card/90 dark:bg-card-dark/90 backdrop-blur-md">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            {/* Left: Mobile menu + Brand */}
+            <div className="flex items-center gap-3">
+              {/* Mobile hamburger */}
+              <button
+                onClick={() => setMobileOpen(!mobileOpen)}
+                className="md:hidden p-2 rounded-lg text-foreground dark:text-foreground-dark hover:bg-surface-100 dark:hover:bg-surface-900/50 transition-colors"
+                aria-label="Open menu"
               >
-                <MenuIcon />
-              </IconButton>
-            )}
+                <FiMenu size={20} />
+              </button>
 
-            {/* Brand */}
-            <Box
-              component={Link}
-              href="/"
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 1,
-                textDecoration: "none",
-                color: "inherit",
-                flexGrow: isMobile ? 1 : 0,
-              }}
-            >
-              <SparklesIcon color="primary" />
-              <Typography
-                variant="h6"
-                noWrap
-                sx={{
-                  fontWeight: 700,
-                  background: (theme) =>
-                    `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  backgroundClip: "text",
-                }}
+              {/* Brand */}
+              <Link
+                href="/"
+                className="flex items-center gap-2 text-foreground dark:text-foreground-dark no-underline"
               >
-                The Lair of Evil
-              </Typography>
-            </Box>
+                <HiSparkles className="text-primary" size={22} />
+                <span className="text-lg font-bold bg-gradient-to-r from-primary to-primary-700 bg-clip-text text-transparent">
+                  The Lair of Evil
+                </span>
+              </Link>
+            </div>
 
-            {/* Desktop Navigation */}
-            {!isMobile && (
-              <Box sx={{ flexGrow: 1, display: "flex", gap: 1, ml: 4 }}>
-                {/* Admin Dropdown */}
-                {admin && (
-                  <>
-                    <Button
-                      color="inherit"
-                      startIcon={<AdminIcon />}
-                      onClick={(e) => setAdminAnchorEl(e.currentTarget)}
-                    >
-                      Admin
-                    </Button>
-                    <Menu
-                      anchorEl={adminAnchorEl}
-                      open={Boolean(adminAnchorEl)}
-                      onClose={() => setAdminAnchorEl(null)}
-                    >
-                      <MenuItem
-                        component={Link}
-                        href="/admin/cms"
-                        onClick={() => setAdminAnchorEl(null)}
-                      >
-                        CMS Admin
-                      </MenuItem>
-                      <MenuItem
-                        component={Link}
-                        href="/admin/suggestions"
-                        onClick={() => setAdminAnchorEl(null)}
-                      >
-                        Suggestions
-                      </MenuItem>
-                      <MenuItem
-                        component={Link}
-                        href="/admin/tags"
-                        onClick={() => setAdminAnchorEl(null)}
-                      >
-                        Tags Management
-                      </MenuItem>
-                      <MenuItem
-                        component={Link}
-                        href="/admin/notifications"
-                        onClick={() => setAdminAnchorEl(null)}
-                      >
-                        Send Notifications
-                      </MenuItem>
-                    </Menu>
-                  </>
-                )}
+            {/* Center: Desktop navigation */}
+            <div className="hidden md:flex items-center gap-1 ml-8 flex-1">
+              {/* Admin Dropdown */}
+              {admin && (
+                <NavDropdown label="Admin" icon={<FiShield size={16} />}>
+                  <DropdownItem href="/admin/cms">CMS Admin</DropdownItem>
+                  <DropdownItem href="/admin/suggestions">
+                    Suggestions
+                  </DropdownItem>
+                  <DropdownItem href="/admin/tags">
+                    Tags Management
+                  </DropdownItem>
+                  <DropdownItem href="/admin/notifications">
+                    Send Notifications
+                  </DropdownItem>
+                </NavDropdown>
+              )}
 
-                {/* Tourney Admins Dropdown */}
-                {admin && (
-                  <>
-                    <Button
-                      color="inherit"
-                      startIcon={<EventIcon />}
-                      onClick={(e) => setTourneyAdminsAnchorEl(e.currentTarget)}
-                    >
-                      Tourney Admins
-                    </Button>
-                    <Menu
-                      anchorEl={tourneyAdminsAnchorEl}
-                      open={Boolean(tourneyAdminsAnchorEl)}
-                      onClose={() => setTourneyAdminsAnchorEl(null)}
-                    >
-                      <MenuItem
-                        component={Link}
-                        href="/admin/phasmoTourney5"
-                        onClick={() => setTourneyAdminsAnchorEl(null)}
-                      >
-                        Phasmo Tourney 5
-                      </MenuItem>
-                    </Menu>
-                  </>
-                )}
-
-                {/* Events Dropdown */}
-                <Button
-                  color="inherit"
-                  startIcon={<EventIcon />}
-                  onClick={(e) => setEventsAnchorEl(e.currentTarget)}
+              {/* Tourney Admins Dropdown */}
+              {admin && (
+                <NavDropdown
+                  label="Tourney Admins"
+                  icon={<FiCalendar size={16} />}
                 >
-                  Events
-                </Button>
-                <Menu
-                  anchorEl={eventsAnchorEl}
-                  open={Boolean(eventsAnchorEl)}
-                  onClose={() => setEventsAnchorEl(null)}
-                  PaperProps={{ sx: { maxHeight: 500, width: 300 } }}
-                >
-                  <MenuItem disabled>
-                    <Typography variant="caption" fontWeight="bold">
-                      CURRENT EVENTS
-                    </Typography>
-                  </MenuItem>
-                  {eventSections.current.map((section) => (
-                    <Box key={section.key}>
-                      {section.routes.map(({ meta, label, href, tourTag }) => (
-                        <MenuItem
-                          key={meta.path}
-                          component={Link}
-                          href={href}
-                          onClick={() => setEventsAnchorEl(null)}
-                        >
-                          <Box
-                            sx={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              width: "100%",
-                            }}
-                          >
+                  <DropdownItem href="/admin/phasmoTourney5">
+                    Phasmo Tourney 5
+                  </DropdownItem>
+                </NavDropdown>
+              )}
+
+              {/* Events Dropdown */}
+              <NavDropdown label="Events" icon={<FiCalendar size={16} />}>
+                {eventSections.current.length > 0 && (
+                  <>
+                    <DropdownLabel>Current Events</DropdownLabel>
+                    {eventSections.current.map((section) =>
+                      section.routes.map(({ meta, label, href, tourTag }) => (
+                        <DropdownItem key={meta.path} href={href}>
+                          <span className="flex items-center justify-between w-full">
                             <span>{label}</span>
                             {tourTag && (
-                              <Chip
-                                label={tourTag.replace("PhasmoTourney", "T")}
-                                size="small"
-                                color="primary"
-                              />
+                              <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
+                                {tourTag.replace("PhasmoTourney", "T")}
+                              </span>
                             )}
-                          </Box>
-                        </MenuItem>
-                      ))}
-                    </Box>
-                  ))}
-                </Menu>
+                          </span>
+                        </DropdownItem>
+                      )),
+                    )}
+                  </>
+                )}
+              </NavDropdown>
 
-                {/* Tools Dropdown */}
-                <Button
-                  color="inherit"
-                  startIcon={<BuildIcon />}
-                  onClick={(e) => setToolsAnchorEl(e.currentTarget)}
-                >
-                  Tools
-                </Button>
-                <Menu
-                  anchorEl={toolsAnchorEl}
-                  open={Boolean(toolsAnchorEl)}
-                  onClose={() => setToolsAnchorEl(null)}
-                >
-                  <MenuItem
-                    component={Link}
-                    href="/notifications"
-                    onClick={() => setToolsAnchorEl(null)}
-                  >
-                    To-Do List
-                  </MenuItem>
-                  {tools.map((meta) => (
-                    <MenuItem
-                      key={meta.path}
-                      component={Link}
-                      href={mapHref(meta.path)}
-                      onClick={() => setToolsAnchorEl(null)}
-                    >
-                      {meta.title || meta.path}
-                    </MenuItem>
-                  ))}
-                </Menu>
+              {/* Tools Dropdown */}
+              <NavDropdown label="Tools" icon={<FiTool size={16} />}>
+                <DropdownItem href="/notifications">To-Do List</DropdownItem>
+                {tools.map((meta) => (
+                  <DropdownItem key={meta.path} href={mapHref(meta.path)}>
+                    {meta.title || meta.path}
+                  </DropdownItem>
+                ))}
+              </NavDropdown>
 
-                {/* Community Updates */}
-                <Button
-                  color="inherit"
-                  startIcon={<NewspaperIcon />}
-                  component={Link}
-                  href="/posts"
-                >
-                  Community Updates
-                </Button>
-              </Box>
-            )}
+              {/* Community Updates */}
+              <Link
+                href="/posts"
+                className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-foreground/80 dark:text-foreground-dark/80 hover:text-foreground dark:hover:text-foreground-dark hover:bg-surface-100 dark:hover:bg-surface-900/50 rounded-lg transition-colors no-underline"
+              >
+                <FiFileText size={16} />
+                Community Updates
+              </Link>
+            </div>
 
-            {/* Right Side Actions */}
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <IconButton
-                color="inherit"
+            {/* Right: Actions */}
+            <div className="flex items-center gap-1">
+              <button
                 onClick={() => setShowSearch(true)}
+                className="p-2 rounded-lg text-foreground/70 dark:text-foreground-dark/70 hover:text-foreground dark:hover:text-foreground-dark hover:bg-surface-100 dark:hover:bg-surface-900/50 transition-colors"
                 aria-label="Search"
               >
-                <SearchIcon />
-              </IconButton>
+                <FiSearch size={18} />
+              </button>
 
               {user && (
-                <IconButton
-                  color="inherit"
-                  component={Link}
+                <Link
                   href="/notifications"
+                  className="relative p-2 rounded-lg text-foreground/70 dark:text-foreground-dark/70 hover:text-foreground dark:hover:text-foreground-dark hover:bg-surface-100 dark:hover:bg-surface-900/50 transition-colors"
                   aria-label="Notifications"
                 >
-                  <Badge badgeContent={unreadCount} color="error">
-                    <NotificationsIcon />
-                  </Badge>
-                </IconButton>
+                  <FiBell size={18} />
+                  {unreadCount > 0 && (
+                    <span className="absolute top-1 right-1 min-w-[16px] h-4 flex items-center justify-center text-[10px] font-bold text-white bg-danger rounded-full px-1">
+                      {unreadCount}
+                    </span>
+                  )}
+                </Link>
               )}
 
-              <IconButton
-                color="inherit"
+              <button
                 onClick={toggleTheme}
+                className="p-2 rounded-lg text-foreground/70 dark:text-foreground-dark/70 hover:text-foreground dark:hover:text-foreground-dark hover:bg-surface-100 dark:hover:bg-surface-900/50 transition-colors"
                 aria-label="Toggle theme"
               >
-                {theme === "dark" ? <LightModeIcon /> : <DarkModeIcon />}
-              </IconButton>
+                {theme === "dark" ? <FiSun size={18} /> : <FiMoon size={18} />}
+              </button>
 
-              <IconButton
-                color="inherit"
+              <button
                 onClick={() => setShowShortcuts(true)}
+                className="hidden sm:block p-2 rounded-lg text-foreground/70 dark:text-foreground-dark/70 hover:text-foreground dark:hover:text-foreground-dark hover:bg-surface-100 dark:hover:bg-surface-900/50 transition-colors"
                 aria-label="Keyboard shortcuts"
               >
-                <HelpIcon />
-              </IconButton>
+                <FiHelpCircle size={18} />
+              </button>
 
-              {!isMobile && (
-                <>
-                  {user ? (
-                    <>
-                      <IconButton
-                        color="inherit"
-                        onClick={(e) => setUserAnchorEl(e.currentTarget)}
-                        aria-label="User menu"
-                      >
-                        <Avatar
-                          sx={{
-                            width: 32,
-                            height: 32,
-                            bgcolor: "primary.main",
-                          }}
-                        >
-                          <AccountCircleIcon />
-                        </Avatar>
-                      </IconButton>
-                      <Menu
-                        anchorEl={userAnchorEl}
-                        open={Boolean(userAnchorEl)}
-                        onClose={() => setUserAnchorEl(null)}
-                      >
-                        <Box sx={{ px: 2, py: 1 }}>
-                          <Typography variant="body2" fontWeight="bold">
+              {/* Desktop user menu */}
+              <div ref={userMenuRef} className="relative hidden md:block">
+                {user ? (
+                  <>
+                    <button
+                      onClick={() => setUserMenuOpen((o) => !o)}
+                      className="flex items-center gap-2 ml-2 p-1.5 rounded-lg hover:bg-surface-100 dark:hover:bg-surface-900/50 transition-colors"
+                      aria-label="User menu"
+                    >
+                      <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-sm font-medium">
+                        {(user.displayName || "U")[0].toUpperCase()}
+                      </div>
+                    </button>
+                    {userMenuOpen && (
+                      <div className="absolute right-0 top-full mt-1 w-56 bg-card dark:bg-card-dark border border-border dark:border-border-dark rounded-xl shadow-soft-lg z-50 py-1 animate-slide-down">
+                        <div className="px-4 py-3 border-b border-border dark:border-border-dark">
+                          <p className="text-sm font-semibold text-foreground dark:text-foreground-dark truncate">
                             {user.displayName || "User"}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
+                          </p>
+                          <p className="text-xs text-foreground-muted dark:text-foreground-dark-muted truncate">
                             {user.email}
-                          </Typography>
-                        </Box>
-                        <Divider />
-                        <MenuItem
-                          component={Link}
+                          </p>
+                        </div>
+                        <Link
                           href={profileHref}
-                          onClick={() => setUserAnchorEl(null)}
+                          onClick={() => setUserMenuOpen(false)}
+                          className="block px-4 py-2.5 text-sm text-foreground dark:text-foreground-dark hover:bg-surface-100 dark:hover:bg-surface-900/50 transition-colors no-underline"
                         >
                           Profile
-                        </MenuItem>
-                        <MenuItem onClick={handleLogout}>Logout</MenuItem>
-                      </Menu>
-                    </>
-                  ) : (
-                    <Button variant="contained" onClick={handleLogin}>
-                      Log in
-                    </Button>
-                  )}
-                </>
-              )}
-            </Box>
-          </Toolbar>
-        </Container>
-      </AppBar>
+                        </Link>
+                        <button
+                          onClick={handleLogout}
+                          className="w-full text-left px-4 py-2.5 text-sm text-danger hover:bg-danger-50 dark:hover:bg-danger/10 transition-colors"
+                        >
+                          Logout
+                        </button>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <button
+                    onClick={handleLogin}
+                    className="ml-2 px-4 py-2 text-sm font-medium bg-primary hover:bg-primary-600 text-white rounded-lg transition-colors"
+                  >
+                    Log in
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      {/* Mobile Drawer Overlay */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm md:hidden"
+          onClick={closeMobile}
+        />
+      )}
 
       {/* Mobile Drawer */}
-      <Drawer anchor="left" open={mobileOpen} onClose={handleDrawerToggle}>
-        {drawer}
-      </Drawer>
+      <div
+        className={cn(
+          "fixed inset-y-0 left-0 z-50 w-72 bg-card dark:bg-card-dark border-r border-border dark:border-border-dark transform transition-transform duration-300 ease-in-out md:hidden overflow-y-auto",
+          mobileOpen ? "translate-x-0" : "-translate-x-full",
+        )}
+      >
+        {/* Drawer Header */}
+        <div className="flex items-center justify-between p-4 border-b border-border dark:border-border-dark">
+          <div className="flex items-center gap-2">
+            <HiSparkles className="text-primary" size={20} />
+            <span className="text-lg font-bold text-foreground dark:text-foreground-dark">
+              The Lair of Evil
+            </span>
+          </div>
+          <button
+            onClick={closeMobile}
+            className="p-2 rounded-lg text-foreground-muted hover:bg-surface-100 dark:hover:bg-surface-900/50 transition-colors"
+            aria-label="Close menu"
+          >
+            <FiX size={18} />
+          </button>
+        </div>
+
+        {/* Drawer Content */}
+        <div className="py-2">
+          {/* Admin Section */}
+          {admin && (
+            <>
+              <MobileSection label="Admin" icon={<FiShield size={16} />}>
+                <MobileLink href="/admin/cms" onClick={closeMobile}>
+                  CMS Admin
+                </MobileLink>
+                <MobileLink href="/admin/suggestions" onClick={closeMobile}>
+                  Suggestions
+                </MobileLink>
+                <MobileLink href="/admin/tags" onClick={closeMobile}>
+                  Tags Management
+                </MobileLink>
+                <MobileLink href="/admin/notifications" onClick={closeMobile}>
+                  Send Notifications
+                </MobileLink>
+              </MobileSection>
+              <div className="mx-4 border-t border-border dark:border-border-dark" />
+            </>
+          )}
+
+          {/* Tourney Admins Section */}
+          {admin && (
+            <>
+              <MobileSection
+                label="Tourney Admins"
+                icon={<FiCalendar size={16} />}
+              >
+                <MobileLink href="/admin/phasmoTourney5" onClick={closeMobile}>
+                  Phasmo Tourney 5
+                </MobileLink>
+              </MobileSection>
+              <div className="mx-4 border-t border-border dark:border-border-dark" />
+            </>
+          )}
+
+          {/* Events Section */}
+          <MobileSection label="Events" icon={<FiCalendar size={16} />}>
+            {eventSections.current.map((section) => (
+              <MobileSection
+                key={section.key}
+                label={section.key}
+                icon={<FiChevronRight size={14} />}
+              >
+                {section.routes.map(({ meta, label, href }) => (
+                  <MobileLink key={meta.path} href={href} onClick={closeMobile}>
+                    {label}
+                  </MobileLink>
+                ))}
+              </MobileSection>
+            ))}
+          </MobileSection>
+
+          {/* Tools Section */}
+          <MobileSection label="Tools" icon={<FiTool size={16} />}>
+            <MobileLink href="/notifications" onClick={closeMobile}>
+              To-Do List
+            </MobileLink>
+            {tools.map((meta) => (
+              <MobileLink
+                key={meta.path}
+                href={mapHref(meta.path)}
+                onClick={closeMobile}
+              >
+                {meta.title || meta.path}
+              </MobileLink>
+            ))}
+          </MobileSection>
+
+          {/* Community Updates */}
+          <MobileLink
+            href="/posts"
+            icon={<FiFileText size={16} />}
+            onClick={closeMobile}
+          >
+            Community Updates
+          </MobileLink>
+
+          {/* Friends - Only show when logged in */}
+          {user && (
+            <MobileLink
+              href="/friends"
+              icon={<FiUsers size={16} />}
+              onClick={closeMobile}
+            >
+              Friends
+            </MobileLink>
+          )}
+
+          {/* Messages - Only show when logged in */}
+          {user && (
+            <MobileLink
+              href="/messages"
+              icon={<FiMessageSquare size={16} />}
+              onClick={closeMobile}
+            >
+              Messages
+            </MobileLink>
+          )}
+        </div>
+
+        {/* Drawer Footer - User */}
+        <div className="border-t border-border dark:border-border-dark p-4 mt-auto">
+          {user ? (
+            <>
+              <div className="mb-3">
+                <p className="text-sm font-semibold text-foreground dark:text-foreground-dark truncate">
+                  {user.displayName || "User"}
+                </p>
+                <p className="text-xs text-foreground-muted dark:text-foreground-dark-muted truncate">
+                  {user.email}
+                </p>
+              </div>
+              <Link
+                href={profileHref}
+                onClick={closeMobile}
+                className="block w-full text-center px-4 py-2 text-sm font-medium border border-border dark:border-border-dark rounded-lg text-foreground dark:text-foreground-dark hover:bg-surface-100 dark:hover:bg-surface-900/50 transition-colors mb-2 no-underline"
+              >
+                Profile
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-danger border border-danger/30 rounded-lg hover:bg-danger-50 dark:hover:bg-danger/10 transition-colors"
+              >
+                <FiLogOut size={14} />
+                Logout
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={handleLogin}
+              className="w-full px-4 py-2.5 text-sm font-medium bg-primary hover:bg-primary-600 text-white rounded-lg transition-colors"
+            >
+              Log in
+            </button>
+          )}
+        </div>
+      </div>
 
       {/* Modals */}
       <SearchModal show={showSearch} onHide={() => setShowSearch(false)} />

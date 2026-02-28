@@ -1,6 +1,6 @@
 "use client";
 import { ReactNode } from "react";
-import { Badge, Breadcrumb, Button, Container, Stack } from "react-bootstrap";
+import { cn } from "@/lib/utils";
 import InlineLink from "@/components/ui/InlineLink";
 
 export type TourneyBreadcrumb = {
@@ -18,6 +18,23 @@ export type TourneyHeroAction = {
 export type TourneyHeroBadge = {
   label: string;
   variant?: string;
+};
+
+const badgeVariantMap: Record<string, string> = {
+  primary: "bg-primary-500 text-white",
+  secondary: "bg-gray-500 text-white",
+  success: "bg-green-500 text-white",
+  warning: "bg-yellow-500 text-black",
+  info: "bg-cyan-500 text-white",
+  danger: "bg-red-500 text-white",
+};
+
+const actionVariantMap: Record<string, string> = {
+  "outline-light":
+    "border border-white/60 text-white hover:bg-white/10 transition-colors",
+  primary: "bg-primary-500 text-white hover:bg-primary-600 transition-colors",
+  "outline-primary":
+    "border border-primary-500 text-primary-500 hover:bg-primary-500/10 transition-colors",
 };
 
 type TourneyHeroProps = {
@@ -40,65 +57,94 @@ export function TourneyHero({
   extra,
 }: TourneyHeroProps) {
   return (
-    <Container fluid className={`tourney-hero tourney-hero-${accent}`}>
-      <Container>
-        <Stack gap={3} className="py-3">
-          <Breadcrumb className="small m-0">
-            {breadcrumbs.map((crumb, index) => {
-              const isLast = index === breadcrumbs.length - 1;
-              return (
-                <Breadcrumb.Item
-                  key={`${crumb.label}-${index}`}
-                  linkAs={InlineLink as any}
-                  linkProps={crumb.href ? { href: crumb.href } : undefined}
-                  href={crumb.href}
-                  active={isLast || !crumb.href}
-                >
-                  {crumb.label}
-                </Breadcrumb.Item>
-              );
-            })}
-          </Breadcrumb>
+    <div className={cn("w-full", `tourney-hero tourney-hero-${accent}`)}>
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="flex flex-col gap-3 py-3">
+          {/* Breadcrumb */}
+          <nav aria-label="breadcrumb">
+            <ol className="flex flex-wrap items-center gap-1 text-sm m-0 list-none p-0">
+              {breadcrumbs.map((crumb, index) => {
+                const isLast = index === breadcrumbs.length - 1;
+                return (
+                  <li
+                    key={`${crumb.label}-${index}`}
+                    className={cn(
+                      "flex items-center",
+                      isLast || !crumb.href
+                        ? "text-foreground-secondary"
+                        : "text-foreground",
+                    )}
+                  >
+                    {index > 0 && (
+                      <span className="mx-1.5 text-foreground-secondary">
+                        /
+                      </span>
+                    )}
+                    {crumb.href && !isLast ? (
+                      <InlineLink href={crumb.href} className="hover:underline">
+                        {crumb.label}
+                      </InlineLink>
+                    ) : (
+                      <span>{crumb.label}</span>
+                    )}
+                  </li>
+                );
+              })}
+            </ol>
+          </nav>
 
-          <div className="d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center gap-3">
-            <div className="d-flex flex-column gap-2">
+          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3">
+            <div className="flex flex-col gap-2">
               {badges && badges.length > 0 && (
-                <Stack direction="horizontal" gap={2} className="flex-wrap">
+                <div className="flex flex-row flex-wrap gap-2">
                   {badges.map((badge) => (
-                    <Badge key={badge.label} bg={badge.variant ?? "secondary"}>
+                    <span
+                      key={badge.label}
+                      className={cn(
+                        "rounded-full text-xs font-medium px-2.5 py-0.5",
+                        badgeVariantMap[badge.variant ?? "secondary"] ??
+                          badgeVariantMap.secondary,
+                      )}
+                    >
                       {badge.label}
-                    </Badge>
+                    </span>
                   ))}
-                </Stack>
+                </div>
               )}
               <div>
-                <h1 className="h3 mb-1">{title}</h1>
-                {subtitle && <p className="text-muted mb-0">{subtitle}</p>}
+                <h1 className="text-xl font-semibold mb-1 text-foreground">
+                  {title}
+                </h1>
+                {subtitle && (
+                  <p className="text-foreground-secondary mb-0">{subtitle}</p>
+                )}
               </div>
             </div>
 
             {actions && actions.length > 0 && (
-              <Stack direction="horizontal" gap={2} className="flex-wrap">
+              <div className="flex flex-row flex-wrap gap-2">
                 {actions.map((action) => (
-                  <Button
+                  <InlineLink
                     key={action.label}
-                    variant={action.variant ?? "outline-light"}
-                    as={InlineLink as any}
                     href={action.href}
-                    className="d-flex align-items-center gap-2"
+                    className={cn(
+                      "inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium no-underline",
+                      actionVariantMap[action.variant ?? "outline-light"] ??
+                        actionVariantMap["outline-light"],
+                    )}
                   >
                     {action.icon}
                     <span>{action.label}</span>
-                  </Button>
+                  </InlineLink>
                 ))}
-              </Stack>
+              </div>
             )}
           </div>
 
           {extra}
-        </Stack>
-      </Container>
-    </Container>
+        </div>
+      </div>
+    </div>
   );
 }
 
