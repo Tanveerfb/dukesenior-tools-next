@@ -29,7 +29,6 @@ export default async function ProfilePage({
         lastSeen={user.lastSeen}
         signInCount={user.signInCount}
         bannerURL={user.bannerURL}
-        accentColor={user.accentColor}
         pronouns={user.pronouns}
         location={user.location}
         timezone={user.timezone}

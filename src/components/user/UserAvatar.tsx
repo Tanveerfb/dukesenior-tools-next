@@ -26,11 +26,11 @@ export default function UserAvatar({
   className = "",
 }: UserAvatarProps) {
   const dimension = sizeMap[size];
-  const accentColor = user.accentColor || "#5865F2";
+  const accentColor = "#5865F2"; // fixed color, accent feature removed
   const displayName = user.displayName || user.username || "User";
   const username = user.username || "";
   const photoURL = user.photoURL;
-  
+
   // Get initials for fallback
   const getInitials = () => {
     if (displayName) {
@@ -47,7 +47,7 @@ export default function UserAvatar({
 
   return (
     <div
-      className={`position-relative ${onClick ? "cursor-pointer" : ""} ${className}`}
+      className={`relative ${onClick ? "cursor-pointer" : ""} ${className}`}
       onClick={onClick}
       style={{
         width: dimension,

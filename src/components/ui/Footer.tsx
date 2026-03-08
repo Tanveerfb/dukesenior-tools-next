@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { FaDiscord, FaInstagram, FaTwitter } from "react-icons/fa";
+import { FiMenu } from "react-icons/fi";
 import { RiNextjsFill } from "react-icons/ri";
 import { SiKofi, SiTailwindcss } from "react-icons/si";
 
@@ -78,12 +79,21 @@ export default function Footer() {
                 &copy; {new Date().getFullYear()} DukeSenior
               </span>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="w-full flex justify-evenly flex-wrap gap-2 mt-4">
               <span className="flex items-center gap-1 text-xs text-foreground-muted dark:text-foreground-dark-muted">
                 <RiNextjsFill size={16} /> Next.js
               </span>
               <span className="flex items-center gap-1 text-xs text-foreground-muted dark:text-foreground-dark-muted">
                 <SiTailwindcss size={14} /> Tailwind
+              </span>
+              <span className="flex items-center gap-1 text-xs text-foreground-muted dark:text-foreground-dark-muted">
+                <FiMenu size={14} /> React Icons
+              </span>
+              <span className="flex items-center gap-1 text-xs text-foreground-muted dark:text-foreground-dark-muted">
+                <span className="font-bold">Framer Motion</span>
+              </span>
+              <span className="flex items-center gap-1 text-xs text-foreground-muted dark:text-foreground-dark-muted">
+                <span className="font-display">Permanent Marker</span>
               </span>
             </div>
           </div>

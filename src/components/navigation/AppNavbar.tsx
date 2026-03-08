@@ -353,7 +353,6 @@ export default function AppNavbar() {
 
               {/* Tools Dropdown */}
               <NavDropdown label="Tools" icon={<FiTool size={16} />}>
-                <DropdownItem href="/notifications">To-Do List</DropdownItem>
                 {tools.map((meta) => (
                   <DropdownItem key={meta.path} href={mapHref(meta.path)}>
                     {meta.title || meta.path}
@@ -522,9 +521,6 @@ export default function AppNavbar() {
 
           {/* Tools Section */}
           <MobileSection label="Tools" icon={<FiTool size={16} />}>
-            <MobileLink href="/notifications" onClick={closeMobile}>
-              To-Do List
-            </MobileLink>
             {tools.map((meta) => (
               <MobileLink
                 key={meta.path}

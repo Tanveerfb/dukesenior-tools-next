@@ -44,7 +44,6 @@ export default function ProfilePage() {
   const pronounsRef = useRef<HTMLInputElement>(null);
   const locationRef = useRef<HTMLInputElement>(null);
   const timezoneRef = useRef<HTMLInputElement>(null);
-  const accentColorRef = useRef<HTMLInputElement>(null);
   const discordRef = useRef<HTMLInputElement>(null);
   const twitchRef = useRef<HTMLInputElement>(null);
   const twitterRef = useRef<HTMLInputElement>(null);
@@ -59,9 +58,12 @@ export default function ProfilePage() {
         const doc = await getUserByUID(user.uid);
         if (cancelled) return;
         setProfileDoc(doc);
-        if (doc?.username) {
-          router.replace(`/profile/${doc.username}`);
-        }
+        // we no longer redirect away from the edit page. '/profile' is
+        // deliberately the edit route; the earlier behavior bounced users
+        // immediately back to the public slug view which made the "Edit
+        // Profile" button useless.
+        // if we ever want to send people to the public page automatically,
+        // we can handle that with a separate button or query parameter.
       } catch {
         if (!cancelled) {
           setStatus({
@@ -236,7 +238,6 @@ export default function ProfilePage() {
         pronouns: pronounsRef.current?.value || "",
         location: locationRef.current?.value || "",
         timezone: timezoneRef.current?.value || "",
-        accentColor: accentColorRef.current?.value || "#5865F2",
         socialLinks: Object.keys(socialLinks).length > 0 ? socialLinks : {},
       };
 
@@ -671,28 +672,6 @@ export default function ProfilePage() {
                         maxLength={100}
                         className="block w-full rounded-lg border border-border dark:border-border-dark bg-background dark:bg-background-dark text-foreground px-3 py-2 text-sm"
                       />
-                    </div>
-                  </div>
-
-                  <div className="mb-3">
-                    <label
-                      htmlFor="accentColor"
-                      className="block text-sm font-medium text-foreground mb-1"
-                    >
-                      Accent Color
-                    </label>
-                    <div className="flex gap-2 items-center">
-                      <input
-                        type="color"
-                        id="accentColor"
-                        ref={accentColorRef}
-                        defaultValue={profileDoc?.accentColor || "#5865F2"}
-                        className="border border-border dark:border-border-dark rounded"
-                        style={{ width: 60, height: 38 }}
-                      />
-                      <span className="text-xs text-foreground-secondary">
-                        Choose a color for your profile borders and badges
-                      </span>
                     </div>
                   </div>
 

@@ -8,7 +8,10 @@ interface SocialLinksProps {
   className?: string;
 }
 
-export default function SocialLinks({ socialLinks, className = "" }: SocialLinksProps) {
+export default function SocialLinks({
+  socialLinks,
+  className = "",
+}: SocialLinksProps) {
   if (!socialLinks || Object.keys(socialLinks).length === 0) {
     return null;
   }
@@ -21,7 +24,7 @@ export default function SocialLinks({ socialLinks, className = "" }: SocialLinks
   ];
 
   return (
-    <div className={`d-flex gap-2 ${className}`}>
+    <div className={`flex items-center gap-2 ${className}`}>
       {links.map(({ key, icon: Icon, color, label }) => {
         const url = socialLinks[key as keyof typeof socialLinks];
         if (!url) return null;
@@ -32,7 +35,7 @@ export default function SocialLinks({ socialLinks, className = "" }: SocialLinks
             href={url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-decoration-none"
+            className="relative z-20"
             style={{
               color: color,
               fontSize: "1.5rem",

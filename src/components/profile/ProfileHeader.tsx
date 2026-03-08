@@ -55,7 +55,6 @@ interface Props {
   lastSeen?: number;
   signInCount?: number;
   bannerURL?: string;
-  accentColor?: string;
   pronouns?: string;
   location?: string;
   timezone?: string;
@@ -73,7 +72,6 @@ export default function ProfileHeader({
   lastSeen,
   signInCount: _signInCount,
   bannerURL,
-  accentColor = "#5865F2",
   pronouns,
   location,
   timezone,
@@ -132,7 +130,6 @@ export default function ProfileHeader({
     username,
     displayName,
     photoURL,
-    accentColor,
   };
 
   useEffect(() => {
@@ -169,13 +166,15 @@ export default function ProfileHeader({
         user.displayName || user.username || "",
         user.photoURL,
         uid,
-        username
+        username,
       );
       setFriendStatus("pending_sent");
       alert("Friend request sent!");
     } catch (error: unknown) {
       const msg =
-        error instanceof Error ? error.message : "Failed to send friend request";
+        error instanceof Error
+          ? error.message
+          : "Failed to send friend request";
       alert(msg);
     } finally {
       setActionLoading(false);
@@ -263,7 +262,7 @@ export default function ProfileHeader({
     if (!user || !uid || !username) return;
     if (
       !confirm(
-        `Block @${username}? This will remove them from your friends and prevent future interactions.`
+        `Block @${username}? This will remove them from your friends and prevent future interactions.`,
       )
     )
       return;
@@ -289,18 +288,15 @@ export default function ProfileHeader({
         backgroundPosition: "center",
       }
     : {
-        background: `linear-gradient(135deg, ${accentColor}99, ${accentColor}33)`,
+        background: "bg-secondary", // fallback color if no banner
       };
 
   return (
     <div className="rounded-xl border border-border dark:border-border-dark bg-card dark:bg-card-dark shadow mb-4 overflow-hidden">
       {/* Banner */}
-      <div
-        className="h-[200px] w-full relative"
-        style={{ borderBottom: `4px solid ${accentColor}`, ...bannerStyle }}
-      />
+      <div className="h-[200px] w-full relative" style={{ ...bannerStyle }} />
 
-      <div className="px-5 pb-5" style={{ marginTop: -48 }}>
+      <div className="px-5 pb-5 relative z-10" style={{ marginTop: -48 }}>
         <div className="flex flex-col md:flex-row items-start">
           {/* Avatar overlapping banner */}
           <div className="mr-3 mb-3 md:mb-0" style={{ marginTop: -48 }}>
@@ -329,7 +325,7 @@ export default function ProfileHeader({
                   )}
                 </div>
                 {socialLinks && (
-                  <div className="mt-2">
+                  <div className="mt-1 flex gap-2">
                     <SocialLinks socialLinks={socialLinks} />
                   </div>
                 )}
@@ -340,19 +336,7 @@ export default function ProfileHeader({
                 {isOwner ? (
                   <button
                     onClick={() => router.push("/profile")}
-                    className="px-3 py-1.5 text-sm rounded-lg border-2 font-medium transition-all duration-200 hover:text-white"
-                    style={{
-                      borderColor: accentColor,
-                      color: accentColor,
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = accentColor;
-                      e.currentTarget.style.color = "white";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = "transparent";
-                      e.currentTarget.style.color = accentColor;
-                    }}
+                    className="px-3 py-1.5 text-sm rounded-lg border-2 font-medium transition-all duration-200 border-primary text-primary hover:bg-primary hover:text-white"
                   >
                     Edit Profile
                   </button>
@@ -399,11 +383,7 @@ export default function ProfileHeader({
                     {friendStatus === "friends" && (
                       <>
                         <button
-                          className="px-3 py-1.5 text-sm rounded-lg text-white transition-colors"
-                          style={{
-                            background: accentColor,
-                            borderColor: accentColor,
-                          }}
+                          className="px-3 py-1.5 text-sm rounded-lg bg-primary border-primary text-white hover:bg-primary-600 transition-colors"
                           onClick={() =>
                             router.push(`/messages?username=${username}`)
                           }
@@ -480,8 +460,16 @@ export default function ProfileHeader({
               <div>
                 <strong>0</strong> following
               </div>
-              {location && <div>{"\ud83d\udccd"} {location}</div>}
-              {timezone && <div>{"\ud83d\udd50"} {timezone}</div>}
+              {location && (
+                <div>
+                  {"\ud83d\udccd"} {location}
+                </div>
+              )}
+              {timezone && (
+                <div>
+                  {"\ud83d\udd50"} {timezone}
+                </div>
+              )}
               {memberSince && <div>Member since {memberSince}</div>}
               {lastSeenMs && (
                 <div>Last seen {new Date(lastSeenMs).toLocaleString()}</div>

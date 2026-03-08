@@ -13,23 +13,26 @@ function tryInit() {
   // avoid running twice
   if (adminAuth !== undefined || adminDb !== undefined) return;
 
+  // only attempt to load when running on Node; this entire module may be
+  // imported by code that also runs in the browser (e.g. SSR client pieces)
+  // so we must avoid letting Webpack/Next try to resolve `firebase-admin`
+  // during client-side bundling. using `eval("require")` hides the literal
+  // string from the bundler's static analysis.
+  if (typeof window !== "undefined") {
+    return; // bail early on client
+  }
+
   try {
-    // use require so TypeScript doesn't try to resolve these at compile time
-    // and so that the module can be missing without crashing the build.
-    // allow require here because the package may be missing
+    // use eval-ified require so the bundler ignores these lines entirely.
+    // the `@ts-expect-error` comments are only for TypeScript, not Webpack.
+    // allow missing module by swallowing errors.
 
-    // @ts-expect-error allow missing module
-    const {
-      getApps,
-      initializeApp,
-      applicationDefault,
-    } = require("firebase-admin/app");
+    const { getApps, initializeApp, applicationDefault } =
+      eval("require")("firebase-admin/app");
 
-    // @ts-expect-error allow missing module
-    const { getAuth } = require("firebase-admin/auth");
+    const { getAuth } = eval("require")("firebase-admin/auth");
 
-    // @ts-expect-error allow missing module
-    const { getFirestore } = require("firebase-admin/firestore");
+    const { getFirestore } = eval("require")("firebase-admin/firestore");
 
     // once we have the constructors we can grab instances for later reuse
     adminAuth = getAuth();

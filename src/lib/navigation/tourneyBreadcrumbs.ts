@@ -1,4 +1,8 @@
-import type { TourneyBreadcrumb } from "@/components/tourney/TourneyHero";
+// breadcrumb type used across nav components
+export interface TourneyBreadcrumb {
+  label: string;
+  href: string;
+}
 
 const SERIES_BASE: TourneyBreadcrumb[] = [
   { label: "Home", href: "/" },
@@ -6,7 +10,7 @@ const SERIES_BASE: TourneyBreadcrumb[] = [
 ];
 
 export function buildTourneyBreadcrumbs(
-  trail: TourneyBreadcrumb[]
+  trail: TourneyBreadcrumb[],
 ): TourneyBreadcrumb[] {
   return [
     ...SERIES_BASE.map((crumb) => ({ ...crumb })),

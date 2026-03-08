@@ -41,7 +41,8 @@
     "remark-gfm": "^4.0.0",
     "sass": "^1.90.0",
     "tailwind-merge": "^2.6.0",
-    "timezones.json": "^1.7.2"
+    "timezones.json": "^1.7.2",
+    "uuid": "^13.0.0"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
