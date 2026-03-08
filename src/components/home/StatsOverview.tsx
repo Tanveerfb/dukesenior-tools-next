@@ -1,4 +1,7 @@
 "use client";
+// NOTE: the homepage no longer renders this component. it remains in the
+// codebase for potential future metrics but currently produces static dummy
+// data and is effectively deprecated.
 import { useEffect, useState, useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { FiUsers, FiAward, FiPlayCircle, FiTrendingUp } from "react-icons/fi";

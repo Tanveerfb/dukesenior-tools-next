@@ -87,7 +87,8 @@ export async function getUserByUID(uid: string): Promise<UserDoc | null> {
   // Prefer admin SDK on server to avoid mixing SDK refs
   if (typeof window === "undefined") {
     try {
-      const { adminDb } = await import("@/lib/firebase/admin");
+      const mod = await import("@/lib/firebase/admin");
+      const adminDb = mod.getAdminDb();
       if (adminDb) {
         try {
           const snap = await adminDb.collection(USERS_COL).doc(uid).get();
@@ -171,7 +172,8 @@ export async function getUserByUsername(
 
   if (typeof window === "undefined") {
     try {
-      const { adminDb } = await import("@/lib/firebase/admin");
+      const mod = await import("@/lib/firebase/admin");
+      const adminDb = mod.getAdminDb();
       if (adminDb) {
         try {
           const mapSnap = await adminDb
@@ -213,7 +215,8 @@ export async function setUsername(
 
   if (typeof window === "undefined") {
     try {
-      const { adminDb } = await import("@/lib/firebase/admin");
+      const mod = await import("@/lib/firebase/admin");
+      const adminDb = mod.getAdminDb();
       if (adminDb) {
         try {
           await adminDb.runTransaction(async (tx: any) => {
@@ -330,7 +333,8 @@ export async function updateUserProfile(
 
   if (typeof window === "undefined") {
     try {
-      const { adminDb } = await import("@/lib/firebase/admin");
+      const mod = await import("@/lib/firebase/admin");
+      const adminDb = mod.getAdminDb();
       if (adminDb) {
         await adminDb.collection(USERS_COL).doc(uid).set(data, { merge: true });
         return;

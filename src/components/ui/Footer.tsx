@@ -7,8 +7,9 @@ const navSections = [
   {
     title: "Explore",
     links: [
-      { label: "Phasmo Tourney series", href: "/phasmotourney-series" },
       { label: "Posts & updates", href: "/posts" },
+      { label: "Leaderboard", href: "/leaderboard" },
+      { label: "Friends", href: "/friends" },
     ],
   },
   {
@@ -24,11 +25,6 @@ const navSections = [
       {
         label: "The Lair of Evil Discord",
         href: "https://discord.gg/xB9mpZfbq3",
-        external: true,
-      },
-      {
-        label: "Phasmo Tourney Discord",
-        href: "https://discord.gg/r9WT8RUPxn",
         external: true,
       },
       { label: "Profile", href: "/profile" },
@@ -65,8 +61,8 @@ export default function Footer() {
               The Lair of Evil
             </h2>
             <p className="text-sm text-foreground-muted dark:text-foreground-dark-muted mb-5">
-              Tools, event dashboards, and community resources powering the
-              Phasmo Tourney project and the DukeSenior community.
+              A collection of community tools, resources, and discussion hubs
+              for the DukeSenior audience.
             </p>
             <div className="flex flex-wrap items-center gap-3 mb-4">
               <a
@@ -128,8 +124,7 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="mt-10 pt-8 border-t border-border dark:border-border-dark flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <p className="text-sm text-foreground-muted dark:text-foreground-dark-muted">
-            Built with care for players, casters, and crew of the Phasmo
-            Tourney.
+            Built with care for the DukeSenior community.
           </p>
           <div className="flex flex-wrap gap-5">
             {socialLinks.map((social) => (

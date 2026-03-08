@@ -1,5 +1,5 @@
 "use client";
-import RoundSettingsViewer from "../../../../components/tourney/RoundSettingsViewer";
+import RoundSettingsViewer from "../../../../src/components/tourney/RoundSettingsViewer";
 
 export default function Tourney5RulesSettingsPage() {
   return (

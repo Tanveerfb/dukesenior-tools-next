@@ -1,6 +1,6 @@
 "use client";
 import HeroSection from "@/components/home/HeroSection";
-import StatsOverview from "@/components/home/StatsOverview";
+// stats section removed per refactor
 import FeaturedPosts from "@/components/home/FeaturedPosts";
 import QuickActions from "@/components/home/QuickActions";
 import ActivityFeed from "@/components/home/ActivityFeed";
@@ -11,8 +11,7 @@ export default function HomePage() {
       {/* Hero Section - Full Width */}
       <HeroSection />
 
-      {/* Stats Overview - Full Width */}
-      <StatsOverview />
+      {/* stats section removed */}
 
       {/* Main Content - Two Column Layout */}
       <div className="py-8 md:py-12 bg-background dark:bg-background-dark">
@@ -27,10 +26,10 @@ export default function HomePage() {
                   </span>
                 </div>
                 <h2 className="text-2xl md:text-3xl font-semibold text-foreground dark:text-foreground-dark mb-1">
-                  Community Posts & Resource Drops
+                  Community Posts & Resources
                 </h2>
                 <p className="text-sm text-foreground-muted dark:text-foreground-dark-muted mb-6">
-                  Stay current on announcements, guides, and match recaps from
+                  Stay current on announcements, guides, and community news from
                   the DukeSenior team.
                 </p>
               </div>

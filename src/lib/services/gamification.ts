@@ -89,7 +89,8 @@ export async function getUserGamification(
     // Try server-side first
     if (typeof window === "undefined") {
       try {
-        const { adminDb } = await import("@/lib/firebase/admin");
+        const mod = await import("@/lib/firebase/admin");
+        const adminDb = mod.getAdminDb();
         if (adminDb) {
           const snap = await adminDb
             .collection(GAMIFICATION_COL)

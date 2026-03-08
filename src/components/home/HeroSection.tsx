@@ -31,7 +31,7 @@ export default function HeroSection() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="text-3xl md:text-5xl lg:text-6xl font-bold leading-tight max-w-4xl text-foreground dark:text-foreground-dark chalk-underline"
           >
-            Your Hub for Phasmo Tournaments & Community Tools
+            Community Hub & Utility Toolkit
           </motion.h1>
 
           <motion.p
@@ -40,8 +40,8 @@ export default function HeroSection() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="max-w-2xl text-base md:text-lg text-foreground-muted dark:text-foreground-dark-muted"
           >
-            Brackets, recorded runs, stats, leaderboards, and community features
-            — all in one place. Join the DukeSenior community today.
+            Everything you need from profiles and leaderboards to resources and
+            community discussion — neatly bundled for easy access.
           </motion.p>
 
           <motion.div
@@ -51,16 +51,16 @@ export default function HeroSection() {
             className="flex flex-col sm:flex-row gap-3"
           >
             <Link
-              href="/phasmotourney-series"
+              href="/leaderboard"
               className="inline-flex items-center justify-center px-6 py-3 text-base font-medium bg-primary hover:bg-primary-600 text-white rounded-md border-2 border-primary-700/30 transition-all hover:scale-105 active:scale-95 no-underline shadow-soft tilt-sm"
             >
-              View Tournaments
+              View Leaderboard
             </Link>
             <Link
               href="/suggestions"
               className="inline-flex items-center justify-center px-6 py-3 text-base font-medium border-2 border-dashed border-border dark:border-border-dark text-foreground dark:text-foreground-dark rounded-md hover:bg-card/60 dark:hover:bg-card-dark/60 transition-all hover:scale-105 active:scale-95 no-underline -tilt-sm"
             >
-              Community Hub
+              Give Feedback
             </Link>
           </motion.div>
         </div>

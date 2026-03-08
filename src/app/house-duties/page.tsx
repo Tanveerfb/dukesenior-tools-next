@@ -59,7 +59,6 @@ export default function HouseDutiesPage() {
     if (user?.uid) {
       loadData();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.uid]);
 
   const loadData = async () => {

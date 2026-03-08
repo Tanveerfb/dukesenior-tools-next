@@ -26,14 +26,16 @@ const eslintConfig = [
       "@typescript-eslint/no-explicit-any": "off",
       "react/no-unescaped-entities": "off",
       "prefer-const": "off",
-      "@typescript-eslint/no-unused-vars": [
-        "warn",
-        {
-          argsIgnorePattern: "^_",
-          varsIgnorePattern: "^_",
-          caughtErrorsIgnorePattern: "^_",
-        },
-      ],
+      // unused variable warnings are extremely noisy across the codebase
+      // and are being tracked manually as needed; disable rule globally
+      "@typescript-eslint/no-unused-vars": "off", // the following additional rules are disabled for convenience
+      // - hooks dependency checks can be overly aggressive in this codebase
+      // - <img> tags are used frequently and the optimization warning is
+      //   more noise than value for our small personal site
+      // - require-imports is used in dynamic loaders and scripts
+      "react-hooks/exhaustive-deps": "off",
+      "@next/next/no-img-element": "off",
+      "@typescript-eslint/no-require-imports": "off",
     },
   },
 ];

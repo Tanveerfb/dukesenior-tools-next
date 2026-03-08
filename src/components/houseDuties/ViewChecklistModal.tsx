@@ -2,8 +2,8 @@
 
 import { FiPrinter, FiDownload } from "react-icons/fi";
 import { Checklist, DAYS_OF_WEEK } from "@/types/houseDuties";
-import { useRef, useEffect } from "react";
-import { cn } from "@/lib/utils";
+import { useRef, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 interface Props {
   show: boolean;
@@ -11,28 +11,52 @@ interface Props {
   checklist: Checklist;
 }
 
+/** Split an array into chunks of `size` */
+function chunk<T>(arr: T[], size: number): T[][] {
+  const chunks: T[][] = [];
+  for (let i = 0; i < arr.length; i += size) {
+    chunks.push(arr.slice(i, i + size));
+  }
+  return chunks;
+}
+
+const ROWS_PER_PAGE = 8;
+
 export default function ViewChecklistModal({ show, onHide, checklist }: Props) {
   const printRef = useRef<HTMLDivElement>(null);
+  const [portalEl, setPortalEl] = useState<HTMLDivElement | null>(null);
+
+  // Create a portal container as a direct child of <body>
+  useEffect(() => {
+    if (!show) return;
+    const el = document.createElement("div");
+    el.className = "checklist-print-portal";
+    document.body.appendChild(el);
+    setPortalEl(el);
+    return () => {
+      document.body.removeChild(el);
+      setPortalEl(null);
+    };
+  }, [show]);
 
   const handlePrint = () => {
     window.print();
   };
 
   const handleExportPDF = () => {
-    // For PDF export, we use the browser's print-to-PDF feature
     window.print();
   };
 
   const getPersonName = (personId: string): string => {
     const person = checklist.people.find((p) => p.id === personId);
-    return person?.name || "-";
+    return person?.name || "\u2013";
   };
 
   const getAssignment = (day: string, dutyId: string): string => {
     const assignment = checklist.assignments.find(
       (a) => a.day === day && a.dutyId === dutyId,
     );
-    return assignment ? getPersonName(assignment.personId) : "-";
+    return assignment ? getPersonName(assignment.personId) : "\u2013";
   };
 
   // Close on Escape key
@@ -47,20 +71,21 @@ export default function ViewChecklistModal({ show, onHide, checklist }: Props) {
 
   if (!show) return null;
 
+  const dutyChunks = chunk(checklist.duties, ROWS_PER_PAGE);
+
   return (
     <>
-      {/* Modal Overlay */}
+      {/* ===== SCREEN: Modal Overlay ===== */}
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+        className="checklist-print-root fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
         onClick={onHide}
       >
-        {/* Inner Dialog */}
         <div
           className="relative w-full max-w-6xl max-h-[90vh] overflow-y-auto rounded-xl bg-card dark:bg-card-dark border border-border dark:border-border-dark shadow-2xl"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Dialog Title */}
-          <div className="no-print px-6 py-4 border-b border-border dark:border-border-dark">
+          <div className="px-6 py-4 border-b border-border dark:border-border-dark">
             <h2 className="text-xl font-semibold text-foreground">
               {checklist.name}
             </h2>
@@ -69,17 +94,8 @@ export default function ViewChecklistModal({ show, onHide, checklist }: Props) {
           {/* Dialog Content */}
           <div className="px-6 py-4">
             <div ref={printRef} className="checklist-view">
-              {/* Print Header */}
-              <div className="print-only text-center mb-4">
-                <h1>{checklist.name}</h1>
-                {checklist.description && <p>{checklist.description}</p>}
-                <p className="text-foreground-secondary">
-                  Created: {new Date(checklist.createdAt).toLocaleDateString()}
-                </p>
-              </div>
-
               {/* Screen Header */}
-              <div className="no-print mb-3">
+              <div className="mb-3">
                 {checklist.isTemplate && (
                   <span className="inline-block rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 px-2 py-0.5 text-xs font-medium mb-2">
                     Template
@@ -128,10 +144,7 @@ export default function ViewChecklistModal({ show, onHide, checklist }: Props) {
                             key={day}
                             className="px-3 py-2 text-center text-foreground align-middle border border-border dark:border-border-dark"
                           >
-                            <div className="assignment-cell">
-                              {getAssignment(day, duty.id)}
-                              <div className="checkbox-cell print-only">☐</div>
-                            </div>
+                            {getAssignment(day, duty.id)}
                           </td>
                         ))}
                       </tr>
@@ -147,18 +160,11 @@ export default function ViewChecklistModal({ show, onHide, checklist }: Props) {
                   {checklist.people.map((person) => person.name).join(", ")}
                 </p>
               </div>
-
-              {/* Print Footer */}
-              <div className="print-only mt-5 text-center text-foreground-secondary">
-                <small>
-                  Printed from The Lair of Evil - House Duties Checklist Tool
-                </small>
-              </div>
             </div>
           </div>
 
           {/* Dialog Actions */}
-          <div className="no-print flex justify-end gap-2 px-6 py-4 border-t border-border dark:border-border-dark">
+          <div className="flex justify-end gap-2 px-6 py-4 border-t border-border dark:border-border-dark">
             <button
               type="button"
               onClick={onHide}
@@ -187,91 +193,220 @@ export default function ViewChecklistModal({ show, onHide, checklist }: Props) {
         </div>
       </div>
 
-      {/* Print Styles */}
+      {/* ===== PRINT: Portal rendered as direct child of <body> ===== */}
+      {portalEl &&
+        createPortal(
+          <div className="checklist-print-content">
+            {dutyChunks.map((duties, pageIdx) => (
+              <div
+                key={pageIdx}
+                className={cn(
+                  "print-page",
+                  pageIdx < dutyChunks.length - 1 && "print-page-break",
+                )}
+              >
+                {/* Header on every page */}
+                <div className="print-header">
+                  <h1>{checklist.name}</h1>
+                  {checklist.description && <p>{checklist.description}</p>}
+                  <p className="print-meta">
+                    Created by {checklist.createdByName} on{" "}
+                    {new Date(checklist.createdAt).toLocaleDateString()}
+                    {" \u2022 "}Last updated:{" "}
+                    {new Date(checklist.updatedAt).toLocaleDateString()}
+                  </p>
+                  {dutyChunks.length > 1 && (
+                    <p className="print-meta">
+                      Page {pageIdx + 1} of {dutyChunks.length}
+                    </p>
+                  )}
+                </div>
+
+                {/* Table for this page's duties */}
+                <table className="print-table">
+                  <thead>
+                    <tr>
+                      <th className="print-th-duty">Duty</th>
+                      {DAYS_OF_WEEK.map((day) => (
+                        <th key={day} className="print-th-day">
+                          {day}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {duties.map((duty, rowIdx) => (
+                      <tr
+                        key={duty.id}
+                        className={rowIdx % 2 === 1 ? "print-row-alt" : ""}
+                      >
+                        <td className="print-td-duty">{duty.name}</td>
+                        {DAYS_OF_WEEK.map((day) => (
+                          <td key={day} className="print-td-cell">
+                            <span>{getAssignment(day, duty.id)}</span>
+                            <span className="print-checkbox">{"\u2610"}</span>
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+
+                {/* People + footer on every page */}
+                <div className="print-people">
+                  <strong>People:</strong>{" "}
+                  {checklist.people.map((p) => p.name).join(", ")}
+                </div>
+                <div className="print-footer">
+                  Printed from The Lair of Evil &mdash; House Duties Checklist
+                  Tool
+                </div>
+              </div>
+            ))}
+          </div>,
+          portalEl,
+        )}
+
+      {/* ===== Styles ===== */}
       <style jsx global>{`
+        /* ---------- SCREEN: hide the print portal entirely ---------- */
+        .checklist-print-portal {
+          display: none;
+        }
+
+        /* ---------- PRINT ---------- */
+        @page {
+          size: A4 landscape;
+          margin: 12mm 15mm;
+        }
+
         @media print {
-          body * {
-            visibility: hidden;
-          }
-
-          .checklist-view,
-          .checklist-view * {
-            visibility: visible;
-          }
-
-          .checklist-view {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-          }
-
-          .no-print {
+          /* Hide the entire page (Next.js root, navbar, modal, etc.) */
+          body > *:not(.checklist-print-portal) {
             display: none !important;
           }
 
-          .print-only {
+          /* Show the portal */
+          .checklist-print-portal {
             display: block !important;
           }
 
-          .checklist-table {
-            page-break-inside: avoid;
+          .checklist-print-content {
+            width: 100%;
+            color: #000;
+            font-family: "Geist", Arial, Helvetica, sans-serif;
           }
 
-          .checklist-table th,
-          .checklist-table td {
-            padding: 12px 8px !important;
-            border: 1px solid #000 !important;
+          /* --- Page wrapper --- */
+          .print-page {
+            width: 100%;
+          }
+          .print-page-break {
+            page-break-after: always;
           }
 
-          .assignment-cell {
-            min-height: 60px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
+          /* --- Header --- */
+          .print-header {
+            text-align: center;
+            margin-bottom: 8px;
+          }
+          .print-header h1 {
+            font-family: "Permanent Marker", cursive;
+            font-size: 22px;
+            margin: 0 0 2px;
+          }
+          .print-header p {
+            font-size: 10px;
+            margin: 1px 0;
+            color: #333;
+          }
+          .print-meta {
+            font-size: 9px !important;
+            color: #666 !important;
           }
 
-          .checkbox-cell {
-            font-size: 24px;
-            margin-top: 10px;
+          /* --- Table --- */
+          .print-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+          }
+          .print-table th,
+          .print-table td {
+            border: 1px solid #222;
+            padding: 6px 5px;
+            font-size: 10px;
+            vertical-align: middle;
+          }
+          .print-th-duty,
+          .print-th-day {
+            background-color: #1976d2 !important;
+            color: #fff !important;
+            font-weight: 700;
+            text-align: center;
+            font-size: 11px;
+            padding: 7px 5px;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
+          .print-th-duty {
+            width: 22%;
+            text-align: left;
+            padding-left: 8px;
+          }
+          .print-td-duty {
+            font-weight: 700;
+            text-align: left;
+            padding-left: 8px;
+            font-size: 10px;
+          }
+          .print-td-cell {
+            text-align: center;
+            padding: 4px 3px 2px;
+          }
+          .print-td-cell span {
+            display: block;
+          }
+          .print-checkbox {
+            font-size: 18px;
+            line-height: 1;
+            margin-top: 2px;
+          }
+          .print-row-alt td {
+            background-color: #f0f0f0 !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
           }
 
-          h1 {
-            font-size: 28px;
-            margin-bottom: 10px;
+          /* --- People --- */
+          .print-people {
+            margin-top: 8px;
+            font-size: 10px;
+            color: #222;
           }
 
-          h6 {
-            font-size: 14px;
-            font-weight: bold;
+          /* --- Footer --- */
+          .print-footer {
+            margin-top: 6px;
+            text-align: center;
+            font-size: 8px;
+            color: #888;
           }
         }
 
-        @media screen {
-          .print-only {
-            display: none !important;
-          }
-
-          .assignment-cell {
-            padding: 8px;
-          }
-        }
-
+        /* ---------- Shared screen styles for checklist table ---------- */
         .checklist-table {
           border-collapse: collapse;
           width: 100%;
         }
-
         .checklist-table th {
           background-color: #1976d2;
           color: white;
           font-weight: 600;
         }
-
         .checklist-table td {
           vertical-align: middle;
         }
-
         .checklist-table th,
         .checklist-table td {
           border: 1px solid rgba(224, 224, 224, 1);

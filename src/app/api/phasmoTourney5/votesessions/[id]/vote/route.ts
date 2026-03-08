@@ -2,18 +2,18 @@ import { NextResponse } from "next/server";
 import { promises as fs } from "fs";
 import path from "path";
 // Public voting: optional token verification; accepts voter info from body when no token
-import { adminDb } from "@/lib/firebase/admin";
+import { getAdminDb } from "@/lib/firebase/admin";
 
 const SESSIONS_PATH = path.join(
   process.cwd(),
   "data",
-  "phasmoTourney5VoteSessions.json"
+  "phasmoTourney5VoteSessions.json",
 );
 const VOTES_PATH = path.join(process.cwd(), "data", "phasmoTourney5Votes.json");
 const PLAYERS_PATH = path.join(
   process.cwd(),
   "data",
-  "phasmoTourney5Players.json"
+  "phasmoTourney5Players.json",
 );
 
 async function readJson(file: string) {
@@ -35,7 +35,7 @@ async function writeJson(file: string, items: any[]) {
 
 export async function POST(
   req: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const { id: sessionId } = await params;
   const token = req.headers.get("authorization")?.replace("Bearer ", "");
@@ -81,7 +81,7 @@ export async function POST(
   if (!choicePlayerId)
     return NextResponse.json(
       { error: "choicePlayerId required" },
-      { status: 400 }
+      { status: 400 },
     );
 
   // Validate choice based on session config
@@ -97,9 +97,9 @@ export async function POST(
       .filter((p: any) =>
         session.type === "pick-ally" && session.subjectPlayerId
           ? p.id !== session.subjectPlayerId
-          : true
+          : true,
       )
-      .map((p: any) => p.id)
+      .map((p: any) => p.id),
   );
 
   if (!poolIds.has(choicePlayerId)) {
@@ -118,14 +118,15 @@ export async function POST(
   await writeJson(VOTES_PATH, votes);
   try {
     // Also persist to Firestore for live dashboards
-    await adminDb.collection("t5_votes").doc(vote.id).set(vote);
+    const adminDb = getAdminDb();
+    if (adminDb) await adminDb.collection("t5_votes").doc(vote.id).set(vote);
   } catch {}
   return NextResponse.json(vote, { status: 201 });
 }
 
 export async function GET(
   _: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const { id: sessionId } = await params;
   const votes = await readJson(VOTES_PATH);

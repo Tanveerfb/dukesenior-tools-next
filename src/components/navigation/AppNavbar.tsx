@@ -8,7 +8,6 @@ import { useNotifications } from "@/hooks/useNotifications";
 import { useTheme as useCustomTheme } from "@/components/ThemeProvider";
 import { getUserByUID } from "@/lib/services/users";
 import type { EffectiveMeta as EffectiveMetaType } from "@/types/tags";
-import { classifyEvents } from "@/lib/navigation/classify";
 import SearchModal from "@/components/navigation/SearchModal";
 import KeyboardShortcutsModal from "@/components/ui/KeyboardShortcutsModal";
 import { useHotkeys } from "react-hotkeys-hook";
@@ -23,7 +22,6 @@ import {
   FiChevronDown,
   FiChevronRight,
   FiShield,
-  FiCalendar,
   FiTool,
   FiFileText,
   FiBell,
@@ -285,32 +283,6 @@ export default function AppNavbar() {
     setMobileOpen(false);
   }, [pathname]);
 
-  const eventSections = useMemo(() => {
-    const { currentGroups, pastGroups, currentKeys, pastKeys } =
-      classifyEvents(effective);
-
-    const buildSection = (
-      keys: string[],
-      groups: Record<string, EffectiveMeta[]>,
-    ) =>
-      keys.map((key) => ({
-        key,
-        routes: [...groups[key]]
-          .sort((a, b) => a.path.localeCompare(b.path))
-          .map((meta) => ({
-            meta,
-            label: formatRouteLabel(meta),
-            href: mapHref(meta.path),
-            tourTag: extractTournamentTag(meta),
-          })),
-      }));
-
-    return {
-      current: buildSection(currentKeys, currentGroups),
-      past: buildSection(pastKeys, pastGroups),
-    };
-  }, [effective]);
-
   const tools = useMemo(
     () =>
       effective
@@ -378,41 +350,6 @@ export default function AppNavbar() {
                   </DropdownItem>
                 </NavDropdown>
               )}
-
-              {/* Tourney Admins Dropdown */}
-              {admin && (
-                <NavDropdown
-                  label="Tourney Admins"
-                  icon={<FiCalendar size={16} />}
-                >
-                  <DropdownItem href="/admin/phasmoTourney5">
-                    Phasmo Tourney 5
-                  </DropdownItem>
-                </NavDropdown>
-              )}
-
-              {/* Events Dropdown */}
-              <NavDropdown label="Events" icon={<FiCalendar size={16} />}>
-                {eventSections.current.length > 0 && (
-                  <>
-                    <DropdownLabel>Current Events</DropdownLabel>
-                    {eventSections.current.map((section) =>
-                      section.routes.map(({ meta, label, href, tourTag }) => (
-                        <DropdownItem key={meta.path} href={href}>
-                          <span className="flex items-center justify-between w-full">
-                            <span>{label}</span>
-                            {tourTag && (
-                              <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
-                                {tourTag.replace("PhasmoTourney", "T")}
-                              </span>
-                            )}
-                          </span>
-                        </DropdownItem>
-                      )),
-                    )}
-                  </>
-                )}
-              </NavDropdown>
 
               {/* Tools Dropdown */}
               <NavDropdown label="Tools" icon={<FiTool size={16} />}>
@@ -582,38 +519,6 @@ export default function AppNavbar() {
               <div className="mx-4 border-t border-border dark:border-border-dark" />
             </>
           )}
-
-          {/* Tourney Admins Section */}
-          {admin && (
-            <>
-              <MobileSection
-                label="Tourney Admins"
-                icon={<FiCalendar size={16} />}
-              >
-                <MobileLink href="/admin/phasmoTourney5" onClick={closeMobile}>
-                  Phasmo Tourney 5
-                </MobileLink>
-              </MobileSection>
-              <div className="mx-4 border-t border-border dark:border-border-dark" />
-            </>
-          )}
-
-          {/* Events Section */}
-          <MobileSection label="Events" icon={<FiCalendar size={16} />}>
-            {eventSections.current.map((section) => (
-              <MobileSection
-                key={section.key}
-                label={section.key}
-                icon={<FiChevronRight size={14} />}
-              >
-                {section.routes.map(({ meta, label, href }) => (
-                  <MobileLink key={meta.path} href={href} onClick={closeMobile}>
-                    {label}
-                  </MobileLink>
-                ))}
-              </MobileSection>
-            ))}
-          </MobileSection>
 
           {/* Tools Section */}
           <MobileSection label="Tools" icon={<FiTool size={16} />}>

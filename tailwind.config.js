@@ -1,5 +1,4 @@
 /** @type {import('tailwindcss').Config} */
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const typography = require("@tailwindcss/typography");
 
 module.exports = {
@@ -65,22 +64,22 @@ module.exports = {
         // auto-switch with theme AND support opacity modifiers.
         background: {
           DEFAULT: "rgb(var(--color-bg-rgb) / <alpha-value>)",
-          dark: "#1a2721",   // keep for back-compat
+          dark: "#1a2721", // keep for back-compat
         },
         foreground: {
           DEFAULT: "rgb(var(--color-fg-rgb) / <alpha-value>)",
           muted: "rgb(var(--color-fg-muted-rgb) / <alpha-value>)",
           secondary: "rgb(var(--color-fg-muted-rgb) / <alpha-value>)",
-          dark: "#e4dfd4",           // keep for back-compat
-          "dark-muted": "#a09888",   // keep for back-compat
+          dark: "#e4dfd4", // keep for back-compat
+          "dark-muted": "#a09888", // keep for back-compat
         },
         card: {
           DEFAULT: "rgb(var(--color-card-rgb) / <alpha-value>)",
-          dark: "#223029",   // keep for back-compat
+          dark: "#223029", // keep for back-compat
         },
         border: {
           DEFAULT: "rgb(var(--color-border-rgb) / <alpha-value>)",
-          dark: "#3a4f41",   // keep for back-compat
+          dark: "#3a4f41", // keep for back-compat
         },
         // Status colors (marker-inspired)
         success: {

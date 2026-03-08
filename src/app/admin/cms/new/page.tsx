@@ -205,7 +205,6 @@ export default function NewPostPage() {
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [content]);
 
   const toolbar = [
@@ -676,7 +675,6 @@ export default function NewPostPage() {
               }}
               onKeyDown={handleTagKeyDown}
               onFocus={() => setShowTagDropdown(true)}
-              aria-expanded={showTagDropdown}
               aria-haspopup="listbox"
               aria-controls="tag-dropdown-list"
               className="w-full rounded border border-border bg-transparent px-3 py-1.5 text-sm text-foreground placeholder:text-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary-500"

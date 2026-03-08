@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import {
   FiUser,
+  FiUsers,
   FiAward,
   FiPlayCircle,
   FiMessageCircle,
@@ -25,16 +26,16 @@ const quickActions: QuickAction[] = [
     href: "/profile",
   },
   {
-    icon: <FiAward size={18} />,
-    label: "Leaderboards",
-    description: "See tournament standings",
-    href: "/phasmotourney-series",
+    icon: <FiUsers size={18} />,
+    label: "Friends",
+    description: "Manage your friends list",
+    href: "/friends",
   },
   {
-    icon: <FiPlayCircle size={18} />,
-    label: "Recorded Runs",
-    description: "Browse match recordings",
-    href: "/phasmotourney-series",
+    icon: <FiAward size={18} />,
+    label: "Leaderboard",
+    description: "See top users",
+    href: "/leaderboard",
   },
   {
     icon: <FiMessageCircle size={18} />,
@@ -45,13 +46,13 @@ const quickActions: QuickAction[] = [
   {
     icon: <FiBookOpen size={18} />,
     label: "Resources",
-    description: "Guides and documentation",
+    description: "Guides, posts, and documentation",
     href: "/posts",
   },
   {
     icon: <FiInfo size={18} />,
     label: "About",
-    description: "Learn more about us",
+    description: "Learn more about the site",
     href: "/about",
   },
 ];

@@ -40,7 +40,14 @@ export default function SearchModal({
           fetch("/api/tags/effective"),
           fetch("/api/tags/registry"),
         ]);
-        if (effRes.ok) setData(await effRes.json());
+        if (effRes.ok) {
+          const raw: EffectiveMeta[] = await effRes.json();
+          // filter out PhasmoTourney routes entirely
+          const filtered = raw.filter(
+            (m) => !m.effective.some((t) => /^PhasmoTourney\d+$/i.test(t)),
+          );
+          setData(filtered);
+        }
         if (regRes.ok) setRegistry(await regRes.json());
         setTimeout(() => inputRef.current?.focus(), 50);
       })();
@@ -87,8 +94,9 @@ export default function SearchModal({
     return fuse.search(trimmed).map((result) => result.item);
   }, [trimmed, fuse]);
 
+  // show a few tools by default instead of events/tournaments
   const suggestions = !trimmed
-    ? data.filter((d) => d.effective.includes("Event")).slice(0, 5)
+    ? data.filter((d) => d.effective.includes("Tool")).slice(0, 5)
     : [];
 
   useEffect(() => {

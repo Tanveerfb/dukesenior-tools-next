@@ -18,54 +18,9 @@ interface Activity {
   metadata?: string;
 }
 
-const sampleActivities: Activity[] = [
-  {
-    id: "1",
-    type: "post",
-    user: "DukeSenior",
-    action: "published a new guide",
-    timestamp: "2 hours ago",
-    metadata: "Advanced Strategies",
-  },
-  {
-    id: "2",
-    type: "run",
-    user: "PlayerOne",
-    action: "recorded a new run",
-    timestamp: "4 hours ago",
-    metadata: "Perfect Score: 100",
-  },
-  {
-    id: "3",
-    type: "tournament",
-    user: "System",
-    action: "Tourney 5 registration opened",
-    timestamp: "5 hours ago",
-  },
-  {
-    id: "4",
-    type: "vote",
-    user: "PlayerTwo",
-    action: "voted on a suggestion",
-    timestamp: "6 hours ago",
-    metadata: "Custom Difficulty",
-  },
-  {
-    id: "5",
-    type: "admin",
-    user: "AdminUser",
-    action: "updated tournament settings",
-    timestamp: "1 day ago",
-  },
-  {
-    id: "6",
-    type: "run",
-    user: "PlayerThree",
-    action: "recorded a new run",
-    timestamp: "1 day ago",
-    metadata: "Score: 87",
-  },
-];
+// currently there is no live activity feed, so we display placeholder
+// text. once a real feed API is available we can fetch and render data here.
+const sampleActivities: Activity[] = [];
 
 const activityConfig: Record<
   Activity["type"],
@@ -115,50 +70,56 @@ export default function ActivityFeed() {
       </p>
 
       <div className="space-y-0">
-        {sampleActivities.map((activity, index) => {
-          const config = activityConfig[activity.type];
-          return (
-            <motion.div
-              key={activity.id}
-              initial={{ opacity: 0, x: 10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.3, delay: index * 0.05 }}
-              className={cn(
-                "flex items-start gap-3 py-3",
-                index < sampleActivities.length - 1 &&
-                  "border-b border-border dark:border-border-dark",
-              )}
-            >
-              <div
+        {sampleActivities.length === 0 ? (
+          <p className="text-sm text-foreground-muted dark:text-foreground-dark-muted">
+            Recent activity will appear here once the feature is live.
+          </p>
+        ) : (
+          sampleActivities.map((activity, index) => {
+            const config = activityConfig[activity.type];
+            return (
+              <motion.div
+                key={activity.id}
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.05 }}
                 className={cn(
-                  "flex items-center justify-center w-10 h-10 rounded-full shrink-0",
-                  config.bgClass,
-                  config.colorClass,
+                  "flex items-start gap-3 py-3",
+                  index < sampleActivities.length - 1 &&
+                    "border-b border-border dark:border-border-dark",
                 )}
               >
-                {config.icon}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm">
-                  <span className="font-semibold text-foreground dark:text-foreground-dark">
-                    {activity.user}
-                  </span>{" "}
-                  <span className="text-foreground-muted dark:text-foreground-dark-muted">
-                    {activity.action}
-                  </span>
-                </p>
-                {activity.metadata && (
-                  <span className="inline-block text-[10px] px-2 py-0.5 rounded-full bg-surface-100 dark:bg-surface-800 text-foreground-muted dark:text-foreground-dark-muted mt-1">
-                    {activity.metadata}
-                  </span>
-                )}
-                <p className="text-xs text-foreground-muted/70 dark:text-foreground-dark-muted/70 mt-0.5">
-                  {activity.timestamp}
-                </p>
-              </div>
-            </motion.div>
-          );
-        })}
+                <div
+                  className={cn(
+                    "flex items-center justify-center w-10 h-10 rounded-full shrink-0",
+                    config.bgClass,
+                    config.colorClass,
+                  )}
+                >
+                  {config.icon}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm">
+                    <span className="font-semibold text-foreground dark:text-foreground-dark">
+                      {activity.user}
+                    </span>{" "}
+                    <span className="text-foreground-muted dark:text-foreground-dark-muted">
+                      {activity.action}
+                    </span>
+                  </p>
+                  {activity.metadata && (
+                    <span className="inline-block text-[10px] px-2 py-0.5 rounded-full bg-surface-100 dark:bg-surface-800 text-foreground-muted dark:text-foreground-dark-muted mt-1">
+                      {activity.metadata}
+                    </span>
+                  )}
+                  <p className="text-xs text-foreground-muted/70 dark:text-foreground-dark-muted/70 mt-0.5">
+                    {activity.timestamp}
+                  </p>
+                </div>
+              </motion.div>
+            );
+          })
+        )}
       </div>
     </motion.div>
   );
