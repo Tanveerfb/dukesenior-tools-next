@@ -1,5 +1,36 @@
 # Patch Notes
 
+## Version 2.0.1 – MUI component cleanup, Kalam font, Firebase Admin credential upgrade (2026-06-21)
+
+### Summary
+
+Post-merge cleanup after incoming commits removed all MUI packages. Three remaining MUI-dependent files were rewritten in Tailwind; Kalam was added as the body typeface to complete the chalkboard font pairing; Firebase Admin SDK updated to support both local (`applicationDefault()`) and Vercel (`cert()` via `FIREBASE_SERVICE_ACCOUNT_JSON`) credential paths.
+
+### Component Rewrites (MUI → Tailwind)
+
+- **`ProfileHeader.tsx`** — Replaced `Box`, `Avatar`, `Button`, `Typography`, `CircularProgress`, MUI Icons, `useTheme` with pure Tailwind + existing `UserAvatar`, `RoleBadge`, `SocialLinks` components. Removed all `alert()`/`confirm()` calls from action handlers; errors now go to `console.error` only.
+- **`StatsOverview.tsx`** — Replaced `Box`, `Container`, `Divider`, `Typography`, `motion.create(Box)` with Tailwind horizontal strip + native `motion.div`.
+- **`profile/loading.tsx`** — Replaced MUI `Skeleton`, `Grid`, `Paper`, `Stack`, `Container` with Tailwind skeleton using the `skeleton` CSS class from `global.scss`.
+
+### Typography
+
+- **Kalam** added via `next/font/google` (`--font-kalam`, weights 300/400/700) as the body font (`global.scss` body `font-family`).
+- **Permanent Marker** (`--font-permanent-marker`) reserved for headings and display text only — applied via inline `style` prop or `.markdown-body` heading rules.
+
+### Firebase Admin SDK
+
+- `src/lib/firebase/admin.ts` updated with lazy `tryInit()` pattern using `eval("require")` to hide from webpack.
+- Credential selection: `FIREBASE_SERVICE_ACCOUNT_JSON` env var → `cert(JSON.parse(...))` (Vercel); fallback to `applicationDefault()` (local, reads `GOOGLE_APPLICATION_CREDENTIALS` file path).
+- `.env.example` updated with `FIREBASE_SERVICE_ACCOUNT_JSON=` entry.
+
+### Documentation
+
+- `CLAUDE.md` — Styling section rewritten to reflect Tailwind-only stack; added `FIREBASE_SERVICE_ACCOUNT_JSON` env var.
+- `README.md` — Font list updated; Key Features updated to reflect current feature set (removed tournament system, added CMS/gamification/social).
+- `PRODUCT.md` — Users/Purpose updated to remove tournament-specific language; Brand Personality updated with Kalam mention.
+
+---
+
 ## Version 2.0.0 – Whiteboard/Chalkboard Theme & Full Tailwind Migration (2025-08-30)
 
 ### Breaking Changes

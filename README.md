@@ -11,7 +11,7 @@ A [Next.js](https://nextjs.org) project for DukeSenior's Twitch community — to
 - **Database**: Firestore (accessed via service modules in `src/lib/services/`)
 - **Animations**: Framer Motion, canvas-confetti
 - **Analytics**: Vercel Analytics & Speed Insights
-- **Fonts**: Permanent Marker (display), Geist (sans), Geist Mono (mono) via `next/font/google`
+- **Fonts**: Kalam (body), Permanent Marker (headings/display), Geist (sans), Geist Mono (mono) via `next/font/google`
 
 ## Design System — Whiteboard / Chalkboard
 
@@ -48,7 +48,7 @@ CSS custom properties with RGB channels power the color system. Tailwind semanti
 
 - **Dashed borders** (`border-2 border-dashed`) on cards, navbar, footer, hero sections
 - **Offset shadows** (`shadow-soft`) for a pinned-card feel
-- **Permanent Marker font** as the primary typeface site-wide
+- **Kalam** body font + **Permanent Marker** display font — chalkboard handwriting pairing
 - **Font scaling**: User-controlled `--font-scale` (0.8x–1.6x)
 
 ## Getting Started
@@ -70,7 +70,6 @@ src/
 │   ├── navigation/        # AppNavbar, SearchModal
 │   ├── ui/                # Card, EmptyState, ErrorBoundary, Footer, Toast
 │   ├── home/              # HeroSection, homepage content
-│   ├── tourney/           # Tournament components
 │   └── ...
 ├── hooks/                 # useAuth, useNotifications, useCmsUploads
 ├── lib/
@@ -92,7 +91,9 @@ src/
 - **Accessibility**: Keyboard navigation, font scaling (0.8x–1.6x), semantic HTML
 - **Global Search**: `⌘K` / `Ctrl+K` opens search modal with tag-based filtering
 - **Keyboard Shortcuts**: `⌘K` (search), `⌘/` (theme toggle)
-- **Tournament System**: Multi-season Phasmo Tourney brackets, stats, recorded runs
+- **Community CMS**: Blog posts with draft/schedule/publish flow, comments, reactions, analytics
+- **Gamification**: XP, levels, achievements, leaderboard
+- **Social Features**: Profiles, friends, DMs, following, notifications
 
 ## Scripts
 

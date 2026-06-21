@@ -12,11 +12,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Styling
 
-**MUI is primary; Tailwind is supplementary.** Do not use Tailwind for component structure or layout — use MUI components and `sx` props. Tailwind utility classes are acceptable for one-off spacing/typography tweaks only.
+**Tailwind CSS is the sole styling framework.** MUI, Bootstrap, and Emotion are fully removed — do not re-introduce them.
 
-Tailwind's preflight is **disabled** (set in `tailwind.config.js`) to avoid conflicts with MUI's CSS reset. Do not re-enable it.
-
-Bootstrap is present but used sparingly — prefer MUI equivalents for new components.
+- Use Tailwind utilities for all layout and component styling
+- Semantic tokens (`text-foreground`, `bg-background`, `bg-card`, `border-border`, `text-foreground-muted`) auto-switch between light/dark via `data-theme` — no `dark:` prefix needed for these
+- `cn()` from `@/lib/utils` (clsx + tailwind-merge) for conditional classes
+- Design system: whiteboard (light) / chalkboard (dark) theme; dashed borders, chalk textures, marker accent colors
+- Custom utility classes in `global.scss`: `chalk-underline`, `marker-highlight`, `card-board`, `chalk-dust`, `tilt-sm/md/lg`, `skeleton`
+- **Fonts**: Kalam (`--font-kalam`) for body text; Permanent Marker (`--font-permanent-marker`) for headings/display — apply via inline `style` prop or `global.scss` rules
 
 ## Path aliases
 
@@ -41,7 +44,8 @@ See `.env.example` for the full list. Key ones:
 - `NEXT_PUBLIC_FIREBASE_*` — Firebase client config (all required)
 - `ADMIN_EMAILS` / `ADMIN_UIDS` — comma-separated server-side admin list
 - `NEXT_PUBLIC_ADMIN_EMAILS` / `NEXT_PUBLIC_ADMIN_UIDS` — same values, client-side
-- `FIREBASE_PROJECT_ID` + `GOOGLE_APPLICATION_CREDENTIALS` — Firebase Admin SDK (Vercel only, empty locally)
+- `FIREBASE_PROJECT_ID` + `GOOGLE_APPLICATION_CREDENTIALS` — Firebase Admin SDK local path (empty on Vercel)
+- `FIREBASE_SERVICE_ACCOUNT_JSON` — Firebase Admin SDK on Vercel (paste full JSON content); takes priority over `applicationDefault()`
 - `CRON_SECRET` — cron job auth (can be empty locally)
 - `VERCEL_OIDC_TOKEN` — auto-injected by Vercel CLI, do not set manually
 
