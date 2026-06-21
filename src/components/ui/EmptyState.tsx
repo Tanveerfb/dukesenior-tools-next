@@ -1,7 +1,7 @@
 "use client";
 import { motion } from "framer-motion";
 import { ReactNode } from "react";
-import { Card as MuiCard, CardContent, Typography, Box } from "@mui/material";
+import { cn } from "@/lib/utils";
 
 interface EmptyStateProps {
   icon?: ReactNode;
@@ -11,8 +11,6 @@ interface EmptyStateProps {
   className?: string;
 }
 
-const MotionCard = motion(MuiCard);
-
 export default function EmptyState({
   icon,
   title,
@@ -21,40 +19,31 @@ export default function EmptyState({
   className = "",
 }: EmptyStateProps) {
   return (
-    <MotionCard
+    <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.3 }}
-      className={className}
-      sx={{
-        border: 0,
-        boxShadow: 0,
-        textAlign: "center",
-      }}
+      className={cn(
+        "rounded-xl text-center bg-card dark:bg-card-dark border border-border dark:border-border-dark",
+        className,
+      )}
     >
-      <CardContent sx={{ py: 5 }}>
+      <div className="py-12 px-6">
         {icon && (
-          <Box
-            sx={{
-              fontSize: "3rem",
-              opacity: 0.5,
-              mb: 3,
-              "& > *": { fontSize: "inherit" },
-            }}
-          >
+          <div className="text-5xl opacity-50 mb-4 flex justify-center">
             {icon}
-          </Box>
+          </div>
         )}
-        <Typography variant="h5" component="h3" fontWeight={600} gutterBottom>
+        <h3 className="text-xl font-semibold text-foreground dark:text-foreground-dark mb-2">
           {title}
-        </Typography>
+        </h3>
         {description && (
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
+          <p className="text-sm text-foreground-muted dark:text-foreground-dark-muted mb-6">
             {description}
-          </Typography>
+          </p>
         )}
-        {action && <Box sx={{ mt: 3 }}>{action}</Box>}
-      </CardContent>
-    </MotionCard>
+        {action && <div className="mt-4">{action}</div>}
+      </div>
+    </motion.div>
   );
 }

@@ -45,7 +45,7 @@ export default function useAdminPlayers(filterEliminated: boolean = true) {
       setPlayers(
         filterEliminated
           ? playerList.filter((p: Player) => p.status !== "Eliminated")
-          : playerList
+          : playerList,
       );
     } catch (err: any) {
       setError(err?.message || "Failed to load players");
@@ -57,7 +57,6 @@ export default function useAdminPlayers(filterEliminated: boolean = true) {
 
   useEffect(() => {
     fetchPlayers();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterEliminated]);
 
   return {

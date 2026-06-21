@@ -1,7 +1,6 @@
 "use client";
 import React, { Component, ReactNode } from "react";
-import { Card, CardContent, Button, Alert, Box, Typography } from "@mui/material";
-import { Warning as WarningIcon, Refresh as RefreshIcon } from "@mui/icons-material";
+import { FiAlertTriangle, FiRefreshCw } from "react-icons/fi";
 
 interface Props {
   children: ReactNode;
@@ -24,11 +23,7 @@ export default class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    // Log error to console in development
     console.error("Error caught by boundary:", error, errorInfo);
-    
-    // In production, you could send this to an error tracking service
-    // Example: logErrorToService(error, errorInfo);
   }
 
   handleReset = () => {
@@ -42,48 +37,43 @@ export default class ErrorBoundary extends Component<Props, State> {
       }
 
       return (
-        <Card sx={{ borderColor: "error.main", my: 4 }}>
-          <CardContent sx={{ textAlign: "center", py: 5 }}>
-            <WarningIcon
-              color="error"
-              sx={{ fontSize: 48, mb: 3 }}
+        <div className="my-8 rounded-xl border border-danger/30 bg-card dark:bg-card-dark overflow-hidden">
+          <div className="text-center py-12 px-6">
+            <FiAlertTriangle
+              className="mx-auto text-danger mb-4"
+              size={48}
               aria-hidden="true"
             />
-            <Typography variant="h5" component="h3" fontWeight={600} gutterBottom>
+            <h3 className="text-xl font-semibold text-foreground dark:text-foreground-dark mb-2">
               Something went wrong
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
+            </h3>
+            <p className="text-sm text-foreground-muted dark:text-foreground-dark-muted mb-6">
               An error occurred while rendering this component.
-            </Typography>
+            </p>
             {this.state.error && process.env.NODE_ENV === "development" && (
-              <Alert severity="error" sx={{ textAlign: "left", mb: 4 }}>
-                <strong>Error:</strong> {this.state.error.message}
-                <Box component="details" sx={{ mt: 2 }}>
-                  <summary style={{ cursor: "pointer" }}>Stack trace</summary>
-                  <Box
-                    component="pre"
-                    sx={{
-                      mt: 2,
-                      mb: 0,
-                      fontSize: "0.875rem",
-                      overflow: "auto",
-                    }}
-                  >
+              <div className="bg-danger-50 dark:bg-danger/10 border border-danger/20 rounded-lg p-4 text-left mb-6 mx-auto max-w-2xl">
+                <p className="text-sm text-danger-600 dark:text-danger">
+                  <strong>Error:</strong> {this.state.error.message}
+                </p>
+                <details className="mt-2">
+                  <summary className="cursor-pointer text-sm text-danger-600 dark:text-danger font-medium">
+                    Stack trace
+                  </summary>
+                  <pre className="mt-2 text-xs overflow-auto whitespace-pre-wrap text-foreground-muted dark:text-foreground-dark-muted">
                     {this.state.error.stack}
-                  </Box>
-                </Box>
-              </Alert>
+                  </pre>
+                </details>
+              </div>
             )}
-            <Button
-              variant="contained"
+            <button
               onClick={this.handleReset}
-              startIcon={<RefreshIcon />}
-              sx={{ textTransform: "none" }}
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary-600 text-white rounded-lg font-medium transition-colors"
             >
+              <FiRefreshCw size={16} />
               Try Again
-            </Button>
-          </CardContent>
-        </Card>
+            </button>
+          </div>
+        </div>
       );
     }
 

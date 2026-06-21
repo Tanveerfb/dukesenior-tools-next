@@ -84,7 +84,8 @@ export async function getUserGamification(
     // Try server-side first
     if (typeof window === "undefined") {
       try {
-        const { adminDb } = await import("@/lib/firebase/admin");
+        const mod = await import("@/lib/firebase/admin");
+        const adminDb = mod.getAdminDb();
         if (adminDb) {
           const snap = await adminDb
             .collection(GAMIFICATION_COL)
@@ -150,9 +151,12 @@ export async function awardXP(
         achievementCount: 0,
         stats: {
           postsCreated: 0,
+          postsPublished: 0,
+          postsDrafted: 0,
           commentsPosted: 0,
           messagesSent: 0,
           friendsAdded: 0,
+          usersFollowed: 0,
           tournamentsParticipated: 0,
           tournamentsWon: 0,
           loginStreak: 0,
@@ -272,9 +276,12 @@ export async function incrementStat(
         achievementCount: 0,
         stats: {
           postsCreated: 0,
+          postsPublished: 0,
+          postsDrafted: 0,
           commentsPosted: 0,
           messagesSent: 0,
           friendsAdded: 0,
+          usersFollowed: 0,
           tournamentsParticipated: 0,
           tournamentsWon: 0,
           loginStreak: 0,

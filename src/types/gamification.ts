@@ -66,6 +66,7 @@ export type XPCategory =
   | 'comment'
   | 'message'
   | 'friend'
+  | 'social'
   | 'tournament'
   | 'achievement'
   | 'login'

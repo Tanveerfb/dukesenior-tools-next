@@ -12,16 +12,10 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.0",
-    "@mui/icons-material": "^6.5.0",
-    "@mui/material": "^6.5.0",
-    "@tanstack/react-query": "^5.90.20",
-    "@tanstack/react-query-devtools": "^5.91.2",
+    "@base-ui/react": "^1.2.0",
     "@types/d3": "^7.4.3",
     "@vercel/analytics": "^1.5.0",
     "@vercel/speed-insights": "^1.3.1",
-    "bootstrap": "^5.3.7",
     "canvas-confetti": "^1.9.4",
     "chart.js": "^4.5.1",
     "class-variance-authority": "^0.7.1",
@@ -29,12 +23,10 @@
     "countries-and-timezones": "^3.8.0",
     "d3": "^7.9.0",
     "firebase": "^12.1.0",
-    "firebase-admin": "^13.4.0",
     "framer-motion": "^12.24.11",
     "fuse.js": "^7.1.0",
     "next": "^16.1.1",
     "react": "19.1.0",
-    "react-bootstrap": "^2.10.10",
     "react-chartjs-2": "^5.3.1",
     "react-dom": "19.1.0",
     "react-hot-toast": "^2.6.0",
@@ -49,7 +41,8 @@
     "remark-gfm": "^4.0.0",
     "sass": "^1.90.0",
     "tailwind-merge": "^2.6.0",
-    "timezones.json": "^1.7.2"
+    "timezones.json": "^1.7.2",
+    "uuid": "^13.0.0"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [

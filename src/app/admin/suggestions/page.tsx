@@ -1,17 +1,6 @@
 "use client";
 import React, { useEffect, useState, useMemo } from "react";
-import {
-  Container,
-  Row,
-  Col,
-  Card,
-  Button,
-  Modal,
-  Form,
-  Badge,
-  InputGroup,
-  FormControl,
-} from "react-bootstrap";
+import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { addAdminResponseToForm } from "@/lib/services/suggestions";
 import { auth } from "@/lib/firebase/client";
@@ -187,235 +176,279 @@ export default function AdminSuggestionsPage() {
 
   if (!admin)
     return (
-      <Container className="py-5">
-        <div className="text-center">Admin access required.</div>
-      </Container>
+      <div className="max-w-7xl mx-auto px-4 py-10">
+        <div className="text-center text-foreground">
+          Admin access required.
+        </div>
+      </div>
     );
 
   return (
-    <Container className="py-4">
-      <Row>
-        <Col>
-          <h3>Suggestions Inbox</h3>
-          <p className="text-muted">
-            Recent suggestions submitted by users and visitors.
-          </p>
-        </Col>
-      </Row>
+    <div className="max-w-7xl mx-auto px-4 py-4">
+      <div>
+        <h3 className="text-xl font-bold text-foreground">Suggestions Inbox</h3>
+        <p className="text-foreground/60 text-sm">
+          Recent suggestions submitted by users and visitors.
+        </p>
+      </div>
 
-      <Row className="mt-3">
-        <Col lg={8}>
-          {loading && <div className="text-muted">Loading...</div>}
+      <div className="mt-3 grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <div className="lg:col-span-8">
+          {loading && <div className="text-foreground/60">Loading...</div>}
           {!loading && items.length === 0 && (
-            <div className="text-muted">No suggestions yet.</div>
+            <div className="text-foreground/60">No suggestions yet.</div>
           )}
 
-          <Row className="mb-3 g-2">
-            <Col md={6}>
-              <InputGroup>
-                <FormControl
+          <div className="mb-3 grid grid-cols-1 md:grid-cols-12 gap-2">
+            <div className="md:col-span-6">
+              <div className="flex">
+                <input
                   placeholder="Search message, email, category"
                   value={searchQuery}
                   onChange={(e) => {
                     setSearchQuery(e.target.value);
                     setVisibleCount(chunkSize);
                   }}
+                  className="flex-1 rounded-l border border-border bg-transparent px-3 py-1.5 text-sm text-foreground placeholder:text-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
-                <Button
+                <button
                   onClick={() => {
                     setSearchQuery("");
                     setVisibleCount(chunkSize);
                   }}
+                  className="px-3 py-1.5 rounded-r bg-primary-500 text-white hover:bg-primary-600 text-sm border border-l-0 border-primary-500"
                 >
                   Clear
-                </Button>
-              </InputGroup>
-            </Col>
-            <Col md={3}>
-              <Form.Select
+                </button>
+              </div>
+            </div>
+            <div className="md:col-span-3">
+              <select
                 value={filterResponded}
                 onChange={(e) => {
                   setFilterResponded(e.target.value as any);
                   setVisibleCount(chunkSize);
                 }}
+                className="w-full rounded border border-border bg-transparent px-3 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
                 <option value="all">All</option>
                 <option value="unresponded">Unresponded</option>
                 <option value="responded">Responded</option>
-              </Form.Select>
-            </Col>
-            <Col md={3} className="d-flex gap-2 justify-content-end">
-              <Button onClick={() => exportJSON()} variant="outline-primary">
+              </select>
+            </div>
+            <div className="md:col-span-3 flex gap-2 justify-end">
+              <button
+                onClick={() => exportJSON()}
+                className="px-3 py-1.5 rounded border border-primary-500 text-primary-500 hover:bg-primary-500/10 text-sm"
+              >
                 Export JSON
-              </Button>
-            </Col>
-          </Row>
+              </button>
+            </div>
+          </div>
 
-          <div className="d-flex justify-content-between align-items-center mb-2">
-            <div className="d-flex gap-2">
-              <Button
-                size="sm"
-                variant="outline-secondary"
+          <div className="flex justify-between items-center mb-2">
+            <div className="flex gap-2">
+              <button
                 onClick={() => bulkArchive(true)}
+                className="px-2 py-1 text-xs rounded border border-gray-500 text-gray-500 hover:bg-gray-500/10"
               >
                 Archive
-              </Button>
-              <Button size="sm" variant="outline-danger" onClick={bulkDelete}>
+              </button>
+              <button
+                onClick={bulkDelete}
+                className="px-2 py-1 text-xs rounded border border-red-600 text-red-600 hover:bg-red-600/10"
+              >
                 Delete
-              </Button>
-              <Button
-                size="sm"
-                variant="outline-secondary"
+              </button>
+              <button
                 onClick={() => bulkArchive(false)}
+                className="px-2 py-1 text-xs rounded border border-gray-500 text-gray-500 hover:bg-gray-500/10"
               >
                 Unarchive
-              </Button>
-              <Button size="sm" variant="link" onClick={clearSelection}>
+              </button>
+              <button
+                onClick={clearSelection}
+                className="px-2 py-1 text-xs text-primary-500 hover:underline"
+              >
                 Clear
-              </Button>
+              </button>
             </div>
-            <div className="small text-muted">
+            <div className="text-sm text-foreground/60">
               Selected: {Object.values(selectedIds).filter(Boolean).length}
             </div>
           </div>
 
-          <div className="d-grid gap-3">
+          <div className="grid gap-3">
             {filtered.slice(0, visibleCount).map((item) => (
-              <Card key={item.id} className="shadow-sm">
-                <Card.Body>
-                  <div className="d-flex align-items-start">
-                    <div style={{ width: 36 }} className="me-2">
+              <div
+                key={item.id}
+                className="rounded-xl border border-border bg-card dark:bg-card-dark dark:border-border-dark shadow-sm"
+              >
+                <div className="p-4">
+                  <div className="flex items-start">
+                    <div className="w-9 mr-2">
                       <input
                         type="checkbox"
                         checked={!!selectedIds[item.id]}
                         onChange={() => toggleSelect(item.id)}
+                        className="rounded border-border"
                       />
                     </div>
-                    <div className="flex-grow-1">
+                    <div className="flex-1 min-w-0">
                       <div className="mb-1">
-                        <strong>{item.category}</strong>{" "}
-                        <small className="text-muted">
+                        <strong className="text-foreground">
+                          {item.category}
+                        </strong>{" "}
+                        <small className="text-foreground/60">
                           {item.createdAt
                             ? new Date(item.createdAt).toLocaleString()
                             : ""}
                         </small>
                       </div>
-                      <div className="mb-2">{item.message}</div>
-                      <div className="small text-muted">
+                      <div className="mb-2 text-foreground">{item.message}</div>
+                      <div className="text-sm text-foreground/60">
                         {item.anonymous ? "Anonymous" : item.email || "—"}
                       </div>
                     </div>
-                    <div className="ms-3 text-end">
+                    <div className="ml-3 text-right shrink-0">
                       {item.response ? (
-                        <Badge bg="success" className="mb-2">
+                        <span className="rounded-full text-xs font-medium px-2.5 py-0.5 bg-green-600 text-white mb-2 inline-block">
                           Responded
-                        </Badge>
+                        </span>
                       ) : (
-                        <Badge bg="secondary" className="mb-2">
+                        <span className="rounded-full text-xs font-medium px-2.5 py-0.5 bg-gray-500 text-white mb-2 inline-block">
                           New
-                        </Badge>
+                        </span>
                       )}
-                      <div className="d-flex gap-2">
-                        <Button size="sm" onClick={() => openDetail(item)}>
+                      <div className="flex gap-2 mt-2">
+                        <button
+                          onClick={() => openDetail(item)}
+                          className="px-2 py-1 text-xs rounded bg-primary-500 text-white hover:bg-primary-600"
+                        >
                           Open
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant={
-                            item.archived
-                              ? "outline-secondary"
-                              : "outline-warning"
-                          }
+                        </button>
+                        <button
                           onClick={() =>
                             import("@/lib/services/suggestions").then((m) =>
                               m.archiveSuggestion(item.id, !item.archived),
                             )
                           }
+                          className={cn(
+                            "px-2 py-1 text-xs rounded border",
+                            item.archived
+                              ? "border-gray-500 text-gray-500 hover:bg-gray-500/10"
+                              : "border-yellow-500 text-yellow-600 hover:bg-yellow-500/10",
+                          )}
                         >
                           {item.archived ? "Unarchive" : "Archive"}
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline-danger"
+                        </button>
+                        <button
                           onClick={() =>
                             import("@/lib/services/suggestions").then((m) =>
                               m.deleteSuggestion(item.id),
                             )
                           }
+                          className="px-2 py-1 text-xs rounded border border-red-600 text-red-600 hover:bg-red-600/10"
                         >
                           Delete
-                        </Button>
+                        </button>
                       </div>
                     </div>
                   </div>
-                </Card.Body>
-              </Card>
+                </div>
+              </div>
             ))}
           </div>
           {filtered.length > visibleCount && (
             <div className="text-center mt-3">
-              <Button
+              <button
                 onClick={() =>
                   setVisibleCount((c) =>
                     Math.min(filtered.length, c + chunkSize),
                   )
                 }
+                className="px-3 py-1.5 rounded bg-primary-500 text-white hover:bg-primary-600 text-sm"
               >
                 Load more
-              </Button>
+              </button>
             </div>
           )}
-        </Col>
+        </div>
 
-        <Col lg={4}>
-          <Card className="sticky-top" style={{ top: "80px" }}>
-            <Card.Body>
-              <h5>Quick Actions</h5>
-              <p className="small text-muted">
+        <div className="lg:col-span-4">
+          <div className="sticky top-20 rounded-xl border border-border bg-card dark:bg-card-dark dark:border-border-dark shadow-sm">
+            <div className="p-4">
+              <h5 className="font-semibold text-foreground">Quick Actions</h5>
+              <p className="text-sm text-foreground/60">
                 Use the inbox to review and respond to suggestions. Responses
                 are stored in the admin doc.
               </p>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
+            </div>
+          </div>
+        </div>
+      </div>
 
-      <Modal show={!!active} onHide={() => setActive(null)} size="lg">
-        <Modal.Header closeButton>
-          <Modal.Title>Suggestion</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {active && (
-            <>
-              <div className="mb-3">
+      {/* Modal */}
+      {!!active && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="absolute inset-0 bg-black/50"
+            onClick={() => setActive(null)}
+          />
+          <div className="relative bg-card dark:bg-card-dark border border-border dark:border-border-dark rounded-xl shadow-lg w-full max-w-2xl mx-4">
+            <div className="flex items-center justify-between p-4 border-b border-border dark:border-border-dark">
+              <h5 className="font-semibold text-foreground">Suggestion</h5>
+              <button
+                onClick={() => setActive(null)}
+                className="text-foreground/60 hover:text-foreground text-xl leading-none"
+              >
+                ×
+              </button>
+            </div>
+            <div className="p-4">
+              <div className="mb-3 text-foreground">
                 <strong>From:</strong>{" "}
                 {active.anonymous ? "Anonymous" : active.email || "—"}
               </div>
               <div className="mb-3">
-                <strong>Message</strong>
-                <div className="border rounded p-3 mt-2">{active.message}</div>
+                <strong className="text-foreground">Message</strong>
+                <div className="border border-border rounded p-3 mt-2 text-foreground">
+                  {active.message}
+                </div>
               </div>
-              <Form.Group>
-                <Form.Label>Admin response</Form.Label>
-                <Form.Control
-                  as="textarea"
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  Admin response
+                </label>
+                <textarea
                   rows={4}
                   value={response}
                   onChange={(e) => setResponse(e.target.value)}
+                  className="w-full rounded border border-border bg-transparent px-3 py-1.5 text-sm text-foreground placeholder:text-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
-              </Form.Group>
-            </>
-          )}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setActive(null)}>
-            Close
-          </Button>
-          <Button disabled={sending} onClick={submitResponse}>
-            Save response
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    </Container>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 p-4 border-t border-border dark:border-border-dark">
+              <button
+                onClick={() => setActive(null)}
+                className="px-3 py-1.5 rounded bg-gray-500 text-white hover:bg-gray-600 text-sm"
+              >
+                Close
+              </button>
+              <button
+                disabled={sending}
+                onClick={submitResponse}
+                className={cn(
+                  "px-3 py-1.5 rounded bg-primary-500 text-white hover:bg-primary-600 text-sm",
+                  sending && "opacity-50 cursor-not-allowed",
+                )}
+              >
+                Save response
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

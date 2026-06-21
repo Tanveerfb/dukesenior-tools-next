@@ -27,6 +27,17 @@ export const metadata: Metadata = {
   title: "The Lair of Evil Tools",
   description:
     "A website developed by DukeSenior for the discord server members of 'The Lair of Evil",
+  icons: {
+    icon: "/logos/faivcon.png",
+    apple: "/logos/faivcon.png",
+  },
+  openGraph: {
+    title: "The Lair of Evil Tools",
+    description:
+      "Tools, event dashboards, and community resources powering the Phasmo Tourney project and the DukeSenior community.",
+    siteName: "The Lair of Evil",
+    images: ["/logos/logo-square-light.svg"],
+  },
 };
 
 export default function RootLayout({

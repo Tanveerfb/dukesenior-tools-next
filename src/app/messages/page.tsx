@@ -1,15 +1,18 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { Container, Row, Col } from 'react-bootstrap';
-import { useAuth } from '@/hooks/useAuth';
-import ThreadList from '@/components/messages/ThreadList';
-import ChatWindow from '@/components/messages/ChatWindow';
-import type { DMThread } from '@/types/messages';
-import { listenToThreads, createOrGetThread, generateThreadId } from '@/lib/services/messages';
-import { getUserByUsername, getUserByUID } from '@/lib/services/users';
-import { blockUser } from '@/lib/services/friends';
+import React, { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
+import ThreadList from "@/components/messages/ThreadList";
+import ChatWindow from "@/components/messages/ChatWindow";
+import type { DMThread } from "@/types/messages";
+import {
+  listenToThreads,
+  createOrGetThread,
+  generateThreadId,
+} from "@/lib/services/messages";
+import { getUserByUsername, getUserByUID } from "@/lib/services/users";
+import { blockUser } from "@/lib/services/friends";
 
 export default function MessagesPage() {
   const { user, loading: authLoading } = useAuth();
@@ -21,7 +24,7 @@ export default function MessagesPage() {
   const [loading, setLoading] = useState(true);
 
   // Get username from URL params if present (e.g., /messages?username=john)
-  const usernameParam = searchParams?.get('username');
+  const usernameParam = searchParams?.get("username");
 
   // Listen to threads for current user
   useEffect(() => {
@@ -47,7 +50,7 @@ export default function MessagesPage() {
         const targetUser = await getUserByUsername(usernameParam!);
         if (!targetUser) {
           alert(`User @${usernameParam} not found`);
-          router.push('/messages');
+          router.push("/messages");
           return;
         }
 
@@ -55,11 +58,11 @@ export default function MessagesPage() {
         setActiveThread(thread);
 
         // Clear URL param
-        router.replace('/messages', { scroll: false });
+        router.replace("/messages", { scroll: false });
       } catch (error: any) {
-        console.error('Error opening thread:', error);
-        alert(error.message || 'Failed to open conversation');
-        router.push('/messages');
+        console.error("Error opening thread:", error);
+        alert(error.message || "Failed to open conversation");
+        router.push("/messages");
       }
     }
 
@@ -69,7 +72,7 @@ export default function MessagesPage() {
   // Redirect to login if not authenticated
   useEffect(() => {
     if (!authLoading && !user) {
-      router.push('/login?redirect=/messages');
+      router.push("/login?redirect=/messages");
     }
   }, [user, authLoading, router]);
 
@@ -83,7 +86,9 @@ export default function MessagesPage() {
   const handleBlock = async () => {
     if (!user || !activeThread) return;
 
-    const otherUserId = activeThread.participants.find((uid) => uid !== user.uid);
+    const otherUserId = activeThread.participants.find(
+      (uid) => uid !== user.uid,
+    );
     if (!otherUserId) return;
 
     const otherUser = activeThread.participantDetails?.[otherUserId];
@@ -91,7 +96,7 @@ export default function MessagesPage() {
 
     if (
       !confirm(
-        `Block @${otherUser.username}? This will remove them from your friends and prevent future interactions.`
+        `Block @${otherUser.username}? This will remove them from your friends and prevent future interactions.`,
       )
     ) {
       return;
@@ -101,43 +106,62 @@ export default function MessagesPage() {
       await blockUser(user.uid, otherUserId, otherUser.username);
       alert(`Blocked @${otherUser.username}`);
       setActiveThread(null);
-      router.push('/messages');
+      router.push("/messages");
     } catch (error: any) {
-      console.error('Error blocking user:', error);
-      alert(error.message || 'Failed to block user');
+      console.error("Error blocking user:", error);
+      alert(error.message || "Failed to block user");
     }
   };
 
   if (authLoading || !user) {
     return (
-      <Container className="py-5">
+      <div className="max-w-7xl mx-auto px-4 py-10">
         <div className="text-center">
-          <div className="spinner-border" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
+          <svg
+            className="animate-spin h-6 w-6 mx-auto text-primary-500"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            />
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+            />
+          </svg>
+          <span className="sr-only">Loading...</span>
         </div>
-      </Container>
+      </div>
     );
   }
 
   // Get other user details for active thread
-  const otherUserId = activeThread?.participants.find((uid) => uid !== user.uid);
+  const otherUserId = activeThread?.participants.find(
+    (uid) => uid !== user.uid,
+  );
   const otherUser = otherUserId
     ? activeThread?.participantDetails?.[otherUserId]
     : null;
 
   return (
-    <Container fluid className="py-3" style={{ height: 'calc(100vh - 100px)' }}>
-      <Row className="h-100">
+    <div className="w-full px-3 py-3" style={{ height: "calc(100vh - 100px)" }}>
+      <div className="grid grid-cols-12 h-full gap-0">
         {/* Thread List - Mobile: Full width when no active thread, Desktop: Fixed width */}
-        <Col
-          xs={12}
-          md={4}
-          lg={3}
-          className={`h-100 border-end ${activeThread ? 'd-none d-md-block' : ''}`}
-          style={{ maxWidth: '300px' }}
+        <div
+          className={`col-span-12 md:col-span-4 lg:col-span-3 h-full border-r border-border dark:border-border-dark ${
+            activeThread ? "hidden md:block" : ""
+          }`}
+          style={{ maxWidth: "300px" }}
         >
-          <div className="h-100 bg-white rounded shadow-sm">
+          <div className="h-full bg-card dark:bg-card-dark rounded-lg shadow-sm">
             <ThreadList
               threads={threads}
               activeThreadId={activeThread?.id}
@@ -146,16 +170,15 @@ export default function MessagesPage() {
               loading={loading}
             />
           </div>
-        </Col>
+        </div>
 
         {/* Chat Window */}
-        <Col
-          xs={12}
-          md={8}
-          lg={9}
-          className={`h-100 ${!activeThread ? 'd-none d-md-block' : ''}`}
+        <div
+          className={`col-span-12 md:col-span-8 lg:col-span-9 h-full ${
+            !activeThread ? "hidden md:block" : ""
+          }`}
         >
-          <div className="h-100 bg-white rounded shadow-sm">
+          <div className="h-full bg-card dark:bg-card-dark rounded-lg shadow-sm">
             {activeThread && otherUser ? (
               <ChatWindow
                 thread={activeThread}
@@ -167,35 +190,39 @@ export default function MessagesPage() {
                 onBlock={handleBlock}
               />
             ) : (
-              <div className="h-100 d-flex align-items-center justify-content-center text-muted">
+              <div className="h-full flex items-center justify-center text-foreground-secondary">
                 {threads.length === 0 ? (
                   <div className="text-center">
-                    <h4>No messages yet</h4>
+                    <h4 className="text-lg font-semibold mb-1">
+                      No messages yet
+                    </h4>
                     <p>Add friends to start chatting!</p>
                   </div>
                 ) : (
                   <div className="text-center">
-                    <h4>Select a conversation</h4>
+                    <h4 className="text-lg font-semibold mb-1">
+                      Select a conversation
+                    </h4>
                     <p>Choose a friend from the list to start messaging</p>
                   </div>
                 )}
               </div>
             )}
           </div>
-        </Col>
-      </Row>
+        </div>
+      </div>
 
       {/* Mobile: Back button when thread is active */}
       {activeThread && (
-        <div className="d-md-none position-fixed bottom-0 start-0 p-3">
+        <div className="md:hidden fixed bottom-0 left-0 p-3">
           <button
-            className="btn btn-secondary"
+            className="rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-foreground px-4 py-2 text-sm font-medium transition-colors"
             onClick={() => setActiveThread(null)}
           >
             ← Back to conversations
           </button>
         </div>
       )}
-    </Container>
+    </div>
   );
 }

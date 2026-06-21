@@ -1,28 +1,13 @@
 "use client";
-import {
-  Card,
-  CardContent,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  Avatar,
-  Typography,
-  Chip,
-  Box,
-} from "@mui/material";
 import { motion } from "framer-motion";
-import { useTheme, type Theme } from "@mui/material/styles";
 import {
-  ThumbUp as ThumbUpIcon,
-  VideoLibrary as VideoIcon,
-  EmojiEvents as TrophyIcon,
-  AdminPanelSettings as AdminIcon,
-  Article as ArticleIcon,
-} from "@mui/icons-material";
-
-const MotionCard = motion.create(Card);
-const MotionListItem = motion.create(ListItem);
+  FiThumbsUp,
+  FiPlayCircle,
+  FiAward,
+  FiShield,
+  FiFileText,
+} from "react-icons/fi";
+import { cn } from "@/lib/utils";
 
 interface Activity {
   id: string;
@@ -33,195 +18,109 @@ interface Activity {
   metadata?: string;
 }
 
-// Sample activities - in a real app, these would come from an API
-const sampleActivities: Activity[] = [
-  {
-    id: "1",
-    type: "post",
-    user: "DukeSenior",
-    action: "published a new guide",
-    timestamp: "2 hours ago",
-    metadata: "Advanced Strategies",
-  },
-  {
-    id: "2",
-    type: "run",
-    user: "PlayerOne",
-    action: "recorded a new run",
-    timestamp: "4 hours ago",
-    metadata: "Perfect Score: 100",
-  },
-  {
-    id: "3",
-    type: "tournament",
-    user: "System",
-    action: "Tourney 5 registration opened",
-    timestamp: "5 hours ago",
-  },
-  {
-    id: "4",
-    type: "vote",
-    user: "PlayerTwo",
-    action: "voted on a suggestion",
-    timestamp: "6 hours ago",
-    metadata: "Custom Difficulty",
-  },
-  {
-    id: "5",
-    type: "admin",
-    user: "AdminUser",
-    action: "updated tournament settings",
-    timestamp: "1 day ago",
-  },
-  {
-    id: "6",
-    type: "run",
-    user: "PlayerThree",
-    action: "recorded a new run",
-    timestamp: "1 day ago",
-    metadata: "Score: 87",
-  },
-];
+// currently there is no live activity feed, so we display placeholder
+// text. once a real feed API is available we can fetch and render data here.
+const sampleActivities: Activity[] = [];
 
-function getActivityIcon(type: Activity["type"]) {
-  switch (type) {
-    case "vote":
-      return <ThumbUpIcon />;
-    case "run":
-      return <VideoIcon />;
-    case "tournament":
-      return <TrophyIcon />;
-    case "admin":
-      return <AdminIcon />;
-    case "post":
-      return <ArticleIcon />;
-    default:
-      return null;
-  }
-}
-
-function getActivityColor(type: Activity["type"], theme: Theme) {
-  switch (type) {
-    case "vote":
-      return theme.palette.success.main;
-    case "run":
-      return theme.palette.info.main;
-    case "tournament":
-      return theme.palette.warning.main;
-    case "admin":
-      return theme.palette.error.main;
-    case "post":
-      return theme.palette.primary.main;
-    default:
-      return theme.palette.text.secondary;
-  }
-}
+const activityConfig: Record<
+  Activity["type"],
+  { icon: React.ReactNode; colorClass: string; bgClass: string }
+> = {
+  vote: {
+    icon: <FiThumbsUp size={16} />,
+    colorClass: "text-success",
+    bgClass: "bg-success/10",
+  },
+  run: {
+    icon: <FiPlayCircle size={16} />,
+    colorClass: "text-info",
+    bgClass: "bg-info/10",
+  },
+  tournament: {
+    icon: <FiAward size={16} />,
+    colorClass: "text-warning",
+    bgClass: "bg-warning/10",
+  },
+  admin: {
+    icon: <FiShield size={16} />,
+    colorClass: "text-danger",
+    bgClass: "bg-danger/10",
+  },
+  post: {
+    icon: <FiFileText size={16} />,
+    colorClass: "text-primary",
+    bgClass: "bg-primary/10",
+  },
+};
 
 export default function ActivityFeed() {
-  const theme = useTheme();
-
   return (
-    <MotionCard
+    <motion.div
       initial={{ opacity: 0, x: 20 }}
       whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5, delay: 0.2 }}
-      elevation={2}
-      sx={{
-        height: "100%",
-        border: `1px solid ${theme.palette.divider}`,
-      }}
+      className="rounded-xl border border-border dark:border-border-dark bg-card dark:bg-card-dark p-5"
     >
-      <CardContent>
-        <Typography
-          variant="h6"
-          component="h2"
-          gutterBottom
-          sx={{ fontWeight: 600 }}
-        >
-          Recent Activity
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          Latest updates from the community
-        </Typography>
+      <h2 className="text-lg font-semibold text-foreground dark:text-foreground-dark mb-1">
+        Recent Activity
+      </h2>
+      <p className="text-sm text-foreground-muted dark:text-foreground-dark-muted mb-4">
+        Latest updates from the community
+      </p>
 
-        <List sx={{ p: 0 }}>
-          {sampleActivities.map((activity, index) => (
-            <MotionListItem
-              key={activity.id}
-              alignItems="flex-start"
-              initial={{ opacity: 0, x: 10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.3, delay: index * 0.05 }}
-              sx={{
-                px: 0,
-                py: 1.5,
-                borderBottom:
-                  index < sampleActivities.length - 1
-                    ? `1px solid ${theme.palette.divider}`
-                    : "none",
-              }}
-            >
-              <ListItemAvatar>
-                <Avatar
-                  sx={{
-                    bgcolor: `${getActivityColor(activity.type, theme)}20`,
-                    color: getActivityColor(activity.type, theme),
-                    width: 40,
-                    height: 40,
-                  }}
+      <div className="space-y-0">
+        {sampleActivities.length === 0 ? (
+          <p className="text-sm text-foreground-muted dark:text-foreground-dark-muted">
+            Recent activity will appear here once the feature is live.
+          </p>
+        ) : (
+          sampleActivities.map((activity, index) => {
+            const config = activityConfig[activity.type];
+            return (
+              <motion.div
+                key={activity.id}
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.05 }}
+                className={cn(
+                  "flex items-start gap-3 py-3",
+                  index < sampleActivities.length - 1 &&
+                    "border-b border-border dark:border-border-dark",
+                )}
+              >
+                <div
+                  className={cn(
+                    "flex items-center justify-center w-10 h-10 rounded-full shrink-0",
+                    config.bgClass,
+                    config.colorClass,
+                  )}
                 >
-                  {getActivityIcon(activity.type)}
-                </Avatar>
-              </ListItemAvatar>
-              <ListItemText
-                primary={
-                  <Box component="span">
-                    <Typography
-                      component="span"
-                      variant="body2"
-                      fontWeight={600}
-                    >
+                  {config.icon}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm">
+                    <span className="font-semibold text-foreground dark:text-foreground-dark">
                       {activity.user}
-                    </Typography>{" "}
-                    <Typography
-                      component="span"
-                      variant="body2"
-                      color="text.secondary"
-                    >
+                    </span>{" "}
+                    <span className="text-foreground-muted dark:text-foreground-dark-muted">
                       {activity.action}
-                    </Typography>
-                  </Box>
-                }
-                secondary={
-                  <Box component="span" sx={{ mt: 0.5 }}>
-                    {activity.metadata && (
-                      <Chip
-                        label={activity.metadata}
-                        size="small"
-                        sx={{
-                          height: 20,
-                          fontSize: "0.7rem",
-                          mb: 0.5,
-                        }}
-                      />
-                    )}
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      display="block"
-                    >
-                      {activity.timestamp}
-                    </Typography>
-                  </Box>
-                }
-                primaryTypographyProps={{ component: "span" }}
-                secondaryTypographyProps={{ component: "div" }}
-              />
-            </MotionListItem>
-          ))}
-        </List>
-      </CardContent>
-    </MotionCard>
+                    </span>
+                  </p>
+                  {activity.metadata && (
+                    <span className="inline-block text-[10px] px-2 py-0.5 rounded-full bg-surface-100 dark:bg-surface-800 text-foreground-muted dark:text-foreground-dark-muted mt-1">
+                      {activity.metadata}
+                    </span>
+                  )}
+                  <p className="text-xs text-foreground-muted/70 dark:text-foreground-dark-muted/70 mt-0.5">
+                    {activity.timestamp}
+                  </p>
+                </div>
+              </motion.div>
+            );
+          })
+        )}
+      </div>
+    </motion.div>
   );
 }

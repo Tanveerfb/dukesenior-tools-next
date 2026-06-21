@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { Card, Form, Button } from "react-bootstrap";
 import ReactMarkdown from "react-markdown";
 import { getAIResponse } from "@/lib/ai/gemini";
+import { cn } from "@/lib/utils";
 
 export default function GeminiMini() {
   const [loading, setLoading] = useState(false);
@@ -22,27 +22,49 @@ export default function GeminiMini() {
   }
 
   return (
-    <Card className="mb-3">
-      <Card.Body>
-        <div className="d-flex gap-2">
-          <Form.Control
+    <div
+      className={cn(
+        "mb-3 rounded-xl border border-border bg-card shadow dark:border-border-dark dark:bg-card-dark",
+      )}
+    >
+      <div className="p-4">
+        <div className="flex gap-2">
+          <input
+            type="text"
             placeholder="Ask something..."
             value={q}
             onChange={(e) => setQ(e.target.value)}
+            className={cn(
+              "flex-1 rounded-md border border-border bg-transparent px-3 py-2 text-sm text-foreground",
+              "placeholder:text-foreground-secondary focus:outline-none focus:ring-2 focus:ring-primary-500",
+              "dark:border-border-dark",
+            )}
           />
-          <Button onClick={ask} disabled={loading}>
+          <button
+            onClick={ask}
+            disabled={loading}
+            className={cn(
+              "rounded-md bg-primary-500 px-4 py-2 text-sm font-medium text-white",
+              "hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed",
+            )}
+          >
             {loading ? "..." : "Ask"}
-          </Button>
+          </button>
         </div>
         {response && (
-          <div className="mt-2 small text-muted">
+          <div className="mt-2 text-sm text-foreground-secondary">
             <ReactMarkdown>{response}</ReactMarkdown>
           </div>
         )}
-        <div className="mt-2 text-end">
-          <a href="/GeminiAI">Open Gemini</a>
+        <div className="mt-2 text-right">
+          <a
+            href="/GeminiAI"
+            className="text-primary-500 hover:text-primary-600 text-sm"
+          >
+            Open Gemini
+          </a>
         </div>
-      </Card.Body>
-    </Card>
+      </div>
+    </div>
   );
 }

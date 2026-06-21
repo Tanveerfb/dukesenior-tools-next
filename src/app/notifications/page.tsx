@@ -1,31 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Container,
-  Typography,
-  Box,
-  Paper,
-  List,
-  ListItem,
-  ListItemText,
-  IconButton,
-  Button,
-  Chip,
-  CircularProgress,
-  Alert,
-  Divider,
-} from "@mui/material";
-import {
-  Delete as DeleteIcon,
-  Check as CheckIcon,
-  DoneAll as DoneAllIcon,
-  Notifications as NotificationsIcon,
-} from "@mui/icons-material";
+import { FiBell, FiCheck, FiCheckCircle, FiTrash2 } from "react-icons/fi";
 import { useNotifications } from "@/hooks/useNotifications";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/ToastProvider";
+import { cn } from "@/lib/utils";
 
 export default function NotificationsPage() {
   const { user } = useAuth();
@@ -46,9 +27,11 @@ export default function NotificationsPage() {
 
   if (!user) {
     return (
-      <Container maxWidth="md" sx={{ py: 4 }}>
-        <Alert severity="info">Please log in to view your notifications.</Alert>
-      </Container>
+      <div className="max-w-3xl mx-auto px-4 py-8">
+        <div className="rounded-lg border border-blue-300 bg-blue-50 p-4 text-blue-800 dark:border-blue-700 dark:bg-blue-950 dark:text-blue-200">
+          Please log in to view your notifications.
+        </div>
+      </div>
     );
   }
 
@@ -97,20 +80,20 @@ export default function NotificationsPage() {
     }
   };
 
-  const getNotificationTypeColor = (type: string) => {
+  const getChipClasses = (type: string) => {
     switch (type) {
       case "message":
-        return "primary";
+        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
       case "friend-request":
-        return "secondary";
+        return "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200";
       case "mention":
-        return "warning";
+        return "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200";
       case "tournament":
-        return "info";
+        return "bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-200";
       case "system":
-        return "error";
+        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
       default:
-        return "default";
+        return "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200";
     }
   };
 
@@ -130,162 +113,137 @@ export default function NotificationsPage() {
   };
 
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
-      <Box sx={{ mb: 4 }}>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            mb: 2,
-          }}
-        >
-          <Typography variant="h4" component="h1" fontWeight="bold">
-            Notifications
-          </Typography>
+    <div className="max-w-3xl mx-auto px-4 py-8">
+      {/* Header */}
+      <div className="mb-8">
+        <div className="flex justify-between items-center mb-2">
+          <h1 className="text-2xl font-bold text-foreground">Notifications</h1>
           {unreadCount > 0 && (
-            <Button
-              variant="outlined"
-              startIcon={<DoneAllIcon />}
+            <button
               onClick={handleMarkAllAsRead}
               disabled={markingAllRead}
+              className={cn(
+                "inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium",
+                "text-foreground hover:bg-gray-100 dark:border-border-dark dark:hover:bg-gray-800",
+                "disabled:opacity-50 disabled:cursor-not-allowed transition-colors",
+              )}
             >
+              <FiCheckCircle className="h-4 w-4" />
               Mark all as read
-            </Button>
+            </button>
           )}
-        </Box>
+        </div>
         {unreadCount > 0 && (
-          <Typography variant="body2" color="text.secondary">
+          <p className="text-sm text-foreground-secondary">
             You have {unreadCount} unread notification
             {unreadCount !== 1 ? "s" : ""}
-          </Typography>
+          </p>
         )}
-      </Box>
+      </div>
 
+      {/* Content */}
       {loading ? (
-        <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
-          <CircularProgress />
-        </Box>
+        <div className="flex justify-center py-16">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-primary-500" />
+        </div>
       ) : notifications.length === 0 ? (
-        <Paper
-          sx={{
-            p: 6,
-            textAlign: "center",
-            bgcolor: "background.paper",
-          }}
-        >
-          <NotificationsIcon
-            sx={{ fontSize: 64, color: "text.secondary", mb: 2 }}
-          />
-          <Typography variant="h6" color="text.secondary" gutterBottom>
+        <div className="rounded-xl border border-border bg-card p-12 text-center shadow dark:border-border-dark dark:bg-card-dark">
+          <FiBell className="mx-auto mb-4 h-16 w-16 text-foreground-secondary" />
+          <h2 className="mb-1 text-lg text-foreground-secondary">
             No notifications yet
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            You'll see notifications here when you receive messages or updates
-          </Typography>
-        </Paper>
+          </h2>
+          <p className="text-sm text-foreground-secondary">
+            You&apos;ll see notifications here when you receive messages or
+            updates
+          </p>
+        </div>
       ) : (
-        <Paper sx={{ bgcolor: "background.paper" }}>
-          <List sx={{ py: 0 }}>
-            {notifications.map((notification, index) => (
-              <Box key={notification.id}>
-                <ListItem
-                  sx={{
-                    py: 2,
-                    px: 2,
-                    cursor: notification.link ? "pointer" : "default",
-                    bgcolor: notification.read ? "transparent" : "action.hover",
-                    "&:hover": {
-                      bgcolor: notification.read
-                        ? "action.hover"
-                        : "action.selected",
-                    },
-                  }}
-                  onClick={() =>
-                    notification.link && handleNotificationClick(notification)
-                  }
-                  secondaryAction={
-                    <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-                      {!notification.read && (
-                        <IconButton
-                          edge="end"
-                          aria-label="mark as read"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleMarkAsRead(notification.id);
-                          }}
-                          disabled={markingRead === notification.id}
-                          size="small"
-                        >
-                          <CheckIcon />
-                        </IconButton>
+        <div className="rounded-xl border border-border bg-card shadow dark:border-border-dark dark:bg-card-dark">
+          {notifications.map((notification, index) => (
+            <div key={notification.id}>
+              <div
+                className={cn(
+                  "flex items-start justify-between gap-4 px-4 py-3",
+                  notification.link ? "cursor-pointer" : "cursor-default",
+                  notification.read
+                    ? "hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                    : "bg-gray-50 hover:bg-gray-100 dark:bg-gray-800/40 dark:hover:bg-gray-800/70",
+                )}
+                onClick={() =>
+                  notification.link && handleNotificationClick(notification)
+                }
+              >
+                {/* Text content */}
+                <div className="min-w-0 flex-1">
+                  <div className="mb-1 flex flex-wrap items-center gap-2">
+                    <span
+                      className={cn(
+                        "text-base text-foreground",
+                        notification.read ? "font-normal" : "font-bold",
                       )}
-                      <IconButton
-                        edge="end"
-                        aria-label="delete"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDelete(notification.id);
-                        }}
-                        disabled={deleting === notification.id}
-                        size="small"
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </Box>
-                  }
-                >
-                  <ListItemText
-                    primary={
-                      <Box
-                        sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 1,
-                          mb: 0.5,
-                        }}
-                      >
-                        <Typography
-                          variant="subtitle1"
-                          fontWeight={notification.read ? "normal" : "bold"}
-                        >
-                          {notification.title}
-                        </Typography>
-                        <Chip
-                          label={notification.type}
-                          size="small"
-                          color={getNotificationTypeColor(notification.type)}
-                          sx={{ height: 20, fontSize: "0.7rem" }}
-                        />
-                      </Box>
-                    }
-                    secondary={
-                      <Box>
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"
-                          component="span"
-                        >
-                          {notification.body}
-                        </Typography>
-                        <Typography
-                          variant="caption"
-                          color="text.secondary"
-                          component="span"
-                          sx={{ mt: 0.5, display: "block" }}
-                        >
-                          {formatTimestamp(notification.createdAt)}
-                        </Typography>
-                      </Box>
-                    }
-                  />
-                </ListItem>
-                {index < notifications.length - 1 && <Divider />}
-              </Box>
-            ))}
-          </List>
-        </Paper>
+                    >
+                      {notification.title}
+                    </span>
+                    <span
+                      className={cn(
+                        "inline-flex items-center rounded-full px-2 py-0.5 text-[0.7rem] font-medium leading-none",
+                        getChipClasses(notification.type),
+                      )}
+                    >
+                      {notification.type}
+                    </span>
+                  </div>
+                  <span className="block text-sm text-foreground-secondary">
+                    {notification.body}
+                  </span>
+                  <span className="mt-1 block text-xs text-foreground-secondary">
+                    {formatTimestamp(notification.createdAt)}
+                  </span>
+                </div>
+
+                {/* Actions */}
+                <div className="flex shrink-0 items-center gap-1">
+                  {!notification.read && (
+                    <button
+                      aria-label="mark as read"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleMarkAsRead(notification.id);
+                      }}
+                      disabled={markingRead === notification.id}
+                      className={cn(
+                        "rounded-full p-1.5 text-foreground-secondary transition-colors",
+                        "hover:bg-gray-200 dark:hover:bg-gray-700",
+                        "disabled:opacity-50 disabled:cursor-not-allowed",
+                      )}
+                    >
+                      <FiCheck className="h-4 w-4" />
+                    </button>
+                  )}
+                  <button
+                    aria-label="delete"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(notification.id);
+                    }}
+                    disabled={deleting === notification.id}
+                    className={cn(
+                      "rounded-full p-1.5 text-foreground-secondary transition-colors",
+                      "hover:bg-gray-200 dark:hover:bg-gray-700",
+                      "disabled:opacity-50 disabled:cursor-not-allowed",
+                    )}
+                  >
+                    <FiTrash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+              {index < notifications.length - 1 && (
+                <hr className="border-border dark:border-border-dark" />
+              )}
+            </div>
+          ))}
+        </div>
       )}
-    </Container>
+    </div>
   );
 }

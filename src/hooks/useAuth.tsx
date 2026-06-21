@@ -34,10 +34,10 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 const ADMIN_EMAILS = new Set(
-  (process.env.NEXT_PUBLIC_ADMIN_EMAILS || '').split(',').map(e => e.trim()).filter(Boolean)
+  (process.env.NEXT_PUBLIC_ADMIN_EMAILS || "").split(",").map((s) => s.trim()).filter(Boolean)
 );
 const ADMIN_UIDS = new Set(
-  (process.env.NEXT_PUBLIC_ADMIN_UIDS || '').split(',').map(u => u.trim()).filter(Boolean)
+  (process.env.NEXT_PUBLIC_ADMIN_UIDS || "").split(",").map((s) => s.trim()).filter(Boolean)
 );
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {

@@ -1,0 +1,14 @@
+<svg id="svg-title-light" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 90" width="400" height="90"><style>@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&amp;family=Cinzel:wght@400;700');</style>
+  <defs>
+    <linearGradient id="tl-g1" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0D0A1A"/>
+      <stop offset="100%" stop-color="#3B1F6B"/>
+    </linearGradient>
+    <linearGradient id="tl-g2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#4A9FE8"/>
+      <stop offset="100%" stop-color="#7B3FC4"/>
+    </linearGradient>
+  </defs>
+  <text x="200" y="36" text-anchor="middle" font-family="'Cinzel Decorative', serif" font-size="26" font-weight="700" fill="url(#tl-g1)">The Lair of</text>
+  <text x="200" y="76" text-anchor="middle" font-family="'Cinzel Decorative', serif" font-size="30" font-weight="700" fill="url(#tl-g2)">Evil Tools</text>
+</svg>

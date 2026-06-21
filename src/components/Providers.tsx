@@ -3,77 +3,36 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { ThemeProvider } from "./ThemeProvider";
 import { ToastProvider } from "./ui/ToastProvider";
 import { NotificationProvider } from "@/hooks/useNotifications";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import dynamic from "next/dynamic";
 import { Toaster } from "react-hot-toast";
-import { useState, useMemo } from "react";
-import { ThemeProvider as MuiThemeProvider, CssBaseline } from "@mui/material";
-import { getTheme } from "@/theme/theme";
-import { useTheme as useCustomTheme } from "./ThemeProvider";
+import { useState } from "react";
 
-// Dynamically import ReactQueryDevtools to avoid hydration issues
-const ReactQueryDevtools = dynamic(
-  () =>
-    import("@tanstack/react-query-devtools").then(
-      (mod) => mod.ReactQueryDevtools,
-    ),
-  { ssr: false },
-);
-
-// Inner component to access theme context
-function MuiThemeWrapper({ children }: { children: React.ReactNode }) {
-  const { theme } = useCustomTheme();
-  const muiTheme = useMemo(() => getTheme(theme as "light" | "dark"), [theme]);
-
-  return (
-    <MuiThemeProvider theme={muiTheme}>
-      <CssBaseline />
-      {children}
-    </MuiThemeProvider>
-  );
-}
+// React Query has been removed; this file no longer creates a query client.
+// Devtools dynamic import removed accordingly.
 
 export default function Providers({ children }: { children: React.ReactNode }) {
-  // Create QueryClient instance in state to avoid creating new instance on every render
-  const [queryClient] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: {
-          queries: {
-            staleTime: 5 * 60 * 1000, // 5 minutes
-            gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
-            refetchOnWindowFocus: false,
-            retry: 1,
-          },
-        },
-      }),
-  );
+  // React Query removed; no client is needed.
+  const [queryClient] = useState(null as any);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <MuiThemeWrapper>
-          <AuthProvider>
-            <NotificationProvider>
-              <ToastProvider>{children}</ToastProvider>
-            </NotificationProvider>
-            {/* react-hot-toast for alternative toast notifications */}
-            <Toaster
-              position="top-right"
-              reverseOrder={false}
-              gutter={8}
-              toastOptions={{
-                duration: 3000,
-                style: {
-                  borderRadius: "8px",
-                  fontSize: "14px",
-                },
-              }}
-            />
-          </AuthProvider>
-        </MuiThemeWrapper>
-      </ThemeProvider>
-      <ReactQueryDevtools initialIsOpen={false} />
-    </QueryClientProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <NotificationProvider>
+          <ToastProvider>{children}</ToastProvider>
+        </NotificationProvider>
+        {/* react-hot-toast for alternative toast notifications */}
+        <Toaster
+          position="top-right"
+          reverseOrder={false}
+          gutter={8}
+          toastOptions={{
+            duration: 3000,
+            style: {
+              borderRadius: "8px",
+              fontSize: "14px",
+            },
+          }}
+        />
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

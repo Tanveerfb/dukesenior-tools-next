@@ -1,78 +1,50 @@
 "use client";
-import { Box, Container, Grid, Stack, Typography } from "@mui/material";
 import HeroSection from "@/components/home/HeroSection";
-import StatsOverview from "@/components/home/StatsOverview";
+// stats section removed per refactor
 import FeaturedPosts from "@/components/home/FeaturedPosts";
 import QuickActions from "@/components/home/QuickActions";
 import ActivityFeed from "@/components/home/ActivityFeed";
 
 export default function HomePage() {
   return (
-    <Box component="main">
+    <main>
       {/* Hero Section - Full Width */}
       <HeroSection />
 
-      {/* Stats Overview - Full Width */}
-      <StatsOverview />
+      {/* stats section removed */}
 
       {/* Main Content - Two Column Layout */}
-      <Box sx={{ py: { xs: 4, md: 6 }, bgcolor: "background.default" }}>
-        <Container maxWidth="lg">
-          <Grid container spacing={4}>
+      <div className="py-8 md:py-12 bg-background dark:bg-background-dark">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Left Column - Featured Posts */}
-            <Grid item xs={12} lg={8}>
-              <Stack spacing={3}>
-                <Box>
-                  <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 1 }}>
-                    <Box
-                      component="span"
-                      sx={{
-                        px: 1.5,
-                        py: 0.5,
-                        borderRadius: 1,
-                        bgcolor: "secondary.main",
-                        color: "secondary.contrastText",
-                        fontSize: "0.75rem",
-                        fontWeight: 600,
-                        textTransform: "uppercase",
-                        letterSpacing: 0.5,
-                      }}
-                    >
-                      Latest Updates
-                    </Box>
-                  </Stack>
-                  <Typography
-                    variant="h4"
-                    component="h2"
-                    gutterBottom
-                    sx={{
-                      fontFamily:
-                        "var(--font-permanent-marker, 'Permanent Marker', cursive)",
-                      fontWeight: 400,
-                      fontSize: { xs: "1.75rem", md: "2rem" },
-                    }}
-                  >
-                    Community Posts & Resource Drops
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                    Stay current on announcements, guides, and match recaps from the DukeSenior team.
-                  </Typography>
-                </Box>
+            <div className="lg:col-span-2 space-y-6">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="px-2.5 py-1 rounded bg-secondary text-white text-xs font-semibold uppercase tracking-wide">
+                    Latest Updates
+                  </span>
+                </div>
+                <h2 className="text-2xl md:text-3xl text-foreground dark:text-foreground-dark mb-1" style={{ fontFamily: "var(--font-permanent-marker, 'Permanent Marker', cursive)", fontWeight: 400 }}>
+                  Community Posts & Resources
+                </h2>
+                <p className="text-sm text-foreground-muted dark:text-foreground-dark-muted mb-6">
+                  Stay current on announcements, guides, and community news from
+                  the DukeSenior team.
+                </p>
+              </div>
 
-                <FeaturedPosts maxFeatured={6} showSampleFallback={false} />
-              </Stack>
-            </Grid>
+              <FeaturedPosts maxFeatured={6} showSampleFallback={false} />
+            </div>
 
             {/* Right Column - Quick Actions & Activity Feed */}
-            <Grid item xs={12} lg={4}>
-              <Stack spacing={4}>
-                <QuickActions />
-                <ActivityFeed />
-              </Stack>
-            </Grid>
-          </Grid>
-        </Container>
-      </Box>
-    </Box>
+            <div className="space-y-8">
+              <QuickActions />
+              <ActivityFeed />
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
   );
 }

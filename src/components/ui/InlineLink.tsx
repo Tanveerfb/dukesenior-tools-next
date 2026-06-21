@@ -10,8 +10,8 @@ type CombinedProps = LinkProps &
     children?: React.ReactNode;
   };
 
-// Shared forwardRef wrapper so React-Bootstrap components can use
-// `as={InlineLink}` without TypeScript ref-errors, and so it can be used as a direct component.
+// Shared forwardRef wrapper used as a direct link component with
+// client-side navigation and proper ref forwarding.
 const InlineLink = React.forwardRef<HTMLAnchorElement, CombinedProps>(
   function InlineLink(props, ref) {
     const { children, href, onClick, target, rel, ...rest } =
@@ -56,7 +56,7 @@ const InlineLink = React.forwardRef<HTMLAnchorElement, CombinedProps>(
           window.location.href = url;
         }
       },
-      [onClick, router, url, target, isExternal]
+      [onClick, router, url, target, isExternal],
     );
 
     return (
@@ -71,7 +71,7 @@ const InlineLink = React.forwardRef<HTMLAnchorElement, CombinedProps>(
         {children}
       </a>
     );
-  }
+  },
 );
 
 export default InlineLink;

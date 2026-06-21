@@ -1,89 +1,38 @@
 import Link from "next/link";
-import { Box, Container, Typography, Button, Stack } from "@mui/material";
-import { Home as HomeIcon, Search as SearchIcon } from "@mui/icons-material";
+import { FiHome, FiSearch } from "react-icons/fi";
 
 export default function NotFound() {
   return (
-    <Container maxWidth="md">
-      <Box
-        sx={{
-          py: 8,
-          textAlign: "center",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: 3,
-        }}
-      >
-        <Typography
-          variant="h1"
-          component="h1"
-          sx={{
-            fontSize: { xs: "4rem", md: "6rem" },
-            fontWeight: 700,
-            background: "linear-gradient(45deg, #ab2fb1, #36453b)",
-            backgroundClip: "text",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-          }}
-        >
-          404
-        </Typography>
+    <div className="max-w-2xl mx-auto px-4 py-16 text-center flex flex-col items-center gap-6">
+      <h1 className="text-6xl md:text-8xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+        404
+      </h1>
 
-        <Typography variant="h4" component="h2" gutterBottom>
-          Page Not Found
-        </Typography>
+      <h2 className="text-2xl md:text-3xl font-semibold text-foreground dark:text-foreground-dark">
+        Page Not Found
+      </h2>
 
-        <Typography
-          variant="body1"
-          color="text.secondary"
-          sx={{ maxWidth: 500 }}
-        >
-          The page you are looking for doesn't exist or has been moved. Let's
-          get you back on track.
-        </Typography>
+      <p className="text-foreground-muted dark:text-foreground-dark-muted max-w-md">
+        The page you are looking for doesn&apos;t exist or has been moved.
+        Let&apos;s get you back on track.
+      </p>
 
-        <Stack
-          direction={{ xs: "column", sm: "row" }}
-          spacing={2}
-          sx={{ mt: 2 }}
+      <div className="flex flex-col sm:flex-row gap-3 mt-2">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 px-6 py-3 text-sm font-medium bg-primary hover:bg-primary-600 text-white rounded-lg transition-all hover:-translate-y-0.5 no-underline"
         >
-          <Link href="/" passHref legacyBehavior>
-            <Button
-              variant="contained"
-              size="large"
-              startIcon={<HomeIcon />}
-              sx={{
-                textTransform: "none",
-                px: 4,
-                transition: "transform 0.2s",
-                "&:hover": {
-                  transform: "translateY(-2px)",
-                },
-              }}
-            >
-              Return Home
-            </Button>
-          </Link>
-          <Link href="/phasmotourney-series" passHref legacyBehavior>
-            <Button
-              variant="outlined"
-              size="large"
-              startIcon={<SearchIcon />}
-              sx={{
-                textTransform: "none",
-                px: 4,
-                transition: "transform 0.2s",
-                "&:hover": {
-                  transform: "translateY(-2px)",
-                },
-              }}
-            >
-              Browse Tourneys
-            </Button>
-          </Link>
-        </Stack>
-      </Box>
-    </Container>
+          <FiHome size={16} />
+          Return Home
+        </Link>
+        <Link
+          href="/phasmotourney-series"
+          className="inline-flex items-center gap-2 px-6 py-3 text-sm font-medium border border-border dark:border-border-dark text-foreground dark:text-foreground-dark rounded-lg hover:bg-surface-100 dark:hover:bg-surface-900/50 transition-all hover:-translate-y-0.5 no-underline"
+        >
+          <FiSearch size={16} />
+          Browse Tourneys
+        </Link>
+      </div>
+    </div>
   );
 }

@@ -28,7 +28,7 @@ export function canCreatePost(
  */
 export function canPublishDirectly(user: UserDoc): boolean {
   return (
-    user.roles?.includes("admin") || user.roles?.includes("contributor")
+    (user.roles?.includes("admin") || user.roles?.includes("contributor")) ?? false
   );
 }
 
@@ -59,5 +59,5 @@ export function canDeletePost(user: UserDoc, postAuthorUID: string): boolean {
  * Only admins can approve or reject posts
  */
 export function canApprovePost(user: UserDoc): boolean {
-  return user.roles?.includes("admin");
+  return user.roles?.includes("admin") ?? false;
 }

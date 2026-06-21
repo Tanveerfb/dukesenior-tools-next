@@ -1,26 +1,46 @@
 "use client";
 
 import { ReactNode } from "react";
-import { Box, Container, Typography, Breadcrumbs, Link as MuiLink } from "@mui/material";
-import { NavigateNext as NavigateNextIcon } from "@mui/icons-material";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { FiChevronRight } from "react-icons/fi";
 
 interface PageLayoutProps {
   children: ReactNode;
-  /** Optional hero title */
   title?: string;
-  /** Optional hero subtitle/description */
   subtitle?: string;
-  /** Optional breadcrumb items */
   breadcrumbs?: Array<{ label: string; href?: string }>;
-  /** Hero background variant */
-  heroVariant?: "primary" | "secondary" | "success" | "warning" | "info" | "none";
-  /** Max width for content container */
+  heroVariant?:
+    | "primary"
+    | "secondary"
+    | "success"
+    | "warning"
+    | "info"
+    | "none";
   maxWidth?: "xs" | "sm" | "md" | "lg" | "xl" | false;
-  /** Additional className for the root element */
   className?: string;
 }
+
+const heroGradients: Record<string, string> = {
+  primary:
+    "bg-gradient-to-br from-primary/10 via-surface-50 to-secondary/5 dark:from-primary/5 dark:via-background-dark dark:to-secondary/5",
+  secondary:
+    "bg-gradient-to-br from-secondary/10 via-surface-50 to-surface-100 dark:from-secondary/5 dark:via-background-dark dark:to-surface-900",
+  success:
+    "bg-gradient-to-br from-success/10 via-surface-50 to-surface-100 dark:from-success/5 dark:via-background-dark dark:to-surface-900",
+  warning:
+    "bg-gradient-to-br from-warning/15 via-surface-50 to-primary/5 dark:from-warning/5 dark:via-background-dark dark:to-primary/5",
+  info: "bg-gradient-to-br from-info/15 via-surface-50 to-primary/5 dark:from-info/5 dark:via-background-dark dark:to-primary/5",
+  none: "",
+};
+
+const maxWidthMap: Record<string, string> = {
+  xs: "max-w-md",
+  sm: "max-w-2xl",
+  md: "max-w-4xl",
+  lg: "max-w-6xl",
+  xl: "max-w-7xl",
+};
 
 export default function PageLayout({
   children,
@@ -32,103 +52,74 @@ export default function PageLayout({
   className,
 }: PageLayoutProps) {
   const hasHero = title || subtitle || breadcrumbs;
-
-  const getHeroBackground = () => {
-    switch (heroVariant) {
-      case "primary":
-        return "linear-gradient(115deg, rgba(171, 47, 177, 0.12), rgba(54, 69, 59, 0.1))";
-      case "secondary":
-        return "linear-gradient(115deg, rgba(54, 69, 59, 0.12), rgba(18, 19, 15, 0.08))";
-      case "success":
-        return "linear-gradient(115deg, rgba(15, 128, 41, 0.12), rgba(54, 69, 59, 0.08))";
-      case "warning":
-        return "linear-gradient(115deg, rgba(255, 202, 58, 0.18), rgba(171, 47, 177, 0.12))";
-      case "info":
-        return "linear-gradient(115deg, rgba(137, 96, 142, 0.18), rgba(171, 47, 177, 0.12))";
-      case "none":
-        return "transparent";
-      default:
-        return "linear-gradient(115deg, rgba(171, 47, 177, 0.12), rgba(54, 69, 59, 0.1))";
-    }
-  };
+  const containerClass = maxWidth
+    ? `${maxWidthMap[maxWidth] || "max-w-7xl"} mx-auto px-4 sm:px-6 lg:px-8`
+    : "px-4 sm:px-6 lg:px-8";
 
   return (
-    <Box className={cn("page-layout", className)}>
+    <div className={cn("page-layout", className)}>
       {/* Hero Section */}
       {hasHero && (
-        <Box
-          sx={{
-            background: getHeroBackground(),
-            borderBottom: 1,
-            borderColor: "divider",
-            py: { xs: 3, md: 4 },
-          }}
+        <div
+          className={cn(
+            "border-b-2 border-dashed border-border dark:border-border-dark py-6 md:py-8",
+            heroGradients[heroVariant] || heroGradients.primary,
+          )}
         >
-          <Container maxWidth={maxWidth}>
+          <div className={containerClass}>
             {/* Breadcrumbs */}
             {breadcrumbs && breadcrumbs.length > 0 && (
-              <Breadcrumbs
-                separator={<NavigateNextIcon fontSize="small" />}
+              <nav
                 aria-label="breadcrumb"
-                sx={{ mb: 2 }}
+                className="flex items-center gap-1 text-sm mb-4"
               >
                 {breadcrumbs.map((crumb, index) => {
                   const isLast = index === breadcrumbs.length - 1;
-                  return crumb.href && !isLast ? (
-                    <MuiLink
-                      key={index}
-                      component={Link}
-                      href={crumb.href}
-                      color="inherit"
-                      underline="hover"
-                    >
-                      {crumb.label}
-                    </MuiLink>
-                  ) : (
-                    <Typography key={index} color="text.primary">
-                      {crumb.label}
-                    </Typography>
+                  return (
+                    <span key={index} className="flex items-center gap-1">
+                      {index > 0 && (
+                        <FiChevronRight
+                          size={14}
+                          className="text-foreground-muted dark:text-foreground-dark-muted"
+                        />
+                      )}
+                      {crumb.href && !isLast ? (
+                        <Link
+                          href={crumb.href}
+                          className="text-foreground-muted dark:text-foreground-dark-muted hover:text-primary transition-colors no-underline"
+                        >
+                          {crumb.label}
+                        </Link>
+                      ) : (
+                        <span className="text-foreground dark:text-foreground-dark font-medium">
+                          {crumb.label}
+                        </span>
+                      )}
+                    </span>
                   );
                 })}
-              </Breadcrumbs>
+              </nav>
             )}
 
             {/* Title */}
             {title && (
-              <Typography
-                variant="h3"
-                component="h1"
-                gutterBottom
-                sx={{
-                  fontWeight: 700,
-                  fontSize: { xs: "1.75rem", md: "2.5rem" },
-                }}
-              >
+              <h1 className="text-2xl md:text-4xl font-bold text-foreground dark:text-foreground-dark mb-2">
                 {title}
-              </Typography>
+              </h1>
             )}
 
             {/* Subtitle */}
             {subtitle && (
-              <Typography
-                variant="body1"
-                color="text.secondary"
-                sx={{
-                  fontSize: { xs: "0.95rem", md: "1.1rem" },
-                  maxWidth: "800px",
-                }}
-              >
+              <p className="text-sm md:text-base text-foreground-muted dark:text-foreground-dark-muted max-w-3xl">
                 {subtitle}
-              </Typography>
+              </p>
             )}
-          </Container>
-        </Box>
+          </div>
+        </div>
       )}
 
       {/* Main Content */}
-      <Container maxWidth={maxWidth} sx={{ py: { xs: 3, md: 4 } }}>
-        {children}
-      </Container>
-    </Box>
+      <div className={cn(containerClass, "py-6 md:py-8")}>{children}</div>
+    </div>
   );
 }

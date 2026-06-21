@@ -1,5 +1,150 @@
 # Patch Notes
 
+## Version 2.0.0 – Whiteboard/Chalkboard Theme & Full Tailwind Migration (2025-08-30)
+
+### Breaking Changes
+
+- **Removed all MUI and React-Bootstrap dependencies** — 67 packages uninstalled. `@mui/*`, `@emotion/*`, `react-bootstrap`, `bootstrap` are no longer in the project. Do not re-introduce them.
+- **Tailwind CSS 3.4 is the sole styling framework.** All 113+ component files migrated from MUI/Bootstrap to Tailwind utility classes.
+- **`@base-ui/react`** replaces MUI Dialog for headless dialog primitives.
+- **`react-icons`** (Fi* Feather icons) replaces MUI Icons.
+
+### Whiteboard / Chalkboard Theme
+
+- **Light mode (Whiteboard)**: Warm off-white background (`#f4f1ec`), faint dot-grid texture, vivid marker accent colors, dashed borders for a hand-drawn feel.
+- **Dark mode (Chalkboard)**: Deep green-black background (`#1a2721`), chalk-dust grain texture, pastel chalk accent colors, chalky off-white text (`#e4dfd4`).
+- **Permanent Marker font** loaded via `next/font/google` as the primary display typeface site-wide.
+- **CSS custom property token system** with RGB channels enables Tailwind opacity modifiers (`text-foreground/80`) and auto-switches with `data-theme` — no `dark:` prefix needed for semantic tokens.
+
+### New Design Tokens & Utility Classes
+
+- **Semantic tokens**: `text-foreground`, `bg-background`, `bg-card`, `border-border`, `text-foreground-muted` auto-switch between light/dark.
+- **Marker colors**: `text-marker-red`, `text-marker-blue`, `text-marker-green`, `text-marker-orange`, `text-marker-purple`, `text-marker-black`.
+- **Utility classes**: `chalk-underline` (squiggly SVG underline), `marker-highlight` (marker swoosh background), `card-board` (dashed card + hover tilt), `chalk-dust` (texture overlay), `tilt-sm/md/lg` / `-tilt-sm/md/lg` (rotation effects), `border-dashed-marker`.
+- **Shadows**: `shadow-soft` (directional offset like a pinned card), `shadow-chalk` (chalk dust glow).
+
+### Component Updates
+
+- **Card.tsx**: Dashed borders (`border-2 border-dashed`), `rounded-md`, hover tilt on elevated variant.
+- **HeroSection.tsx**: Dashed borders, `chalk-underline` on headings, marker-styled buttons with tilt.
+- **AppNavbar.tsx**: Dashed border-bottom, glass background (`bg-card/90`), custom Tailwind dropdowns.
+- **Footer.tsx**: Dashed border-top, board-themed layout.
+- **PageLayout.tsx**: Dashed hero border.
+- **All admin, tourney, CMS, profile, and feature pages**: Migrated from MUI/Bootstrap to Tailwind utilities.
+
+### Bug Fixes
+
+- **Banner validation auth**: `/api/admin/validate-banner` now receives `Authorization: Bearer <token>` from the admin CMS page (was missing, causing unauthorized errors).
+- **Dark mode text visibility**: Fixed 820+ instances where `text-foreground` was invisible in dark mode by restructuring CSS tokens to use RGB channels that auto-resolve per theme.
+
+### Code Quality
+
+- Removed all `@mui/*`, `@emotion/*`, `react-bootstrap`, `bootstrap` imports across the entire codebase.
+- `cn()` utility (`clsx` + `tailwind-merge`) used consistently for conditional class composition.
+- Pre-existing type errors in `cms.ts` and `gamification.ts` services fixed.
+- Build passes clean with all 79 routes generated.
+
+### Documentation
+
+- Updated `copilot-instructions.md` with full design system reference (tokens, colors, utility classes, typography, board textures).
+- Updated `README.md` to reflect Tailwind-only stack, whiteboard/chalkboard theme, and new project structure.
+- Updated `CONTRIBUTING.md` with current styling guidelines (Tailwind utilities, semantic tokens, dashed borders, marker colors).
+
+### Migration Notes
+
+- If you have local branches referencing MUI or Bootstrap components, they will need to be rewritten using Tailwind utilities.
+- The `src/theme/` directory is no longer used for MUI theme configuration.
+- Sass `@import` deprecation warnings may still appear — migration to `@use` is a separate concern.
+
+---
+
+## Version 1.1.5 – Admin CMS: upload progress, toasts & banner validation (2025-08-29)
+
+### Highlights 1.1.5
+
+- Resumable image uploads with per-file progress reporting and cancellation.
+- Centralized upload logic moved to `src/hooks/useCmsUploads.ts` (optimize + upload + progress callbacks).
+- Admin new-post page (`/admin/cms/new`) updated with:
+  - per-file progress bars and overall upload state,
+  - toasts for upload success/failure,
+  - keyboard-accessible tag dropdown with highlighted matches and arrow-key navigation,
+  - banner upload progress and live preview.
+- Server-side banner validation endpoint `POST /api/admin/validate-banner` added: performs a HEAD probe to check MIME type and size (max 10MB) and requires a verified Firebase ID token (admin) to run.
+- Improved error handling and reporting for uploads; added cancel/retry controls and optimistic UI behavior for image inserts.
+
+### Notes
+
+- The validate-banner endpoint requires an ID token in `Authorization: Bearer <token>`; client-side calls should include the current user's Firebase token (the admin page can be updated to attach it automatically).
+- Some remote hosts may not respond to HEAD requests; a GET fallback can be added if needed.
+- Build completed successfully during development with non-blocking lint warnings.
+
+---
+
+## Version 1.1.4 – UI polish, admin CMS refactor & link standardization (2025-08-29)
+
+### Highlights 1.1.4
+
+- Reworked internal link handling across the UI: introduced a shared `InlineLink` usage pattern and replaced several raw `Link` elements that used bootstrap `btn` classes with `React-Bootstrap` `Button` using `InlineLink` as the `as` prop for consistent behavior and better accessibility.
+- Admin CMS list UI refactor: the posts table was replaced with a card-based listing and an actions `DropdownButton` for Edit / Pin / Delete flows to improve mobile layout and match the rest of the site's card-driven listing styles.
+- Navbar improvements: replaced several `next/link` usages in the Navbar with the shared `InlineLink`, and the Profile menu now resolves a public `/profile/[username]` route (falls back to `/profile`) by reading the current user's public username when available.
+- Post list and home feed tweaks: `PostsFeed` and posts index updated to use `Button as={InlineLink}` for the Read actions; featured/list layout spacing and Read button behavior improved.
+- Removed several legacy/empty route stubs and small unused pages to reduce surface area (legacy tourney redirect stubs removed).
+- Developer tooling: minor changes to `page` bootstrapping and the `style-check` page received content and component additions for more comprehensive UI testing (components like Breadcrumb, Modal, Toast, Tabs were added in the style-check playground).
+
+### Developer notes & migration
+
+- The shared `InlineLink` is a client component and is used with a narrow `as={InlineLink as any}` cast in places to avoid brittle typing with React-Bootstrap's `as` prop; we can remove the `as any` cast later by tightening types or adding a small type shim.
+- Admin API/behavior unchanged — the CMS list refactor is purely presentational and keeps the same CRUD calls under `src/lib/services/cms`.
+- A few ESLint/TS warnings remain after the refactor (unused imports, missing hook deps). They are non-blocking but recommended for a follow-up cleanup pass.
+
+---
+
+## Version 1.1.3 – Navbar & Mobile UX: Offcanvas mobile menu, Accordion nav (2025-08-26)
+
+### Mobile & Navbar Highlights
+
+- Reworked the main navigation mobile experience to use a right-side Offcanvas menu opened via the hamburger toggle. The Offcanvas mirrors desktop sections (Admin, Community, Events, Tools) but uses Accordion items for reliable mobile interaction.
+- Desktop navigation remains centered with dropdown mega-panels; Offcanvas no longer renders inline on large screens to avoid duplication.
+- Accessibility controls, search button, and profile/login actions are available inside the Offcanvas and close the menu after selection.
+- Fixed mobile-specific dropdown issues (Admin/Community/Events/Tools) by replacing nested dropdowns with Accordion items for predictable touch behavior.
+- Minor TypeScript + lint cleanups related to unused refs/state during the refactor.
+
+Build: production build completed successfully (warnings present; none blocking).
+
+### Notes & Follow-ups
+
+- Legacy notifications created before `postSlug` was recorded will need a backfill to provide slug-based links — a safe server-side backfill script is recommended (not executed automatically).
+- UX polish ideas: mark-as-read-on-click (atomic), inbox pagination/grouping, avatars & timestamps formatting improvements.
+
+---
+
+## Version 1.1.2 – Mentions & Notifications Inbox, comment anchors (2025-08-25)
+
+### Highlights 1.1.2
+
+- Implemented client-side @-mention autocomplete inside post and comment composers with scoped suggestion dropdowns and keyboard navigation (works for main composer and nested replies).
+- Server-side mention notifications: secure API endpoint verifies ID tokens and writes per-user notification documents. Notifications now persist a friendly `postSlug` (when available) so links point to human-readable post URLs.
+- Added a Notifications inbox page (`/notifications`) that lists a user's notifications with quick mark-as-read actions and links to the related post and comment anchor.
+- Added comment DOM anchors (`id="comment-<id>"`) and a robust scroll-to-hash effect (retry interval + hashchange listener) so SPA navigation reliably scrolls to the target comment after async loading.
+- Navbar notification dropdown updated to prefer slug-based links and includes a "View all notifications" link to the inbox.
+
+---
+
+## Version 1.1.1 – Route cleanup, image & lint fixes, Discord patch publishing (2025-08-25)
+
+### Changes & Improvements
+
+- Consolidated Phasmo tournament routes under `src/app/phasmotourney-series/*` and removed duplicate legacy stubs after verification.
+- Restored and stabilized Phasmo Tourney 2 bracket page with explicit winners displayed (matches now render bold winners as in the original site).
+- Converted post images and markdown-rendered images to `next/image` for better LCP and automatic optimization (keeps click-to-open lightbox behavior).
+- Fixed runtime "Element type is invalid" errors by replacing fragile react-bootstrap subcomponent usage and switching a few components to plain Bootstrap markup.
+
+### Code Quality & Build
+
+- Addressed several top ESLint/TypeScript warnings (removed unused imports, surfaced previously-unused state, converted images) and reduced runtime errors; a few non-blocking warnings remain (useEffect deps, Sass @import deprecation).
+
+---
+
 ## Version 1.1.0 – CMS, Realtime Interactions, Tournament Redirect Fixes (2025-08-25)
 
 ### Highlights
@@ -66,85 +211,4 @@
 
 ---
 
-Generated automatically based on recent commits and build changes on 2025-08-25.
-
-## Version 1.1.1 – Route cleanup, image & lint fixes, Discord patch publishing (2025-08-25)
-
-### Changes & Improvements
-
-- Consolidated Phasmo tournament routes under `src/app/phasmotourney-series/*` and removed duplicate legacy stubs after verification.
-- Restored and stabilized Phasmo Tourney 2 bracket page with explicit winners displayed (matches now render bold winners as in the original site).
-- Converted post images and markdown-rendered images to `next/image` for better LCP and automatic optimization (keeps click-to-open lightbox behavior).
-- Fixed runtime "Element type is invalid" errors by replacing fragile react-bootstrap subcomponent usage and switching a few components to plain Bootstrap markup.
-
-### Code Quality & Build
-
-- Addressed several top ESLint/TypeScript warnings (removed unused imports, surfaced previously-unused state, converted images) and reduced runtime errors; a few non-blocking warnings remain (useEffect deps, Sass @import deprecation).
-
----
-
-## Version 1.1.2 – Mentions & Notifications Inbox, comment anchors (2025-08-25)
-
-### Highlights 1.1.2
-
-- Implemented client-side @-mention autocomplete inside post and comment composers with scoped suggestion dropdowns and keyboard navigation (works for main composer and nested replies).
-- Server-side mention notifications: secure API endpoint verifies ID tokens and writes per-user notification documents. Notifications now persist a friendly `postSlug` (when available) so links point to human-readable post URLs.
-- Added a Notifications inbox page (`/notifications`) that lists a user's notifications with quick mark-as-read actions and links to the related post and comment anchor.
-- Added comment DOM anchors (`id="comment-<id>"`) and a robust scroll-to-hash effect (retry interval + hashchange listener) so SPA navigation reliably scrolls to the target comment after async loading.
-- Navbar notification dropdown updated to prefer slug-based links and includes a "View all notifications" link to the inbox.
-
-## Version 1.1.3 – Navbar & Mobile UX: Offcanvas mobile menu, Accordion nav (2025-08-26)
-
-### Mobile & Navbar Highlights
-
-- Reworked the main navigation mobile experience to use a right-side Offcanvas menu opened via the hamburger toggle. The Offcanvas mirrors desktop sections (Admin, Community, Events, Tools) but uses Accordion items for reliable mobile interaction.
-- Desktop navigation remains centered with dropdown mega-panels; Offcanvas no longer renders inline on large screens to avoid duplication.
-- Accessibility controls, search button, and profile/login actions are available inside the Offcanvas and close the menu after selection.
-- Fixed mobile-specific dropdown issues (Admin/Community/Events/Tools) by replacing nested dropdowns with Accordion items for predictable touch behavior.
-- Minor TypeScript + lint cleanups related to unused refs/state during the refactor.
-
-Build: production build completed successfully (warnings present; none blocking).
-
-### Notes & Follow-ups
-
-- Legacy notifications created before `postSlug` was recorded will need a backfill to provide slug-based links — a safe server-side backfill script is recommended (not executed automatically).
-- UX polish ideas: mark-as-read-on-click (atomic), inbox pagination/grouping, avatars & timestamps formatting improvements.
-
-## Version 1.1.4 – UI polish, admin CMS refactor & link standardization (2025-08-29)
-
-### Highlights 1.1.4
-
-- Reworked internal link handling across the UI: introduced a shared `InlineLink` usage pattern and replaced several raw `Link` elements that used bootstrap `btn` classes with `React-Bootstrap` `Button` using `InlineLink` as the `as` prop for consistent behavior and better accessibility.
-- Admin CMS list UI refactor: the posts table was replaced with a card-based listing and an actions `DropdownButton` for Edit / Pin / Delete flows to improve mobile layout and match the rest of the site's card-driven listing styles.
-- Navbar improvements: replaced several `next/link` usages in the Navbar with the shared `InlineLink`, and the Profile menu now resolves a public `/profile/[username]` route (falls back to `/profile`) by reading the current user's public username when available.
-- Post list and home feed tweaks: `PostsFeed` and posts index updated to use `Button as={InlineLink}` for the Read actions; featured/list layout spacing and Read button behavior improved.
-- Removed several legacy/empty route stubs and small unused pages to reduce surface area (legacy tourney redirect stubs removed).
-- Developer tooling: minor changes to `page` bootstrapping and the `style-check` page received content and component additions for more comprehensive UI testing (components like Breadcrumb, Modal, Toast, Tabs were added in the style-check playground).
-
-### Developer notes & migration
-
-- The shared `InlineLink` is a client component and is used with a narrow `as={InlineLink as any}` cast in places to avoid brittle typing with React-Bootstrap's `as` prop; we can remove the `as any` cast later by tightening types or adding a small type shim.
-- Admin API/behavior unchanged — the CMS list refactor is purely presentational and keeps the same CRUD calls under `src/lib/services/cms`.
-- A few ESLint/TS warnings remain after the refactor (unused imports, missing hook deps). They are non-blocking but recommended for a follow-up cleanup pass.
-
----
-
-## Version 1.1.5 – Admin CMS: upload progress, toasts & banner validation (2025-08-29)
-
-### Highlights 1.1.5
-
-- Resumable image uploads with per-file progress reporting and cancellation.
-- Centralized upload logic moved to `src/hooks/useCmsUploads.ts` (optimize + upload + progress callbacks).
-- Admin new-post page (`/admin/cms/new`) updated with:
-  - per-file progress bars and overall upload state,
-  - toasts for upload success/failure,
-  - keyboard-accessible tag dropdown with highlighted matches and arrow-key navigation,
-  - banner upload progress and live preview.
-- Server-side banner validation endpoint `POST /api/admin/validate-banner` added: performs a HEAD probe to check MIME type and size (max 10MB) and requires a verified Firebase ID token (admin) to run.
-- Improved error handling and reporting for uploads; added cancel/retry controls and optimistic UI behavior for image inserts.
-
-### Notes
-
-- The validate-banner endpoint requires an ID token in `Authorization: Bearer <token>`; client-side calls should include the current user's Firebase token (the admin page can be updated to attach it automatically).
-- Some remote hosts may not respond to HEAD requests; a GET fallback can be added if needed.
-- Build completed successfully during development with non-blocking lint warnings.
+Generated automatically based on recent commits and build changes.

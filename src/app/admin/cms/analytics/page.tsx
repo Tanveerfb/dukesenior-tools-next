@@ -1,15 +1,5 @@
 "use client";
 import { useState, useEffect } from "react";
-import {
-  Container,
-  Row,
-  Col,
-  Card,
-  Spinner,
-  Alert,
-  Table,
-  Button,
-} from "react-bootstrap";
 import { useAuth } from "@/hooks/useAuth";
 import InlineLink from "@/components/ui/InlineLink";
 import {
@@ -36,7 +26,7 @@ ChartJS.register(
   Legend,
   ArcElement,
   PointElement,
-  LineElement
+  LineElement,
 );
 
 interface AnalyticsData {
@@ -72,7 +62,7 @@ export default function AnalyticsPage() {
   useEffect(() => {
     async function fetchAnalytics() {
       if (!user) return;
-      
+
       setLoading(true);
       try {
         const token = await user.getIdToken();
@@ -81,11 +71,11 @@ export default function AnalyticsPage() {
             Authorization: `Bearer ${token}`,
           },
         });
-        
+
         if (!res.ok) {
           throw new Error("Failed to fetch analytics");
         }
-        
+
         const data = await res.json();
         setAnalytics(data);
       } catch (err: any) {
@@ -100,33 +90,58 @@ export default function AnalyticsPage() {
 
   if (!admin) {
     return (
-      <Container className="py-5">
-        <Alert variant="danger">Admin only</Alert>
-      </Container>
+      <div className="max-w-7xl mx-auto px-4 py-10">
+        <div className="rounded border border-red-400/30 bg-red-50 dark:bg-red-900/30 p-3 text-sm text-red-700 dark:text-red-300">
+          Admin only
+        </div>
+      </div>
     );
   }
 
   if (loading) {
     return (
-      <Container className="py-5 text-center">
-        <Spinner animation="border" />
-      </Container>
+      <div className="max-w-7xl mx-auto px-4 py-10 text-center">
+        <svg
+          className="animate-spin h-8 w-8 text-primary-500 mx-auto"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            className="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="4"
+          />
+          <path
+            className="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+          />
+        </svg>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <Container className="py-5">
-        <Alert variant="danger">{error}</Alert>
-      </Container>
+      <div className="max-w-7xl mx-auto px-4 py-10">
+        <div className="rounded border border-red-400/30 bg-red-50 dark:bg-red-900/30 p-3 text-sm text-red-700 dark:text-red-300">
+          {error}
+        </div>
+      </div>
     );
   }
 
   if (!analytics) {
     return (
-      <Container className="py-5">
-        <Alert variant="info">No analytics data available</Alert>
-      </Container>
+      <div className="max-w-7xl mx-auto px-4 py-10">
+        <div className="rounded border border-blue-300 bg-blue-50 dark:bg-blue-900/30 dark:border-blue-700 p-3 text-sm text-blue-800 dark:text-blue-200">
+          No analytics data available
+        </div>
+      </div>
     );
   }
 
@@ -188,120 +203,115 @@ export default function AnalyticsPage() {
   };
 
   return (
-    <Container className="py-4">
-      <div className="d-flex align-items-center mb-4">
-        <h1 className="mb-0">CMS Analytics</h1>
-        <Button
-          as={InlineLink as any}
+    <div className="max-w-7xl mx-auto px-4 py-4">
+      <div className="flex items-center mb-4">
+        <h1 className="text-2xl font-bold text-foreground">CMS Analytics</h1>
+        <InlineLink
           href="/admin/cms"
-          variant="outline-secondary"
-          className="ms-auto"
+          className="ml-auto px-3 py-1.5 rounded border border-gray-500 text-gray-500 hover:bg-gray-500/10 text-sm"
         >
           Back to CMS
-        </Button>
+        </InlineLink>
       </div>
 
       {/* Summary Cards */}
-      <Row className="mb-4">
-        <Col md={4}>
-          <Card className="text-center">
-            <Card.Body>
-              <h3 className="text-primary">{analytics.totalPosts}</h3>
-              <p className="text-muted mb-0">Total Posts</p>
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col md={4}>
-          <Card className="text-center">
-            <Card.Body>
-              <h3 className="text-success">{analytics.totalViews}</h3>
-              <p className="text-muted mb-0">Total Views</p>
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col md={4}>
-          <Card className="text-center">
-            <Card.Body>
-              <h3 className="text-info">{analytics.totalComments}</h3>
-              <p className="text-muted mb-0">Total Comments</p>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        <div className="rounded-xl border border-border bg-card dark:bg-card-dark dark:border-border-dark shadow-sm text-center p-4">
+          <h3 className="text-2xl font-bold text-primary-500">
+            {analytics.totalPosts}
+          </h3>
+          <p className="text-foreground/60 mb-0">Total Posts</p>
+        </div>
+        <div className="rounded-xl border border-border bg-card dark:bg-card-dark dark:border-border-dark shadow-sm text-center p-4">
+          <h3 className="text-2xl font-bold text-green-600">
+            {analytics.totalViews}
+          </h3>
+          <p className="text-foreground/60 mb-0">Total Views</p>
+        </div>
+        <div className="rounded-xl border border-border bg-card dark:bg-card-dark dark:border-border-dark shadow-sm text-center p-4">
+          <h3 className="text-2xl font-bold text-blue-500">
+            {analytics.totalComments}
+          </h3>
+          <p className="text-foreground/60 mb-0">Total Comments</p>
+        </div>
+      </div>
 
       {/* Charts */}
-      <Row className="mb-4">
-        <Col lg={8}>
-          <Card>
-            <Card.Header>
-              <h5 className="mb-0">Top Posts by Views</h5>
-            </Card.Header>
-            <Card.Body style={{ height: "400px" }}>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 mb-4">
+        <div className="lg:col-span-8">
+          <div className="rounded-xl border border-border bg-card dark:bg-card-dark dark:border-border-dark shadow-sm">
+            <div className="px-4 py-3 border-b border-border dark:border-border-dark">
+              <h5 className="font-semibold text-foreground">
+                Top Posts by Views
+              </h5>
+            </div>
+            <div className="p-4" style={{ height: "400px" }}>
               <Bar data={topPostsData} options={chartOptions} />
-            </Card.Body>
-          </Card>
-        </Col>
-        <Col lg={4}>
-          <Card>
-            <Card.Header>
-              <h5 className="mb-0">Tag Usage</h5>
-            </Card.Header>
-            <Card.Body style={{ height: "400px" }}>
+            </div>
+          </div>
+        </div>
+        <div className="lg:col-span-4">
+          <div className="rounded-xl border border-border bg-card dark:bg-card-dark dark:border-border-dark shadow-sm">
+            <div className="px-4 py-3 border-b border-border dark:border-border-dark">
+              <h5 className="font-semibold text-foreground">Tag Usage</h5>
+            </div>
+            <div className="p-4" style={{ height: "400px" }}>
               <Pie data={tagUsageData} options={chartOptions} />
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
+            </div>
+          </div>
+        </div>
+      </div>
 
-      <Row className="mb-4">
-        <Col>
-          <Card>
-            <Card.Header>
-              <h5 className="mb-0">Views by Day (Last 30 Days)</h5>
-            </Card.Header>
-            <Card.Body style={{ height: "300px" }}>
-              <Line data={viewsByDayData} options={chartOptions} />
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
+      <div className="mb-4">
+        <div className="rounded-xl border border-border bg-card dark:bg-card-dark dark:border-border-dark shadow-sm">
+          <div className="px-4 py-3 border-b border-border dark:border-border-dark">
+            <h5 className="font-semibold text-foreground">
+              Views by Day (Last 30 Days)
+            </h5>
+          </div>
+          <div className="p-4" style={{ height: "300px" }}>
+            <Line data={viewsByDayData} options={chartOptions} />
+          </div>
+        </div>
+      </div>
 
       {/* Top Posts Table */}
-      <Row>
-        <Col>
-          <Card>
-            <Card.Header>
-              <h5 className="mb-0">Top Posts Details</h5>
-            </Card.Header>
-            <Card.Body>
-              <Table striped bordered hover responsive>
-                <thead>
-                  <tr>
-                    <th>Title</th>
-                    <th>Views</th>
-                    <th>Likes</th>
-                    <th>Dislikes</th>
-                    <th>Comments</th>
-                    <th>Created</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {analytics.topPosts.map((post) => (
-                    <tr key={post.postId}>
-                      <td>{post.title}</td>
-                      <td>{post.views}</td>
-                      <td>{post.likes}</td>
-                      <td>{post.dislikes}</td>
-                      <td>{post.comments}</td>
-                      <td>{new Date(post.createdAt).toLocaleDateString()}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-    </Container>
+      <div className="rounded-xl border border-border bg-card dark:bg-card-dark dark:border-border-dark shadow-sm">
+        <div className="px-4 py-3 border-b border-border dark:border-border-dark">
+          <h5 className="font-semibold text-foreground">Top Posts Details</h5>
+        </div>
+        <div className="p-4 overflow-x-auto">
+          <table className="w-full text-sm text-foreground border-collapse">
+            <thead>
+              <tr className="border-b border-border">
+                <th className="px-3 py-2 text-left font-semibold">Title</th>
+                <th className="px-3 py-2 text-left font-semibold">Views</th>
+                <th className="px-3 py-2 text-left font-semibold">Likes</th>
+                <th className="px-3 py-2 text-left font-semibold">Dislikes</th>
+                <th className="px-3 py-2 text-left font-semibold">Comments</th>
+                <th className="px-3 py-2 text-left font-semibold">Created</th>
+              </tr>
+            </thead>
+            <tbody>
+              {analytics.topPosts.map((post) => (
+                <tr
+                  key={post.postId}
+                  className="border-b border-border even:bg-foreground/5 hover:bg-foreground/10"
+                >
+                  <td className="px-3 py-2">{post.title}</td>
+                  <td className="px-3 py-2">{post.views}</td>
+                  <td className="px-3 py-2">{post.likes}</td>
+                  <td className="px-3 py-2">{post.dislikes}</td>
+                  <td className="px-3 py-2">{post.comments}</td>
+                  <td className="px-3 py-2">
+                    {new Date(post.createdAt).toLocaleDateString()}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   );
 }

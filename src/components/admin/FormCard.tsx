@@ -1,6 +1,6 @@
 "use client";
 import { ReactNode } from "react";
-import { Card, CardHeader, CardContent, CardActions, Button, Typography, Box } from "@mui/material";
+import { cn } from "@/lib/utils";
 
 interface FormCardProps {
   children: ReactNode;
@@ -19,18 +19,6 @@ interface FormCardProps {
  *
  * Provides a consistent styled card wrapper for forms with optional
  * submit button and collapsible functionality.
- *
- * @example
- * ```tsx
- * <FormCard
- *   title="Add New Result"
- *   subtitle="Enter player performance data"
- *   onSubmit={handleSubmit}
- *   submitLabel="Save Result"
- * >
- *   <YourFormFields />
- * </FormCard>
- * ```
  */
 export default function FormCard({
   children,
@@ -43,42 +31,47 @@ export default function FormCard({
   collapsible: _collapsible = false,
   defaultCollapsed: _defaultCollapsed = false,
 }: FormCardProps) {
-  const content = (
-    <>
-      <CardHeader
-        title={
-          <Typography variant="h6" component="h3" fontWeight={600}>
-            {title}
-          </Typography>
-        }
-        subheader={subtitle}
-      />
-      <CardContent>
+  return (
+    <div className="mb-6 overflow-hidden rounded-xl border border-border bg-card shadow-md dark:border-border-dark dark:bg-card-dark">
+      {/* Header */}
+      <div className="border-b border-border px-6 py-4 dark:border-border-dark">
+        <h3 className="text-lg font-semibold text-foreground">{title}</h3>
+        {subtitle && (
+          <p className="mt-0.5 text-sm text-foreground-secondary">{subtitle}</p>
+        )}
+      </div>
+
+      {/* Content */}
+      <div className="px-6 py-4">
         {onSubmit ? (
-          <Box component="form" onSubmit={onSubmit}>
+          <form onSubmit={onSubmit}>
             {children}
-            <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 3 }}>
-              <Button
+            <div className="mt-6 flex justify-end gap-3">
+              <button
                 type="submit"
-                variant="contained"
                 disabled={submitDisabled}
-                sx={{ textTransform: "none" }}
+                className={cn(
+                  "rounded-lg px-5 py-2.5 text-sm font-medium text-white transition-colors",
+                  submitDisabled
+                    ? "cursor-not-allowed bg-primary-300 opacity-60"
+                    : "bg-primary-500 hover:bg-primary-600 active:bg-primary-700",
+                )}
               >
                 {submitLabel}
-              </Button>
-            </Box>
-          </Box>
+              </button>
+            </div>
+          </form>
         ) : (
           children
         )}
-      </CardContent>
-      {footer && <CardActions>{footer}</CardActions>}
-    </>
-  );
+      </div>
 
-  return (
-    <Card elevation={2} sx={{ mb: 4 }}>
-      {content}
-    </Card>
+      {/* Footer */}
+      {footer && (
+        <div className="border-t border-border px-6 py-3 dark:border-border-dark">
+          {footer}
+        </div>
+      )}
+    </div>
   );
 }

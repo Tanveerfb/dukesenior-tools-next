@@ -1,47 +1,63 @@
-# This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# The Lair of Evil — DukeSenior Tools
+
+A [Next.js](https://nextjs.org) project for DukeSenior's Twitch community — tournament brackets, community tools, and more.
 
 ## Tech Stack
 
 - **Framework**: Next.js 16 (App Router) with React 19
-- **UI Library**: Material-UI (MUI) v6 + Tailwind CSS
-- **Styling**: SCSS with CSS variables, Tailwind utilities
-- **State Management**: React Query (TanStack Query)
-- **Authentication**: Firebase Auth with admin gating
-- **Database**: Firestore
-- **Animations**: Framer Motion
+- **Styling**: Tailwind CSS 3.4 (sole styling framework) with CSS custom properties
+- **UI Primitives**: `@base-ui/react` (Dialog), `react-icons` (Fi* Feather icons)
+- **Authentication**: Firebase Auth with admin gating (email/UID allowlist)
+- **Database**: Firestore (accessed via service modules in `src/lib/services/`)
+- **Animations**: Framer Motion, canvas-confetti
 - **Analytics**: Vercel Analytics & Speed Insights
+- **Fonts**: Permanent Marker (display), Geist (sans), Geist Mono (mono) via `next/font/google`
 
-## Design System
+## Design System — Whiteboard / Chalkboard
 
-This project uses a **unified MUI + Tailwind design system**:
-- **MUI Components**: Primary component library for consistent UI
-- **Tailwind CSS**: Utility classes for rapid styling
-- **Theme**: Custom theme with light/dark mode support
-- **Colors**: Brand colors defined in MUI theme (`primary`, `secondary`, `tertiary`)
-- **Typography**: Fluid type scale with font scaling (0.8x-1.6x)
-- **Spacing**: 8px base unit system
+The site uses a **hand-drawn aesthetic** that switches between two themes:
 
-See `BOOTSTRAP_MIGRATION.md` for migration patterns from legacy Bootstrap code.
+| | Light (Whiteboard) | Dark (Chalkboard) |
+|---|---|---|
+| **Background** | `#f4f1ec` warm off-white | `#1a2721` green-black |
+| **Text** | `#2b2b2b` warm dark | `#e4dfd4` chalky off-white |
+| **Card** | `#faf8f5` | `#223029` |
+| **Border** | `#d6d0c4` | `#3a4f41` |
+| **Texture** | Faint dot-grid | Chalk-dust grain |
+
+### Token System
+
+CSS custom properties with RGB channels power the color system. Tailwind semantic tokens (`text-foreground`, `bg-background`, `bg-card`, `border-border`) resolve to `rgb(var(--color-*-rgb) / <alpha-value>)` and **auto-switch** with the `data-theme` attribute — no `dark:` prefix needed.
+
+### Marker / Chalk Accent Colors
+
+`text-marker-red`, `text-marker-blue`, `text-marker-green`, `text-marker-orange`, `text-marker-purple`, `text-marker-black` — vivid markers in light mode, pastel chalk in dark mode.
+
+### Utility Classes
+
+| Class | Effect |
+|---|---|
+| `chalk-underline` | Squiggly SVG underline |
+| `marker-highlight` | Marker swoosh background |
+| `card-board` | Dashed-border card with hover tilt |
+| `chalk-dust` | Chalk texture overlay |
+| `tilt-sm/md/lg` | Slight rotation effects |
+| `border-dashed-marker` | Themed dashed border |
+
+### Visual Patterns
+
+- **Dashed borders** (`border-2 border-dashed`) on cards, navbar, footer, hero sections
+- **Offset shadows** (`shadow-soft`) for a pinned-card feel
+- **Permanent Marker font** as the primary typeface site-wide
+- **Font scaling**: User-controlled `--font-scale` (0.8x–1.6x)
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Open [http://localhost:3000](http://localhost:3000). Pages auto-update as you edit.
 
 ## Project Structure
 
@@ -50,70 +66,56 @@ src/
 ├── app/                    # Next.js App Router pages
 ├── components/
 │   ├── admin/             # Admin-only components
-│   ├── layout/            # PageLayout, AppChrome
-│   ├── navigation/        # Navbar, Breadcrumbs, Search
-│   ├── ui/                # Shared UI components
-│   ├── home/              # Homepage sections
+│   ├── layout/            # PageLayout
+│   ├── navigation/        # AppNavbar, SearchModal
+│   ├── ui/                # Card, EmptyState, ErrorBoundary, Footer, Toast
+│   ├── home/              # HeroSection, homepage content
 │   ├── tourney/           # Tournament components
 │   └── ...
-├── hooks/                 # Custom React hooks
+├── hooks/                 # useAuth, useNotifications, useCmsUploads
 ├── lib/
 │   ├── services/          # Firestore service modules
-│   ├── navigation/        # Navigation utilities
-│   └── firebase/          # Firebase config
-├── styles/                # Global styles
-├── theme/                 # MUI theme configuration
-└── types/                 # TypeScript types
+│   ├── navigation/        # classify.ts, route helpers
+│   ├── content/           # tags.ts (taggedManifest)
+│   ├── firebase/          # Firebase client + admin config
+│   ├── server/            # verifyIdToken, verifyAdminFromRequest
+│   └── utils/             # Shared utilities
+├── styles/
+│   └── global.scss        # All CSS custom properties + utility classes
+└── types/                 # TypeScript interfaces
 ```
 
 ## Key Features
 
-- **Responsive Design**: Mobile-first with MUI breakpoints
-- **Dark Mode**: Automatic theme switching with persistence
-- **Accessibility**: WCAG 2.1 AA compliant, keyboard navigation
-- **Font Scaling**: User-controlled font size (0.8x-1.6x)
-- **Search**: Global fuzzy search (⌘K/Ctrl+K)
-- **Keyboard Shortcuts**: ⌘K (search), ⌘/ (theme toggle)
+- **Whiteboard/Chalkboard Themes**: Hand-drawn aesthetic with automatic dark mode
+- **Tag-Driven Navigation**: Routes tagged in manifest; navbar auto-builds from `/api/tags/effective`
+- **Accessibility**: Keyboard navigation, font scaling (0.8x–1.6x), semantic HTML
+- **Global Search**: `⌘K` / `Ctrl+K` opens search modal with tag-based filtering
+- **Keyboard Shortcuts**: `⌘K` (search), `⌘/` (theme toggle)
+- **Tournament System**: Multi-season Phasmo Tourney brackets, stats, recorded runs
 
 ## Scripts
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm start` - Start production server
-- `npm run lint` - Run ESLint
-- `npm test` - Run tests with Vitest
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Command | Purpose |
+|---|---|
+| `npm run dev` | Start development server |
+| `npm run build` | Production build |
+| `npm start` | Start production server |
+| `npm run lint` | Run ESLint |
+| `npm test` | Run tests (Vitest) |
 
 ## CI/CD Quality Assurance
 
-This repository enforces quality gates to ensure production stability:
+- **Automated Build Checks**: GitHub Actions verifies all builds on PRs
+- **Branch Protection**: Requires green status checks before merging
+- **Vercel Integration**: Deployment previews for every PR
 
-- ✅ **Automated Build Checks**: GitHub Actions verifies all builds on PRs
-- ✅ **Branch Protection**: Requires green status checks before merging
-- ✅ **Vercel Integration**: Provides deployment previews for every PR
-
-### For Contributors
-
-All pull requests must pass build checks before merging. See [CI/CD Quality Assurance Guidelines](docs/CI_QUALITY_ASSURANCE.md) for the complete workflow.
-
-### For Administrators
-
-To set up branch protection rules, follow the [Branch Protection Setup Guide](docs/BRANCH_PROTECTION_SETUP.md).
+See [CI/CD Quality Assurance Guidelines](docs/CI_QUALITY_ASSURANCE.md) and [Branch Protection Setup](docs/BRANCH_PROTECTION_SETUP.md).
 
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines and code standards.
+
+## Deploy
+
+Deployed on [Vercel](https://vercel.com). See [Next.js deployment docs](https://nextjs.org/docs/app/building-your-application/deploying) for details.

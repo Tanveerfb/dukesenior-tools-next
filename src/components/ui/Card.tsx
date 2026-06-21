@@ -1,65 +1,41 @@
 "use client";
-import { Card as MuiCard, CardProps as MuiCardProps, styled } from "@mui/material";
-import { forwardRef, ReactNode } from "react";
+import { forwardRef, ReactNode, HTMLAttributes } from "react";
+import { cn } from "@/lib/utils";
 
-export interface CardProps extends Omit<MuiCardProps, "variant"> {
+export interface CardProps extends HTMLAttributes<HTMLDivElement> {
   variant?: "default" | "elevated" | "outlined" | "glass";
   children: ReactNode;
 }
 
-const StyledCard = styled(MuiCard, {
-  shouldForwardProp: (prop) => prop !== "customVariant",
-})<{ customVariant?: string }>(({ theme, customVariant }) => {
-  const baseStyles = {
-    transition: "all 0.3s ease",
-  };
-
-  const variantStyles = {
-    default: {},
-    elevated: {
-      boxShadow: theme.shadows[3],
-      "&:hover": {
-        boxShadow: theme.shadows[8],
-        transform: "translateY(-2px)",
-      },
-    },
-    outlined: {
-      border: `2px solid ${theme.palette.divider}`,
-      boxShadow: "none",
-      backgroundColor: "transparent",
-    },
-    glass: {
-      backgroundColor: theme.palette.mode === "dark" 
-        ? "rgba(255, 255, 255, 0.05)"
-        : "rgba(255, 255, 255, 0.7)",
-      backdropFilter: "blur(10px)",
-      border: `1px solid ${theme.palette.mode === "dark" 
-        ? "rgba(255, 255, 255, 0.1)" 
-        : "rgba(0, 0, 0, 0.1)"}`,
-    },
-  };
-
-  return {
-    ...baseStyles,
-    ...(customVariant && variantStyles[customVariant as keyof typeof variantStyles]),
-  };
-});
+const variantClasses: Record<string, string> = {
+  default:
+    "bg-card dark:bg-card-dark border-2 border-dashed border-border dark:border-border-dark rounded-md shadow-soft",
+  elevated:
+    "bg-card dark:bg-card-dark border-2 border-dashed border-border dark:border-border-dark rounded-md shadow-soft hover:shadow-soft-lg hover:-translate-y-1 hover:rotate-[-0.3deg] transition-all duration-300",
+  outlined:
+    "bg-transparent border-2 border-dashed border-border dark:border-border-dark rounded-md shadow-none",
+  glass: "glass rounded-md",
+};
 
 /**
  * Enhanced Card component with variants:
- * - default: Standard MUI card
+ * - default: Standard card with subtle shadow
  * - elevated: Card with elevation and hover effects
  * - outlined: Card with border, no background
  * - glass: Glassmorphism effect with backdrop blur
  */
 const Card = forwardRef<HTMLDivElement, CardProps>(
-  ({ variant = "default", children, ...props }, ref) => {
+  ({ variant = "default", children, className, ...props }, ref) => {
     return (
-      <StyledCard ref={ref} customVariant={variant} {...props}>
+      <div
+        ref={ref}
+        className={cn(variantClasses[variant], className)}
+        {...props}
+      >
         {children}
-      </StyledCard>
+      </div>
     );
-  }
+  },
 );
 
 Card.displayName = "Card";

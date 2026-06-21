@@ -1,14 +1,14 @@
 "use client";
 
-import { Box, LinearProgress, Typography, Tooltip } from '@mui/material';
-import { getLevelTitle } from '@/types/gamification';
+import { cn } from "@/lib/utils";
+import { getLevelTitle } from "@/types/gamification";
 
 interface XPProgressBarProps {
   currentXP: number;
   xpInLevel: number;
   xpForNextLevel: number;
   currentLevel: number;
-  variant?: 'default' | 'compact';
+  variant?: "default" | "compact";
   showLabel?: boolean;
 }
 
@@ -17,73 +17,70 @@ export function XPProgressBar({
   xpInLevel,
   xpForNextLevel,
   currentLevel,
-  variant = 'default',
+  variant = "default",
   showLabel = true,
 }: XPProgressBarProps) {
-  const percentage = xpForNextLevel > 0 ? (xpInLevel / xpForNextLevel) * 100 : 100;
+  const percentage =
+    xpForNextLevel > 0 ? (xpInLevel / xpForNextLevel) * 100 : 100;
   const isMaxLevel = currentLevel >= 100;
 
-  if (variant === 'compact') {
+  if (variant === "compact") {
     return (
-      <Tooltip 
-        title={isMaxLevel ? 'Max Level Reached!' : `${xpInLevel.toLocaleString()} / ${xpForNextLevel.toLocaleString()} XP`}
-        arrow
+      <div
+        title={
+          isMaxLevel
+            ? "Max Level Reached!"
+            : `${xpInLevel.toLocaleString()} / ${xpForNextLevel.toLocaleString()} XP`
+        }
+        className="w-full"
       >
-        <Box sx={{ width: '100%' }}>
-          <LinearProgress
-            variant="determinate"
-            value={isMaxLevel ? 100 : percentage}
-            sx={{
-              height: 8,
-              borderRadius: 1,
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              '& .MuiLinearProgress-bar': {
-                backgroundColor: isMaxLevel ? '#FFD700' : '#4CAF50',
-                borderRadius: 1,
-              },
-            }}
+        <div className="h-2 w-full overflow-hidden rounded bg-white/10">
+          <div
+            className={cn(
+              "h-full rounded transition-all duration-500",
+              isMaxLevel ? "bg-yellow-400" : "bg-green-500",
+            )}
+            style={{ width: `${isMaxLevel ? 100 : percentage}%` }}
           />
-        </Box>
-      </Tooltip>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Box sx={{ width: '100%' }}>
+    <div className="w-full">
       {showLabel && (
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-          <Typography variant="body2" color="text.secondary">
-            {isMaxLevel ? 'Max Level' : `Level ${currentLevel} - ${getLevelTitle(currentLevel)}`}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {isMaxLevel 
+        <div className="mb-1 flex justify-between">
+          <span className="text-sm text-foreground-secondary">
+            {isMaxLevel
+              ? "Max Level"
+              : `Level ${currentLevel} - ${getLevelTitle(currentLevel)}`}
+          </span>
+          <span className="text-sm text-foreground-secondary">
+            {isMaxLevel
               ? `${currentXP.toLocaleString()} Total XP`
-              : `${xpInLevel.toLocaleString()} / ${xpForNextLevel.toLocaleString()} XP`
-            }
-          </Typography>
-        </Box>
+              : `${xpInLevel.toLocaleString()} / ${xpForNextLevel.toLocaleString()} XP`}
+          </span>
+        </div>
       )}
-      <LinearProgress
-        variant="determinate"
-        value={isMaxLevel ? 100 : percentage}
-        sx={{
-          height: 12,
-          borderRadius: 2,
-          backgroundColor: 'rgba(255, 255, 255, 0.1)',
-          '& .MuiLinearProgress-bar': {
-            backgroundColor: isMaxLevel ? '#FFD700' : '#4CAF50',
-            borderRadius: 2,
-            background: isMaxLevel 
-              ? 'linear-gradient(90deg, #FFD700 0%, #FFA500 100%)'
-              : 'linear-gradient(90deg, #4CAF50 0%, #81C784 100%)',
-          },
-        }}
-      />
+      <div className="h-3 w-full overflow-hidden rounded-lg bg-white/10">
+        <div
+          className={cn(
+            "h-full rounded-lg transition-all duration-500",
+            isMaxLevel
+              ? "bg-gradient-to-r from-yellow-500 to-orange-500"
+              : "bg-gradient-to-r from-green-500 to-green-300",
+          )}
+          style={{ width: `${isMaxLevel ? 100 : percentage}%` }}
+        />
+      </div>
       {!showLabel && (
-        <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
-          {isMaxLevel ? 'Maximum level reached!' : `${percentage.toFixed(1)}% to level ${currentLevel + 1}`}
-        </Typography>
+        <span className="mt-1 block text-xs text-foreground-secondary">
+          {isMaxLevel
+            ? "Maximum level reached!"
+            : `${percentage.toFixed(1)}% to level ${currentLevel + 1}`}
+        </span>
       )}
-    </Box>
+    </div>
   );
 }

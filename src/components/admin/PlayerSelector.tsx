@@ -1,5 +1,5 @@
 "use client";
-import { FormControl, InputLabel, Select, MenuItem, SelectChangeEvent } from "@mui/material";
+import { cn } from "@/lib/utils";
 
 interface Player {
   id: string;
@@ -20,20 +20,9 @@ interface PlayerSelectorProps {
 
 /**
  * PlayerSelector - Reusable dropdown for selecting players
- * 
+ *
  * A consistent player selection component used across admin forms.
  * Optionally displays player status and can filter based on various criteria.
- * 
- * @example
- * ```tsx
- * <PlayerSelector
- *   players={players}
- *   value={form.playerId}
- *   onChange={(id) => setForm({ ...form, playerId: id })}
- *   label="Select Player"
- *   required
- * />
- * ```
  */
 export default function PlayerSelector({
   players,
@@ -45,30 +34,34 @@ export default function PlayerSelector({
   disabled = false,
   showStatus = false,
 }: PlayerSelectorProps) {
-  const handleChange = (event: SelectChangeEvent<string>) => {
-    onChange(event.target.value);
-  };
-
   return (
-    <FormControl fullWidth margin="normal" required={required} disabled={disabled}>
-      <InputLabel id="player-selector-label">{label}</InputLabel>
-      <Select
-        labelId="player-selector-label"
+    <div className="mt-3 w-full">
+      {label && (
+        <label className="mb-1.5 block text-sm font-medium text-foreground">
+          {label}
+          {required && <span className="ml-0.5 text-red-500">*</span>}
+        </label>
+      )}
+      <select
         value={value}
-        onChange={handleChange}
-        label={label}
-        displayEmpty={false}
+        onChange={(e) => onChange(e.target.value)}
+        required={required}
+        disabled={disabled}
+        className={cn(
+          "w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground transition-colors",
+          "focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20",
+          "dark:border-border-dark dark:bg-background-dark",
+          disabled && "cursor-not-allowed opacity-50",
+        )}
       >
-        <MenuItem value="">
-          <em>{placeholder}</em>
-        </MenuItem>
+        <option value="">{placeholder}</option>
         {players.map((player) => (
-          <MenuItem key={player.id} value={player.id}>
+          <option key={player.id} value={player.id}>
             {player.name}
             {showStatus && player.status ? ` (${player.status})` : ""}
-          </MenuItem>
+          </option>
         ))}
-      </Select>
-    </FormControl>
+      </select>
+    </div>
   );
 }

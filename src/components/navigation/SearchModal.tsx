@@ -1,14 +1,7 @@
 "use client";
-import {
-  Modal,
-  Form,
-  Button,
-  ListGroup,
-  Badge,
-  InputGroup,
-} from "react-bootstrap";
+
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
-import InlineLink from "@/components/ui/InlineLink";
+import Link from "next/link";
 import Fuse from "fuse.js";
 import {
   FaSearch,
@@ -18,7 +11,7 @@ import {
   FaExternalLinkAlt,
 } from "react-icons/fa";
 import { useRouter } from "next/navigation";
-
+import { cn } from "@/lib/utils";
 import type { EffectiveMeta } from "@/types/tags";
 
 export default function SearchModal({
@@ -37,6 +30,7 @@ export default function SearchModal({
   const [activeIdx, setActiveIdx] = useState(0);
   const listRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const backdropRef = useRef<HTMLDivElement | null>(null);
 
   // Fetch data when opened
   useEffect(() => {
@@ -47,12 +41,14 @@ export default function SearchModal({
           fetch("/api/tags/registry"),
         ]);
         if (effRes.ok) {
-          setData(await effRes.json());
+          const raw: EffectiveMeta[] = await effRes.json();
+          // filter out PhasmoTourney routes entirely
+          const filtered = raw.filter(
+            (m) => !m.effective.some((t) => /^PhasmoTourney\d+$/i.test(t)),
+          );
+          setData(filtered);
         }
-        if (regRes.ok) {
-          setRegistry(await regRes.json());
-        }
-        // focus input after short delay to ensure modal mount
+        if (regRes.ok) setRegistry(await regRes.json());
         setTimeout(() => inputRef.current?.focus(), 50);
       })();
     } else {
@@ -69,7 +65,7 @@ export default function SearchModal({
         { name: "path", weight: 0.3 },
         { name: "effective", weight: 0.2 },
       ],
-      threshold: 0.4, // 0.0 = exact match, 1.0 = match anything
+      threshold: 0.4,
       includeScore: true,
       includeMatches: true,
       minMatchCharLength: 2,
@@ -79,39 +75,34 @@ export default function SearchModal({
 
   const tagColor = useCallback(
     (tag: string) => registry.find((r) => r.name === tag)?.data.color,
-    [registry]
+    [registry],
   );
 
   const safeHref = useCallback(
     (p: string) =>
       p.replace(/\[(.+?)\]/g, (_, name) =>
-        name.toLowerCase() === "id" ? "example-id" : "sample"
+        name.toLowerCase() === "id" ? "example-id" : "sample",
       ),
-    []
+    [],
   );
 
   const trimmed = q.trim();
   const hasQuery = trimmed.length > 0;
 
-  // Use Fuse.js for fuzzy search
   const results = useMemo(() => {
     if (!trimmed) return [];
-    const fuseResults = fuse.search(trimmed);
-    return fuseResults.map((result) => result.item);
+    return fuse.search(trimmed).map((result) => result.item);
   }, [trimmed, fuse]);
 
-  // Suggestions when no query: top events
+  // show a few tools by default instead of events/tournaments
   const suggestions = !trimmed
-    ? data
-        .filter((d) => d.effective.includes("Event"))
-        .slice(0, 5)
+    ? data.filter((d) => d.effective.includes("Tool")).slice(0, 5)
     : [];
 
   useEffect(() => {
     setActiveIdx(0);
   }, [q]);
 
-  // Keyboard navigation
   const handleKey = (e: React.KeyboardEvent) => {
     if (!show) return;
     if (e.key === "ArrowDown") {
@@ -142,10 +133,7 @@ export default function SearchModal({
     return (
       <>
         {text.slice(0, idx)}
-        <mark
-          className="px-0 py-0 bg-warning-subtle"
-          style={{ backgroundColor: "rgba(255,215,0,0.4)" }}
-        >
+        <mark className="bg-yellow-300/50 dark:bg-yellow-500/30 rounded px-0.5">
           {text.slice(idx, idx + normalized.length)}
         </mark>
         {text.slice(idx + normalized.length)}
@@ -153,127 +141,145 @@ export default function SearchModal({
     );
   }
 
+  if (!show) return null;
+
+  const items = trimmed ? results : suggestions;
+
   return (
-    <Modal show={show} onHide={onHide} size="lg" centered onKeyDown={handleKey}>
-      <Modal.Header className="border-0 pb-0">
-        <div className="w-100">
-          <Form onSubmit={(e) => e.preventDefault()}>
-            <InputGroup>
-              <InputGroup.Text className="bg-transparent border-secondary-subtle">
-                <FaSearch />
-              </InputGroup.Text>
-              <Form.Control
+    <div
+      className="fixed inset-0 z-50 flex items-start justify-center pt-[10vh]"
+      onKeyDown={handleKey}
+    >
+      {/* Backdrop */}
+      <div
+        ref={backdropRef}
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        onClick={onHide}
+      />
+
+      {/* Dialog */}
+      <div className="relative w-full max-w-2xl mx-4 bg-card dark:bg-card-dark border border-border dark:border-border-dark rounded-2xl shadow-soft-lg overflow-hidden animate-fade-in">
+        {/* Search Input */}
+        <div className="p-4 pb-2">
+          <form onSubmit={(e) => e.preventDefault()}>
+            <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-surface-50 dark:bg-surface-900/50 border border-border dark:border-border-dark focus-within:border-primary dark:focus-within:border-primary transition-colors">
+              <FaSearch className="text-foreground-muted dark:text-foreground-dark-muted shrink-0" />
+              <input
                 ref={inputRef}
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="Search pages, paths, or tags..."
                 aria-label="Search"
+                className="flex-1 bg-transparent border-none outline-none text-foreground dark:text-foreground-dark placeholder:text-foreground-muted dark:placeholder:text-foreground-dark-muted"
               />
               {hasQuery && (
-                <InputGroup.Text className="bg-transparent border-0">
-                  <button
-                    type="button"
-                    className="btn-close"
-                    aria-label="Clear search"
-                    onClick={() => setQ("")}
-                  />
-                </InputGroup.Text>
+                <button
+                  type="button"
+                  aria-label="Clear search"
+                  onClick={() => setQ("")}
+                  className="p-1 rounded-full hover:bg-surface-200 dark:hover:bg-surface-800 transition-colors"
+                >
+                  <FaTimes className="text-foreground-muted" size={12} />
+                </button>
               )}
-            </InputGroup>
-          </Form>
-          <div className="d-flex justify-content-between align-items-center mt-2 small text-muted px-1">
+            </div>
+          </form>
+          <div className="flex justify-between items-center mt-2 text-xs text-foreground-muted dark:text-foreground-dark-muted px-1">
             <span>
               {trimmed
                 ? `${results.length} result${results.length === 1 ? "" : "s"}`
                 : "Suggestions"}
             </span>
-            <span className="d-flex align-items-center gap-2">
-              <span className="d-none d-md-inline">
-                <FaArrowUp />/<FaArrowDown /> navigate
+            <span className="flex items-center gap-2">
+              <span className="hidden md:inline-flex items-center gap-1">
+                <FaArrowUp size={10} />/<FaArrowDown size={10} /> navigate
               </span>
-              <kbd className="border rounded px-1">Enter</kbd> open
-              <kbd className="border rounded px-1">Esc</kbd> close
+              <kbd className="border border-border dark:border-border-dark rounded px-1.5 py-0.5 text-[10px] font-mono">
+                Enter
+              </kbd>{" "}
+              open
+              <kbd className="border border-border dark:border-border-dark rounded px-1.5 py-0.5 text-[10px] font-mono">
+                Esc
+              </kbd>{" "}
+              close
             </span>
           </div>
         </div>
-      </Modal.Header>
-      <Modal.Body
-        className="pt-3"
-        style={{ maxHeight: "60vh", overflowY: "auto" }}
-        ref={listRef}
-      >
-        <ListGroup variant="flush">
-          {(trimmed ? results : suggestions).map((r, idx) => {
+
+        {/* Results */}
+        <div ref={listRef} className="max-h-[60vh] overflow-y-auto px-2 pb-2">
+          {items.map((r, idx) => {
             const href = safeHref(r.path);
             const isActive = idx === activeIdx;
             return (
-              <ListGroup.Item
+              <Link
                 key={r.path}
-                action
-                as={InlineLink}
                 href={href}
                 onClick={onHide}
-                className={`d-flex justify-content-between align-items-start rounded ${
-                  isActive ? "bg-primary text-white" : ""
-                }`}
-                style={{ textDecoration: "none" }}
+                className={cn(
+                  "flex justify-between items-start rounded-lg px-4 py-3 no-underline transition-colors",
+                  isActive
+                    ? "bg-primary text-white"
+                    : "text-foreground dark:text-foreground-dark hover:bg-surface-100 dark:hover:bg-surface-900/50",
+                )}
               >
-                <div className="me-3">
-                  <div className="fw-semibold small">
+                <div className="mr-3 min-w-0">
+                  <div className="font-semibold text-sm truncate">
                     {highlight(r.title || r.path)}
                   </div>
                   <div
-                    className={`small ${
-                      isActive ? "text-white-50" : "text-muted"
-                    }`}
+                    className={cn(
+                      "text-xs truncate",
+                      isActive
+                        ? "text-white/60"
+                        : "text-foreground-muted dark:text-foreground-dark-muted",
+                    )}
                   >
                     {r.path}
                   </div>
                 </div>
-                <div
-                  className="d-flex flex-wrap justify-content-end"
-                  style={{ maxWidth: "40%" }}
-                >
+                <div className="flex flex-wrap justify-end gap-1 max-w-[40%] shrink-0">
                   {r.effective.slice(0, 3).map((t) => (
-                    <Badge
+                    <span
                       key={t}
-                      className={`ms-1 mb-1 ${
-                        isActive ? "border border-light" : ""
-                      }`}
+                      className={cn(
+                        "text-[10px] px-2 py-0.5 rounded-full font-medium text-white",
+                        isActive && "border border-white/30",
+                      )}
                       style={{
                         background: isActive
                           ? "rgba(255,255,255,0.25)"
-                          : tagColor(t) || "#6c757d",
+                          : tagColor(t) || "#6b7280",
                       }}
                     >
                       {t}
-                    </Badge>
+                    </span>
                   ))}
                 </div>
-              </ListGroup.Item>
+              </Link>
             );
           })}
-          {!(trimmed ? results : suggestions).length && (
-            <ListGroup.Item disabled className="text-center py-4 text-muted">
+          {!items.length && (
+            <div className="text-center py-8 text-foreground-muted dark:text-foreground-dark-muted text-sm">
               {trimmed ? "No matches" : "No suggestions available"}
-            </ListGroup.Item>
+            </div>
           )}
-        </ListGroup>
-      </Modal.Body>
-      <Modal.Footer className="border-0 pt-0 small text-muted d-flex justify-content-between">
-        <span className="d-flex align-items-center gap-1">
-          <FaExternalLinkAlt /> Dynamic route links use placeholder ids.
-        </span>
-        <Button
-          variant="outline-secondary"
-          size="sm"
-          onClick={onHide}
-          className="px-3 d-flex align-items-center gap-1"
-          style={{ borderRadius: "999px" }}
-        >
-          <FaTimes /> Close
-        </Button>
-      </Modal.Footer>
-    </Modal>
+        </div>
+
+        {/* Footer */}
+        <div className="flex justify-between items-center px-4 py-3 border-t border-border dark:border-border-dark text-xs text-foreground-muted dark:text-foreground-dark-muted">
+          <span className="flex items-center gap-1">
+            <FaExternalLinkAlt size={10} /> Dynamic route links use placeholder
+            ids.
+          </span>
+          <button
+            onClick={onHide}
+            className="flex items-center gap-1 px-3 py-1.5 text-xs border border-border dark:border-border-dark rounded-full hover:bg-surface-100 dark:hover:bg-surface-900/50 transition-colors text-foreground dark:text-foreground-dark"
+          >
+            <FaTimes size={10} /> Close
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
