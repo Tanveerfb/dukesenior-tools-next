@@ -18,16 +18,13 @@ import {
   limit,
   onSnapshot,
   writeBatch,
-  Timestamp,
   startAfter,
   QueryDocumentSnapshot,
   DocumentData,
 } from "firebase/firestore";
 import type {
   Notification,
-  NotificationDoc,
   CreateNotificationInput,
-  UpdateNotificationInput,
 } from "@/types/notification";
 
 // Collection name

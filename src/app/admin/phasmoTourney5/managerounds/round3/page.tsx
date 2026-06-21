@@ -23,6 +23,7 @@ import {
 } from "@/lib/services/phasmoTourney5";
 import TeamsManager from "../../../../../components/tourney/TeamsManager";
 import EliminatorCard from "@/components/tourney/EliminatorCard";
+import useAdminPlayers from "@/components/admin/useAdminPlayers";
 
 interface Team {
   id: string;
@@ -44,9 +45,7 @@ interface TeamRunResult {
 export default function Round3AdminPage() {
   const { user, admin } = useAuth();
   const officer = user?.displayName || user?.email || "Unknown";
-  const [players, setPlayers] = useState<
-    Array<{ id: string; name: string; status: string }>
-  >([]);
+  const { players } = useAdminPlayers();
   const [teams, setTeams] = useState<Team[]>([]);
   const [results, setResults] = useState<TeamRunResult[]>([]);
   const [showRoundSettings, setShowRoundSettings] = useState(false);
@@ -71,17 +70,6 @@ export default function Round3AdminPage() {
 
   useEffect(() => {
     (async () => {
-      try {
-        const res = await fetch("/api/admin/phasmoTourney5/players");
-        const json = await res.json();
-        setPlayers(
-          Array.isArray(json)
-            ? json
-                .filter((p: any) => p.status !== "Eliminated")
-                .map((p: any) => ({ id: p.id, name: p.name, status: p.status }))
-            : []
-        );
-      } catch {}
       try {
         const t = await listTeams();
         setTeams(t);

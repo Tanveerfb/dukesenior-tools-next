@@ -218,7 +218,14 @@ export default function AppNavbar() {
     <Box sx={{ width: 280 }}>
       <Box sx={{ p: 2, display: "flex", alignItems: "center", gap: 1 }}>
         <SparklesIcon color="primary" />
-        <Typography variant="h6" fontWeight="bold">
+        <Typography
+          variant="h6"
+          sx={{
+            fontFamily: "var(--font-permanent-marker, 'Permanent Marker', cursive)",
+            fontWeight: 400,
+            letterSpacing: "0.01em",
+          }}
+        >
           The Lair of Evil
         </Typography>
       </Box>
@@ -496,17 +503,16 @@ export default function AppNavbar() {
                 flexGrow: isMobile ? 1 : 0,
               }}
             >
-              <SparklesIcon color="primary" />
+              <SparklesIcon sx={{ color: "#fff" }} />
               <Typography
                 variant="h6"
                 noWrap
                 sx={{
-                  fontWeight: 700,
-                  background: (theme) =>
-                    `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  backgroundClip: "text",
+                  fontFamily: "var(--font-permanent-marker, 'Permanent Marker', cursive)",
+                  fontWeight: 400,
+                  color: "#fff",
+                  letterSpacing: "0.01em",
+                  lineHeight: 1.2,
                 }}
               >
                 The Lair of Evil

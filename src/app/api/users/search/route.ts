@@ -1,24 +1,23 @@
-import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase/admin';
+import { apiError, apiOk } from '@/lib/utils/api';
 
 // GET /api/users/search?q=prefix
 export async function GET(req: Request){
   const url = new URL(req.url);
   const q = (url.searchParams.get('q') || '').trim().toLowerCase();
-  if(!q) return NextResponse.json({ results: [] });
-  if(!adminDb) return NextResponse.json({ error: 'admin_uninitialized' }, { status: 503 });
+  if(!q) return apiOk({ results: [] });
+  if(!adminDb) return apiError('admin_uninitialized', 503);
 
   try {
-    // Prefix range query: username >= q && username <= q + '\uffff'
+    // Prefix range query: username >= q && username <= q + ''
     const start = q;
-    const end = q + '\uf8ff';
-  const col = adminDb.collection('usernames');
-  // Admin SDK doesn't support the unicode range trick the same way—use where >= start and <= end
-  const snap = await col.where('username', '>=', start).where('username', '<=', end).orderBy('username').limit(10).get();
-  const results: { username: string; uid: string }[] = [];
-  snap.forEach((d: any)=> { const data = d.data() as any; if(data?.username && data?.uid) results.push({ username: data.username, uid: data.uid }); });
-    return NextResponse.json({ results });
+    const end = q + '';
+    const col = adminDb.collection('usernames');
+    const snap = await col.where('username', '>=', start).where('username', '<=', end).orderBy('username').limit(10).get();
+    const results: { username: string; uid: string }[] = [];
+    snap.forEach((d: any)=> { const data = d.data() as any; if(data?.username && data?.uid) results.push({ username: data.username, uid: data.uid }); });
+    return apiOk({ results });
   } catch (err){
-    return NextResponse.json({ error: 'query_failed', details: String(err) }, { status: 500 });
+    return apiError(`query_failed: ${String(err)}`, 500);
   }
 }

@@ -16,7 +16,6 @@ import {
   where, 
   orderBy,
   runTransaction,
-  Timestamp,
   writeBatch
 } from 'firebase/firestore';
 import type { FriendRequest, Friend, BlockedUser } from '@/types/friends';

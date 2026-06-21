@@ -674,7 +674,15 @@ export default function PostView() {
               </div>
             </div>
 
-            <h1 className="mb-2">
+            <h1
+              className="mb-2"
+              style={{
+                fontFamily:
+                  "var(--font-permanent-marker, 'Permanent Marker', cursive)",
+                fontWeight: 400,
+                lineHeight: 1.2,
+              }}
+            >
               {post.title}{" "}
               {post.id && post.id.startsWith("sample-") && (
                 <Badge bg="secondary" className="ms-2">

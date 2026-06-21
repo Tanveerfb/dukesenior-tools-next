@@ -14,7 +14,6 @@ import {
   query,
   where,
   orderBy,
-  Timestamp,
 } from "firebase/firestore";
 import type { Bookmark } from "@/types/bookmarks";
 import type { CMSPost } from "@/types/cms";

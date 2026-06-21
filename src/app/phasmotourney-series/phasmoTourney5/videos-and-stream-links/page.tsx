@@ -68,13 +68,8 @@ function VideoEmbed({ link }: { link: VideoLink }) {
         </Alert>
       );
     }
-    // Twitch requires parent domain for iframe embedding
-    // TODO: Move to environment config
-    const ALLOWED_DOMAINS = ['localhost', 'dukesenior-tools.web.app'];
-    const currentHost = typeof window !== 'undefined' ? window.location.hostname : '';
-    const parentDomain = ALLOWED_DOMAINS.includes(currentHost) 
-      ? currentHost 
-      : ALLOWED_DOMAINS[1];
+    // Twitch requires the embedding page's domain as parent for iframe embedding
+    const parentDomain = window.location.hostname;
     return (
       <div className="ratio ratio-16x9">
         <iframe

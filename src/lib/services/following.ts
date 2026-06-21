@@ -9,13 +9,9 @@ import {
   doc,
   getDoc,
   getDocs,
-  setDoc,
-  deleteDoc,
   query,
-  where,
   orderBy,
   runTransaction,
-  writeBatch,
 } from "firebase/firestore";
 import type { Following, FollowCounts } from "@/types/following";
 import type { UserDoc } from "@/lib/services/users";

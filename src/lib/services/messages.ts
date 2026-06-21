@@ -19,7 +19,6 @@ import {
   onSnapshot,
   runTransaction,
   writeBatch,
-  Timestamp,
   startAfter,
   QueryDocumentSnapshot,
   DocumentData,
@@ -234,7 +233,6 @@ export async function markThreadAsRead(threadId: string, uid: string): Promise<v
   }
 
   // Update thread unread count
-  const currentUnreadCount = threadData.unreadCount || {};
   await updateDoc(threadRef, {
     [`unreadCount.${uid}`]: 0,
   });

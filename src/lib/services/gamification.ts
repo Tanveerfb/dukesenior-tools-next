@@ -9,16 +9,12 @@ import {
   doc,
   getDoc,
   setDoc,
-  updateDoc,
   runTransaction,
-  increment,
-  serverTimestamp,
   query,
   where,
   getDocs,
   orderBy,
   limit,
-  Timestamp,
 } from "firebase/firestore";
 import type {
   UserGamification,
@@ -30,7 +26,6 @@ import type {
 } from "@/types/gamification";
 import {
   calculateLevelFromXP,
-  getLevelTitle,
   XP_REWARDS,
 } from "@/types/gamification";
 import { ACHIEVEMENTS, checkAchievementEligibility } from "@/data/achievements";
@@ -186,20 +181,7 @@ export async function awardXP(
     data.lastXPEarned = Date.now();
 
     // Check for new achievements
-    const statMapping: Record<string, keyof UserGamification["stats"]> = {
-      posts_created: "postsCreated",
-      comments_posted: "commentsPosted",
-      messages_sent: "messagesSent",
-      friends_added: "friendsAdded",
-      tournaments_participated: "tournamentsParticipated",
-      tournaments_won: "tournamentsWon",
-      login_streak: "loginStreak",
-      total_logins: "totalLogins",
-      level_reached: "postsCreated", // Dummy mapping, we check level separately
-      xp_earned: "postsCreated", // Dummy mapping, we check XP separately
-    };
-
-    const { lastLoginDate, ...numericStats } = data.stats;
+    const { lastLoginDate: _lastLoginDate, ...numericStats } = data.stats;
     const stats = {
       ...numericStats,
       level_reached: data.currentLevel,
@@ -317,7 +299,7 @@ export async function incrementStat(
     data.updatedAt = Date.now();
 
     // Check for achievements
-    const { lastLoginDate, ...numericStats } = data.stats;
+    const { lastLoginDate: _lastLoginDate, ...numericStats } = data.stats;
     const stats = {
       ...numericStats,
       level_reached: data.currentLevel,
@@ -570,27 +552,24 @@ export async function getLeaderboard(
     }
 
     const snapshot = await getDocs(q);
-    const entries: LeaderboardEntry[] = [];
 
-    for (let i = 0; i < snapshot.docs.length; i++) {
-      const doc = snapshot.docs[i];
-      const data = doc.data() as UserGamification;
-
-      // Fetch user profile data
-      const user = await getUserByUID(data.uid);
-
-      entries.push({
-        uid: data.uid,
-        displayName: user?.displayName,
-        photoURL: user?.photoURL,
-        username: user?.username,
-        rank: i + 1,
-        totalXP: data.totalXP,
-        currentLevel: data.currentLevel,
-        achievementCount: data.achievementsUnlocked.length,
-        lastActive: data.updatedAt,
-      });
-    }
+    const entries = await Promise.all(
+      snapshot.docs.map(async (doc, i) => {
+        const data = doc.data() as UserGamification;
+        const user = await getUserByUID(data.uid);
+        return {
+          uid: data.uid,
+          displayName: user?.displayName,
+          photoURL: user?.photoURL,
+          username: user?.username,
+          rank: i + 1,
+          totalXP: data.totalXP,
+          currentLevel: data.currentLevel,
+          achievementCount: data.achievementsUnlocked.length,
+          lastActive: data.updatedAt,
+        } satisfies LeaderboardEntry;
+      }),
+    );
 
     return entries;
   } catch (error) {

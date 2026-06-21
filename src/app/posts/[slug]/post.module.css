@@ -32,6 +32,7 @@
 .markdown-body {
   word-break: break-word;
 }
+
 .twitch-badge { display:inline-block; }
 .twitch-badge .twitch-link { display:inline-flex; gap:8px; align-items:center; background:#9146FF; color:#fff; padding:8px 10px; border-radius:8px; text-decoration:none; }
 .twitch-badge .twitch-link svg { opacity:0.95 }

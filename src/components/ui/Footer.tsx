@@ -70,7 +70,16 @@ export default function Footer() {
       <Container maxWidth="xl">
         <Grid container spacing={5}>
           <Grid item xs={12} lg={4}>
-            <Typography variant="h5" component="h2" gutterBottom fontWeight={600}>
+            <Typography
+              variant="h5"
+              component="h2"
+              gutterBottom
+              sx={{
+                fontFamily:
+                  "var(--font-permanent-marker, 'Permanent Marker', cursive)",
+                fontWeight: 400,
+              }}
+            >
               The Lair of Evil
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>

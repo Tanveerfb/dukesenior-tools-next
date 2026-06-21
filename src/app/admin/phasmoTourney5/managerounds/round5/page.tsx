@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Alert,
   Button,
@@ -17,17 +17,12 @@ import {
 } from "@/lib/services/phasmoTourney5";
 import EliminatorCard from "@/components/tourney/EliminatorCard";
 import RecordedRunsTable from "@/components/tourney/RecordedRunsTable";
-
-interface Player {
-  id: string;
-  name: string;
-  status: "Active" | "Inactive" | "Eliminated";
-}
+import useAdminPlayers from "@/components/admin/useAdminPlayers";
 
 export default function Round5AdminPage() {
   const { user, admin } = useAuth();
   const officer = user?.displayName || user?.email || "Unknown";
-  const [players, setPlayers] = useState<Player[]>([]);
+  const { players } = useAdminPlayers();
   const [showRoundSettings, setShowRoundSettings] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<{
@@ -47,20 +42,6 @@ export default function Round5AdminPage() {
     correctGhostType: false,
     notes: "",
   });
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const res = await fetch("/api/admin/phasmoTourney5/players");
-        const json = await res.json();
-        setPlayers(
-          Array.isArray(json)
-            ? json.filter((p: any) => p.status !== "Eliminated")
-            : []
-        );
-      } catch {}
-    })();
-  }, []);
 
   function resetForm() {
     setForm({

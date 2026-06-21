@@ -84,8 +84,11 @@ function normalizeDoc(raw: any): UserDoc | null {
 export async function getUserByUID(uid: string): Promise<UserDoc | null> {
   if (!uid) return null;
 
-  // Prefer admin SDK on server to avoid mixing SDK refs
-  if (typeof window === "undefined") {
+  // Prefer admin SDK on server — only when credentials are actually configured
+  const adminCredsAvailable = !!(
+    process.env.GOOGLE_APPLICATION_CREDENTIALS || process.env.VERCEL_OIDC_TOKEN
+  );
+  if (typeof window === "undefined" && adminCredsAvailable) {
     try {
       const { adminDb } = await import("@/lib/firebase/admin");
       if (adminDb) {
@@ -169,7 +172,10 @@ export async function getUserByUsername(
   const uname = normalizeUsername(username);
   if (!uname) return null;
 
-  if (typeof window === "undefined") {
+  const adminCredsAvailableUn = !!(
+    process.env.GOOGLE_APPLICATION_CREDENTIALS || process.env.VERCEL_OIDC_TOKEN
+  );
+  if (typeof window === "undefined" && adminCredsAvailableUn) {
     try {
       const { adminDb } = await import("@/lib/firebase/admin");
       if (adminDb) {

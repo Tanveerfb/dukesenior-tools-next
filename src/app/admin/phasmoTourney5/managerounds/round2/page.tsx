@@ -16,12 +16,7 @@ import {
   addRound2MoneyResult,
   listRound2MoneyResults,
 } from "@/lib/services/phasmoTourney5";
-
-interface Player {
-  id: string;
-  name: string;
-  status: "Active" | "Inactive" | "Eliminated";
-}
+import useAdminPlayers from "@/components/admin/useAdminPlayers";
 interface Result {
   id: string;
   playerId: string;
@@ -35,7 +30,7 @@ interface Result {
 export default function Round2ManageMoneyPage() {
   const { user, admin } = useAuth();
   const officer = user?.displayName || user?.email || "Unknown";
-  const [players, setPlayers] = useState<Player[]>([]);
+  const { players } = useAdminPlayers();
   const [results, setResults] = useState<Result[]>([]);
   const [showRoundSettings, setShowRoundSettings] = useState<boolean>(false);
   const [form, setForm] = useState<{
@@ -45,17 +40,6 @@ export default function Round2ManageMoneyPage() {
   }>({ playerId: "", money: "", notes: "" });
 
   useEffect(() => {
-    (async () => {
-      try {
-        const res = await fetch("/api/admin/phasmoTourney5/players");
-        const json = await res.json();
-        setPlayers(
-          Array.isArray(json)
-            ? json.filter((p: any) => p.status !== "Eliminated")
-            : []
-        );
-      } catch {}
-    })();
     (async () => {
       try {
         const list = await listRound2MoneyResults();

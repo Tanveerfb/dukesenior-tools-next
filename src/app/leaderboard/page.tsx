@@ -58,7 +58,15 @@ export default function LeaderboardPage() {
     <Container maxWidth="lg" sx={{ py: 4 }}>
       {/* Header */}
       <Box sx={{ mb: 4, textAlign: 'center' }}>
-        <Typography variant="h3" sx={{ fontWeight: 'bold', mb: 2 }}>
+        <Typography
+          variant="h3"
+          sx={{
+            fontFamily:
+              "var(--font-permanent-marker, 'Permanent Marker', cursive)",
+            fontWeight: 400,
+            mb: 2,
+          }}
+        >
           🏆 Leaderboard
         </Typography>
         <Typography variant="body1" color="text.secondary">

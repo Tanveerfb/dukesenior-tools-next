@@ -1,14 +1,14 @@
-import { NextResponse } from 'next/server';
 import { adminDb, verifyIdToken } from '@/lib/firebase/admin';
+import { apiError, apiOk } from '@/lib/utils/api';
 
 // GET /api/admin/suggestions/export?category=&responded=all&archived=false
 export async function GET(req: Request) {
-  if (!adminDb) return NextResponse.json({ error: 'admin_db_unavailable' }, { status: 503 });
+  if (!adminDb) return apiError('admin_db_unavailable', 503);
 
   const authHeader = req.headers.get('authorization') || '';
   const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : undefined;
   const verified = await verifyIdToken(token);
-  if (!verified) return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+  if (!verified) return apiError('unauthorized', 401);
 
   try {
     const url = new URL(req.url);
@@ -26,9 +26,9 @@ export async function GET(req: Request) {
     const snaps = await q.get();
     const out: any[] = [];
     snaps.forEach((s: any) => out.push(s.data()));
-    return NextResponse.json({ results: out });
+    return apiOk({ results: out });
   } catch (err) {
     console.error('export suggestions error', err);
-    return NextResponse.json({ error: 'export_failed' }, { status: 500 });
+    return apiError('export_failed', 500);
   }
 }

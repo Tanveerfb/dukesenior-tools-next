@@ -77,8 +77,10 @@ export default function HeroSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
             sx={{
+              fontFamily:
+                "var(--font-permanent-marker, 'Permanent Marker', cursive)",
+              fontWeight: 400,
               fontSize: { xs: "2.5rem", md: "3.5rem", lg: "4rem" },
-              fontWeight: 700,
               lineHeight: 1.2,
               maxWidth: "900px",
             }}

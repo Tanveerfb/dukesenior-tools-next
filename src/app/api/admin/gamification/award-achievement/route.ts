@@ -1,55 +1,29 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { verifyIdToken } from '@/lib/server/auth';
 import { awardAchievement } from '@/lib/services/gamification';
+import { apiError, apiOk } from '@/lib/utils/api';
 
 export async function POST(request: NextRequest) {
   try {
-    // Verify admin access
     const authHeader = request.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return apiError('Unauthorized', 401);
     }
 
-    const token = authHeader.substring(7);
-    const verifiedUser = await verifyIdToken(token);
+    const verifiedUser = await verifyIdToken(authHeader.substring(7));
+    if (!verifiedUser) return apiError('Unauthorized', 401);
 
-    if (!verifiedUser) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
-    // Parse request body
-    const body = await request.json();
-    const { uid, achievementId } = body;
-
+    const { uid, achievementId } = await request.json();
     if (!uid || !achievementId) {
-      return NextResponse.json(
-        { error: 'User ID and achievement ID are required' },
-        { status: 400 }
-      );
+      return apiError('User ID and achievement ID are required', 400);
     }
 
-    // Award the achievement
     const success = await awardAchievement(uid, achievementId, verifiedUser.uid);
+    if (!success) return apiError('Achievement already unlocked or user not found', 400);
 
-    if (!success) {
-      return NextResponse.json(
-        { error: 'Achievement already unlocked or user not found' },
-        { status: 400 }
-      );
-    }
-
-    return NextResponse.json({ success: true });
+    return apiOk({ success: true });
   } catch (error) {
     console.error('Error awarding achievement:', error);
-    return NextResponse.json(
-      { error: 'Failed to award achievement' },
-      { status: 500 }
-    );
+    return apiError('Failed to award achievement', 500);
   }
 }

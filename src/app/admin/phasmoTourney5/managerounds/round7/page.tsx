@@ -18,12 +18,7 @@ import {
 } from "@/lib/services/phasmoTourney5";
 import BestOutOfThree from "../../../../../components/tourney/BestOutOfThree";
 import RecordedRunsTable from "@/components/tourney/RecordedRunsTable";
-
-interface Player {
-  id: string;
-  name: string;
-  status: "Active" | "Inactive" | "Eliminated";
-}
+import useAdminPlayers from "@/components/admin/useAdminPlayers";
 interface RunSummary {
   id: string;
   playerId: string;
@@ -36,7 +31,7 @@ interface RunSummary {
 export default function Round7AdminPage() {
   const { user, admin } = useAuth();
   const officer = user?.displayName || user?.email || "Unknown";
-  const [players, setPlayers] = useState<Player[]>([]);
+  const { players } = useAdminPlayers();
   const [showRoundSettings, setShowRoundSettings] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<{
@@ -60,15 +55,6 @@ export default function Round7AdminPage() {
 
   useEffect(() => {
     (async () => {
-      try {
-        const res = await fetch("/api/admin/phasmoTourney5/players");
-        const json = await res.json();
-        setPlayers(
-          Array.isArray(json)
-            ? json.filter((p: any) => p.status !== "Eliminated")
-            : []
-        );
-      } catch {}
       try {
         const list = await listRound7Runs();
         setRuns(list);

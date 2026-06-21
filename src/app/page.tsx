@@ -45,7 +45,12 @@ export default function HomePage() {
                     variant="h4"
                     component="h2"
                     gutterBottom
-                    sx={{ fontWeight: 600, fontSize: { xs: "1.75rem", md: "2rem" } }}
+                    sx={{
+                      fontFamily:
+                        "var(--font-permanent-marker, 'Permanent Marker', cursive)",
+                      fontWeight: 400,
+                      fontSize: { xs: "1.75rem", md: "2rem" },
+                    }}
                   >
                     Community Posts & Resource Drops
                   </Typography>

@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 
-interface Player {
+export interface Player {
   id: string;
   name: string;
   status: "Active" | "Inactive" | "Eliminated";

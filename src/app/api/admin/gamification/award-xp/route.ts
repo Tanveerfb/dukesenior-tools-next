@@ -1,46 +1,29 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { verifyIdToken } from '@/lib/server/auth';
 import { awardXP } from '@/lib/services/gamification';
+import { apiError, apiOk } from '@/lib/utils/api';
 
 export async function POST(request: NextRequest) {
   try {
-    // Verify admin access
     const authHeader = request.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return apiError('Unauthorized', 401);
     }
 
-    const token = authHeader.substring(7);
-    const verifiedUser = await verifyIdToken(token);
+    const verifiedUser = await verifyIdToken(authHeader.substring(7));
+    if (!verifiedUser) return apiError('Unauthorized', 401);
 
-    if (!verifiedUser) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
-    // Parse request body
-    const body = await request.json();
-    const { uid, amount, reason } = body;
-
+    const { uid, amount, reason } = await request.json();
     if (!uid || !amount || amount <= 0 || !reason) {
-      return NextResponse.json(
-        { error: 'User ID, positive XP amount, and reason are required' },
-        { status: 400 }
-      );
+      return apiError('User ID, positive XP amount, and reason are required', 400);
     }
 
-    // Award the XP
     const result = await awardXP(uid, amount, reason, 'manual', {
       awardedBy: verifiedUser.uid,
       manual: true,
     });
 
-    return NextResponse.json({
+    return apiOk({
       success: true,
       newXP: result.newXP,
       leveledUp: result.leveledUp,
@@ -48,9 +31,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error awarding XP:', error);
-    return NextResponse.json(
-      { error: 'Failed to award XP' },
-      { status: 500 }
-    );
+    return apiError('Failed to award XP', 500);
   }
 }

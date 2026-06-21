@@ -19,16 +19,12 @@ import {
 import EliminatorCard from "@/components/tourney/EliminatorCard";
 import ImmunityAssigner from "@/components/tourney/ImmunityAssigner";
 import RecordedRunsTable from "@/components/tourney/RecordedRunsTable";
-interface Player {
-  id: string;
-  name: string;
-  status: "Active" | "Inactive" | "Eliminated";
-}
+import useAdminPlayers from "@/components/admin/useAdminPlayers";
 
 export default function Round1ManageRunsPage() {
   const { user, admin } = useAuth();
   const officer = user?.displayName || user?.email || "Unknown";
-  const [players, setPlayers] = useState<Player[]>([]);
+  const { players } = useAdminPlayers();
   const [wildcards, setWildcards] = useState<string[]>([]);
   const [wildcardState, setWildcardState] = useState<
     { name: string; used: boolean }[]
@@ -56,18 +52,6 @@ export default function Round1ManageRunsPage() {
   });
 
   useEffect(() => {
-    // Load players
-    (async () => {
-      try {
-        const res = await fetch("/api/admin/phasmoTourney5/players");
-        const json = await res.json();
-        setPlayers(
-          Array.isArray(json)
-            ? json.filter((p: any) => p.status !== "Eliminated")
-            : []
-        );
-      } catch {}
-    })();
     // Load wildcards
     (async () => {
       try {
