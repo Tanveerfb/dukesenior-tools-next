@@ -1,48 +1,41 @@
-import { Box, Container, Grid, Paper, Skeleton, Stack } from "@mui/material";
-
 export default function Loading() {
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      {/* Profile header skeleton */}
-      <Paper
-        variant="outlined"
-        sx={{ borderRadius: 2, overflow: "hidden", mb: 3 }}
-      >
-        <Skeleton variant="rectangular" height={180} />
-        <Box sx={{ px: 3, pb: 3 }}>
-          <Box sx={{ display: "flex", justifyContent: "space-between", mt: "-48px", mb: 2 }}>
-            <Skeleton variant="circular" width={96} height={96} sx={{ border: "4px solid white" }} />
-            <Skeleton variant="rounded" width={120} height={36} sx={{ mt: "52px" }} />
-          </Box>
-          <Skeleton width={200} height={32} sx={{ mb: 0.5 }} />
-          <Skeleton width={140} height={20} sx={{ mb: 1.5 }} />
-          <Skeleton width="60%" height={16} />
-        </Box>
-      </Paper>
+    <div className="max-w-6xl mx-auto px-4 py-4">
+      {/* Header card */}
+      <div className="rounded-xl border border-border dark:border-border-dark bg-card dark:bg-card-dark overflow-hidden mb-6">
+        <div className="skeleton h-44 w-full" />
+        <div className="px-6 pb-5">
+          <div className="flex items-end justify-between" style={{ marginTop: -48 }}>
+            <div className="skeleton rounded-full border-4 border-card dark:border-card-dark" style={{ width: 96, height: 96 }} />
+            <div className="skeleton rounded-lg" style={{ width: 110, height: 34, marginBottom: 4 }} />
+          </div>
+          <div className="mt-3 space-y-2">
+            <div className="skeleton rounded" style={{ width: 180, height: 28 }} />
+            <div className="skeleton rounded" style={{ width: 120, height: 16 }} />
+            <div className="skeleton rounded" style={{ width: "55%", height: 14 }} />
+          </div>
+        </div>
+      </div>
 
-      {/* Body skeleton */}
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={8}>
-          <Stack spacing={3}>
-            {[140, 100].map((h, i) => (
-              <Paper key={i} variant="outlined" sx={{ p: 3 }}>
-                <Skeleton width={160} height={28} sx={{ mb: 2 }} />
-                <Skeleton height={h} variant="rectangular" sx={{ borderRadius: 1 }} />
-              </Paper>
-            ))}
-          </Stack>
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <Stack spacing={3}>
-            {[160, 120, 80].map((h, i) => (
-              <Paper key={i} variant="outlined" sx={{ p: 3 }}>
-                <Skeleton width={100} height={28} sx={{ mb: 2 }} />
-                <Skeleton height={h} variant="rectangular" sx={{ borderRadius: 1 }} />
-              </Paper>
-            ))}
-          </Stack>
-        </Grid>
-      </Grid>
-    </Container>
+      {/* Body */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+        <div className="md:col-span-8 space-y-4">
+          {[160, 120].map((h, i) => (
+            <div key={i} className="rounded-xl border border-border dark:border-border-dark bg-card dark:bg-card-dark p-5">
+              <div className="skeleton rounded mb-4" style={{ width: 140, height: 22 }} />
+              <div className="skeleton rounded" style={{ height: h }} />
+            </div>
+          ))}
+        </div>
+        <aside className="md:col-span-4 space-y-4">
+          {[140, 110, 80].map((h, i) => (
+            <div key={i} className="rounded-xl border border-border dark:border-border-dark bg-card dark:bg-card-dark p-5">
+              <div className="skeleton rounded mb-4" style={{ width: 90, height: 22 }} />
+              <div className="skeleton rounded" style={{ height: h }} />
+            </div>
+          ))}
+        </aside>
+      </div>
+    </div>
   );
 }

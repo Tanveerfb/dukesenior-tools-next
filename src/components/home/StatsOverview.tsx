@@ -1,19 +1,8 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
-import { Box, Container, Divider, Typography } from "@mui/material";
 import { motion, useInView } from "framer-motion";
 
-const MotionBox = motion.create(Box);
-
-function CountUpAnimation({
-  end,
-  duration = 2000,
-  suffix = "",
-}: {
-  end: number;
-  duration?: number;
-  suffix?: string;
-}) {
+function CountUpAnimation({ end, duration = 2000, suffix = "" }: { end: number; duration?: number; suffix?: string }) {
   const [count, setCount] = useState(0);
   const ref = useRef<HTMLSpanElement>(null);
   const isInView = useInView(ref, { once: true });
@@ -21,28 +10,19 @@ function CountUpAnimation({
   useEffect(() => {
     if (!isInView) return;
     let startTime: number | null = null;
-    let animationFrameId: number;
-    const animate = (currentTime: number) => {
-      if (startTime === null) startTime = currentTime;
-      const progress = Math.min((currentTime - startTime) / duration, 1);
-      const easeOut = 1 - Math.pow(1 - progress, 3);
-      setCount(Math.floor(end * easeOut));
-      if (progress < 1) {
-        animationFrameId = requestAnimationFrame(animate);
-      } else {
-        setCount(end);
-      }
+    let id: number;
+    const animate = (now: number) => {
+      if (startTime === null) startTime = now;
+      const progress = Math.min((now - startTime) / duration, 1);
+      setCount(Math.floor(end * (1 - Math.pow(1 - progress, 3))));
+      if (progress < 1) id = requestAnimationFrame(animate);
+      else setCount(end);
     };
-    animationFrameId = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(animationFrameId);
+    id = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(id);
   }, [end, duration, isInView]);
 
-  return (
-    <span ref={ref}>
-      {count.toLocaleString()}
-      {suffix}
-    </span>
-  );
+  return <span ref={ref}>{count.toLocaleString()}{suffix}</span>;
 }
 
 const stats = [
@@ -54,76 +34,35 @@ const stats = [
 
 export default function StatsOverview() {
   return (
-    <Box sx={{ py: { xs: 5, md: 6 }, bgcolor: "background.default" }}>
-      <Container maxWidth="lg">
-        <Box
-          sx={{
-            display: "flex",
-            flexWrap: "wrap",
-            justifyContent: "center",
-            gap: { xs: 4, sm: 0 },
-          }}
-        >
+    <section className="py-10 md:py-14 bg-background dark:bg-background-dark border-b border-dashed border-border dark:border-border-dark">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-wrap justify-center divide-x divide-border dark:divide-border-dark">
           {stats.map((stat, i) => (
-            <Box
+            <motion.div
               key={stat.label}
-              sx={{
-                display: "flex",
-                alignItems: "stretch",
-                flex: { xs: "0 0 45%", sm: "1 1 0" },
-                justifyContent: "center",
-              }}
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: i * 0.07 }}
+              className="flex flex-col items-center text-center px-8 py-4 flex-1 min-w-[120px]"
             >
-              <MotionBox
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.45, delay: i * 0.08 }}
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  textAlign: "center",
-                  px: { xs: 2, md: 4 },
-                  py: { xs: 1, md: 2 },
+              <span
+                className="text-4xl md:text-5xl leading-none mb-1"
+                style={{
+                  fontFamily: "var(--font-permanent-marker, 'Permanent Marker', cursive)",
+                  fontWeight: 400,
+                  color: "var(--color-primary)",
                 }}
               >
-                <Typography
-                  component="div"
-                  sx={{
-                    fontFamily:
-                      "var(--font-permanent-marker, 'Permanent Marker', cursive)",
-                    fontWeight: 400,
-                    fontSize: { xs: "2.5rem", md: "3.25rem" },
-                    color: "primary.main",
-                    lineHeight: 1,
-                    mb: 0.75,
-                  }}
-                >
-                  <CountUpAnimation
-                    end={stat.value}
-                    suffix={stat.suffix ?? ""}
-                  />
-                </Typography>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ fontWeight: 500, fontSize: "0.875rem" }}
-                >
-                  {stat.label}
-                </Typography>
-              </MotionBox>
-              {i < stats.length - 1 && (
-                <Divider
-                  orientation="vertical"
-                  flexItem
-                  sx={{ display: { xs: "none", sm: "block" }, my: 1 }}
-                />
-              )}
-            </Box>
+                <CountUpAnimation end={stat.value} suffix={stat.suffix ?? ""} />
+              </span>
+              <span className="text-sm text-foreground-muted dark:text-foreground-dark-muted font-medium">
+                {stat.label}
+              </span>
+            </motion.div>
           ))}
-        </Box>
-      </Container>
-    </Box>
+        </div>
+      </div>
+    </section>
   );
 }

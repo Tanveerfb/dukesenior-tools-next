@@ -1,25 +1,11 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import {
-  Box,
-  Avatar,
-  Typography,
-  Button,
-  Stack,
-  Chip,
-  Divider,
-  IconButton,
-  Tooltip,
-  CircularProgress,
-} from "@mui/material";
-import { useTheme } from "@mui/material/styles";
-import EditIcon from "@mui/icons-material/Edit";
-import PlaceIcon from "@mui/icons-material/Place";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
 import SocialLinks from "@/components/user/SocialLinks";
 import RoleBadge from "@/components/user/RoleBadge";
+import UserAvatar from "@/components/user/UserAvatar";
 import type { UserDoc } from "@/lib/services/users";
 import type { FriendStatus } from "@/types/friends";
 import {
@@ -62,6 +48,40 @@ function toMillis(v?: any): number | null {
   return null;
 }
 
+function Btn({
+  children,
+  onClick,
+  disabled,
+  variant = "outline",
+  className,
+}: {
+  children: React.ReactNode;
+  onClick?: () => void;
+  disabled?: boolean;
+  variant?: "primary" | "outline" | "danger";
+  className?: string;
+}) {
+  const base =
+    "px-3 py-1.5 text-sm rounded-lg font-medium transition-all disabled:opacity-50 border";
+  const styles = {
+    primary:
+      "bg-primary border-primary text-white hover:opacity-90",
+    outline:
+      "border-border dark:border-border-dark text-foreground dark:text-foreground-dark hover:bg-surface-100 dark:hover:bg-surface-900/50",
+    danger:
+      "border-red-500 text-red-500 hover:bg-red-500 hover:text-white",
+  };
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={cn(base, styles[variant], className)}
+    >
+      {children}
+    </button>
+  );
+}
+
 export default function ProfileHeader({
   uid,
   username,
@@ -69,16 +89,13 @@ export default function ProfileHeader({
   photoURL,
   bio,
   createdAt,
-  lastSeen,
   bannerURL,
   accentColor = "#ab2fb1",
   pronouns,
   location,
-  timezone: _timezone,
   socialLinks,
   roles = [],
 }: Props) {
-  const theme = useTheme();
   const { user } = useAuth();
   const isOwner = !!(user?.uid && uid && user.uid === uid);
   const router = useRouter();
@@ -115,29 +132,16 @@ export default function ProfileHeader({
       .finally(() => {
         if (!cancelled) setLoading(false);
       });
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [user, uid, isOwner]);
 
   const handleSendRequest = async () => {
     if (!user || !uid || !username) return;
     setActionLoading(true);
     try {
-      await sendFriendRequest(
-        user.uid,
-        user.username || "",
-        user.displayName || user.username || "",
-        user.photoURL,
-        uid,
-        username,
-      );
+      await sendFriendRequest(user.uid, user.username || "", user.displayName || user.username || "", user.photoURL, uid, username);
       setFriendStatus("pending_sent");
-    } catch (e: any) {
-      console.error(e);
-    } finally {
-      setActionLoading(false);
-    }
+    } catch (e) { console.error(e); } finally { setActionLoading(false); }
   };
 
   const handleAcceptRequest = async () => {
@@ -146,69 +150,36 @@ export default function ProfileHeader({
     try {
       await acceptFriendRequest(requestId);
       setFriendStatus("friends");
-      if (user && uid) {
-        const m = await getMutualFriends(user.uid, uid);
-        setMutualFriendsCount(m.length);
-      }
-    } catch (e: any) {
-      console.error(e);
-    } finally {
-      setActionLoading(false);
-    }
+      if (user && uid) { const m = await getMutualFriends(user.uid, uid); setMutualFriendsCount(m.length); }
+    } catch (e) { console.error(e); } finally { setActionLoading(false); }
   };
 
   const handleDeclineRequest = async () => {
     if (!requestId) return;
     setActionLoading(true);
-    try {
-      await declineFriendRequest(requestId);
-      setFriendStatus("none");
-    } catch (e: any) {
-      console.error(e);
-    } finally {
-      setActionLoading(false);
-    }
+    try { await declineFriendRequest(requestId); setFriendStatus("none"); }
+    catch (e) { console.error(e); } finally { setActionLoading(false); }
   };
 
   const handleCancelRequest = async () => {
     if (!requestId) return;
     setActionLoading(true);
-    try {
-      await cancelFriendRequest(requestId);
-      setFriendStatus("none");
-    } catch (e: any) {
-      console.error(e);
-    } finally {
-      setActionLoading(false);
-    }
+    try { await cancelFriendRequest(requestId); setFriendStatus("none"); }
+    catch (e) { console.error(e); } finally { setActionLoading(false); }
   };
 
   const handleRemoveFriend = async () => {
     if (!user || !uid) return;
     setActionLoading(true);
-    try {
-      await removeFriend(user.uid, uid);
-      setFriendStatus("none");
-      setMutualFriendsCount(0);
-    } catch (e: any) {
-      console.error(e);
-    } finally {
-      setActionLoading(false);
-    }
+    try { await removeFriend(user.uid, uid); setFriendStatus("none"); setMutualFriendsCount(0); }
+    catch (e) { console.error(e); } finally { setActionLoading(false); }
   };
 
   const handleBlock = async () => {
     if (!user || !uid || !username) return;
     setActionLoading(true);
-    try {
-      await blockUser(user.uid, uid, username);
-      setFriendStatus("blocked");
-      setMutualFriendsCount(0);
-    } catch (e: any) {
-      console.error(e);
-    } finally {
-      setActionLoading(false);
-    }
+    try { await blockUser(user.uid, uid, username); setFriendStatus("blocked"); setMutualFriendsCount(0); }
+    catch (e) { console.error(e); } finally { setActionLoading(false); }
   };
 
   const fallbackGradient = `linear-gradient(135deg, #12130f 0%, #ab2fb1 60%, ${accentColor} 100%)`;
@@ -216,245 +187,92 @@ export default function ProfileHeader({
     ? `url(${bannerURL}) center/cover, ${fallbackGradient}`
     : fallbackGradient;
 
-  const initials = (displayName || username || "?")
-    .split(" ")
-    .map((w) => w[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
+  const userProfile: Partial<UserDoc> = { uid, username, displayName, photoURL };
 
   return (
-    <Box
-      sx={{
-        borderRadius: 2,
-        overflow: "hidden",
-        bgcolor: "background.paper",
-        border: `1px solid ${theme.palette.divider}`,
-        mb: 3,
-      }}
-    >
+    <div className="rounded-xl border border-border dark:border-border-dark bg-card dark:bg-card-dark overflow-hidden mb-6">
       {/* Banner */}
-      <Box
-        sx={{
-          height: { xs: 140, sm: 180 },
-          background: bannerBackground,
-          position: "relative",
-        }}
-      />
+      <div className="h-36 sm:h-44 w-full" style={{ background: bannerBackground }} />
 
-      {/* Content area */}
-      <Box sx={{ px: { xs: 2, sm: 3 }, pb: 3 }}>
-        {/* Avatar + action row */}
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "flex-end",
-            justifyContent: "space-between",
-            mt: "-52px",
-            mb: 2,
-          }}
-        >
-          <Avatar
-            src={photoURL || undefined}
-            alt={displayName || username}
-            sx={{
-              width: 96,
-              height: 96,
-              border: `4px solid ${theme.palette.background.paper}`,
-              fontSize: "2rem",
-              bgcolor: accentColor,
-              fontFamily:
-                "var(--font-permanent-marker, 'Permanent Marker', cursive)",
-            }}
-          >
-            {initials}
-          </Avatar>
+      {/* Content */}
+      <div className="px-4 sm:px-6 pb-5">
+        {/* Avatar + actions row */}
+        <div className="flex items-end justify-between" style={{ marginTop: -48 }}>
+          <div className="border-4 border-card dark:border-card-dark rounded-full">
+            <UserAvatar user={userProfile} size="large" />
+          </div>
 
-          {/* Action buttons */}
-          <Box sx={{ display: "flex", gap: 1, pb: 0.5 }}>
+          <div className="flex gap-2 pb-1">
             {isOwner ? (
-              <Button
-                variant="outlined"
-                size="small"
-                startIcon={<EditIcon />}
-                onClick={() => router.push("/profile")}
-                sx={{ borderColor: "divider", color: "text.primary" }}
-              >
-                Edit Profile
-              </Button>
+              <Btn onClick={() => router.push("/profile")}>Edit Profile</Btn>
             ) : loading ? (
-              <CircularProgress size={20} />
+              <span className="text-sm text-foreground-muted dark:text-foreground-dark-muted">…</span>
             ) : (
               <>
                 {friendStatus === "none" && (
-                  <Button
-                    variant="contained"
-                    size="small"
-                    onClick={handleSendRequest}
-                    disabled={actionLoading}
-                    sx={{ bgcolor: "primary.main" }}
-                  >
-                    Add Friend
-                  </Button>
+                  <Btn variant="primary" onClick={handleSendRequest} disabled={actionLoading}>Add Friend</Btn>
                 )}
                 {friendStatus === "pending_sent" && (
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    onClick={handleCancelRequest}
-                    disabled={actionLoading}
-                  >
-                    Request Sent
-                  </Button>
+                  <Btn onClick={handleCancelRequest} disabled={actionLoading}>Request Sent</Btn>
                 )}
                 {friendStatus === "pending_received" && (
                   <>
-                    <Button
-                      variant="contained"
-                      size="small"
-                      color="success"
-                      onClick={handleAcceptRequest}
-                      disabled={actionLoading}
-                    >
-                      Accept
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      color="error"
-                      onClick={handleDeclineRequest}
-                      disabled={actionLoading}
-                    >
-                      Decline
-                    </Button>
+                    <Btn variant="primary" onClick={handleAcceptRequest} disabled={actionLoading}>Accept</Btn>
+                    <Btn variant="danger" onClick={handleDeclineRequest} disabled={actionLoading}>Decline</Btn>
                   </>
                 )}
                 {friendStatus === "friends" && (
                   <>
-                    <Button
-                      variant="contained"
-                      size="small"
-                      onClick={() =>
-                        router.push(`/messages?username=${username}`)
-                      }
-                      sx={{ bgcolor: "primary.main" }}
-                    >
-                      Message
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      color="error"
-                      onClick={handleRemoveFriend}
-                      disabled={actionLoading}
-                    >
-                      Unfriend
-                    </Button>
+                    <Btn variant="primary" onClick={() => router.push(`/messages?username=${username}`)}>Message</Btn>
+                    <Btn variant="danger" onClick={handleRemoveFriend} disabled={actionLoading}>Unfriend</Btn>
                   </>
                 )}
                 {friendStatus === "blocked" && (
-                  <Typography variant="caption" color="text.disabled">
-                    Profile unavailable
-                  </Typography>
+                  <span className="text-sm text-foreground-muted dark:text-foreground-dark-muted">Profile unavailable</span>
                 )}
               </>
             )}
-          </Box>
-        </Box>
+          </div>
+        </div>
 
         {/* Name + roles */}
-        <Box sx={{ mb: 0.5 }}>
-          <Stack direction="row" alignItems="center" spacing={1} flexWrap="wrap">
-            <Typography
-              variant="h5"
-              component="h1"
-              sx={{
-                fontFamily:
-                  "var(--font-permanent-marker, 'Permanent Marker', cursive)",
-                fontWeight: 400,
-                lineHeight: 1.2,
-              }}
+        <div className="mt-3 mb-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h1
+              className="text-2xl text-foreground dark:text-foreground-dark leading-tight"
+              style={{ fontFamily: "var(--font-permanent-marker, 'Permanent Marker', cursive)", fontWeight: 400 }}
             >
               {displayName || username}
-            </Typography>
-            {roles.map((role) => (
-              <RoleBadge key={role} role={role} />
-            ))}
-          </Stack>
-
-          <Typography variant="body2" color="text.secondary">
+            </h1>
+            {roles.map((role) => <RoleBadge key={role} role={role} />)}
+          </div>
+          <p className="text-sm text-foreground-muted dark:text-foreground-dark-muted">
             @{username}
-            {pronouns && (
-              <Box component="span" sx={{ ml: 1, opacity: 0.7 }}>
-                ({pronouns})
-              </Box>
-            )}
-          </Typography>
-        </Box>
+            {pronouns && <span className="ml-2 opacity-70">({pronouns})</span>}
+          </p>
+        </div>
 
-        {/* Social links */}
-        {socialLinks && (
-          <Box sx={{ mb: 1.5 }}>
-            <SocialLinks socialLinks={socialLinks} />
-          </Box>
-        )}
+        {socialLinks && <div className="mb-3"><SocialLinks socialLinks={socialLinks} /></div>}
 
-        {/* Bio */}
-        {bio && (
-          <Typography variant="body2" sx={{ mb: 1.5, maxWidth: 560 }}>
-            {bio}
-          </Typography>
-        )}
+        {bio && <p className="text-sm text-foreground dark:text-foreground-dark mb-3 max-w-xl">{bio}</p>}
 
-        {/* Mutual friends */}
         {!isOwner && friendStatus === "friends" && mutualFriendsCount > 0 && (
-          <Typography variant="caption" color="text.secondary" sx={{ mb: 1.5, display: "block" }}>
+          <p className="text-xs text-foreground-muted dark:text-foreground-dark-muted mb-3">
             {mutualFriendsCount} mutual friend{mutualFriendsCount !== 1 ? "s" : ""}
-          </Typography>
+          </p>
         )}
 
-        <Divider sx={{ my: 1.5 }} />
+        <hr className="border-border dark:border-border-dark my-3" />
 
-        {/* Meta stats row */}
-        <Stack
-          direction="row"
-          spacing={2}
-          flexWrap="wrap"
-          alignItems="center"
-          sx={{ color: "text.secondary" }}
-        >
-          <Typography variant="caption">
-            <Box component="strong" sx={{ color: "text.primary", fontWeight: 600 }}>
-              0
-            </Box>{" "}
-            posts
-          </Typography>
-          <Typography variant="caption">
-            <Box component="strong" sx={{ color: "text.primary", fontWeight: 600 }}>
-              0
-            </Box>{" "}
-            followers
-          </Typography>
-          <Typography variant="caption">
-            <Box component="strong" sx={{ color: "text.primary", fontWeight: 600 }}>
-              0
-            </Box>{" "}
-            following
-          </Typography>
-          {location && (
-            <Stack direction="row" alignItems="center" spacing={0.5}>
-              <PlaceIcon sx={{ fontSize: 14 }} />
-              <Typography variant="caption">{location}</Typography>
-            </Stack>
-          )}
-          {memberSince && (
-            <Stack direction="row" alignItems="center" spacing={0.5}>
-              <CalendarTodayIcon sx={{ fontSize: 14 }} />
-              <Typography variant="caption">Joined {memberSince}</Typography>
-            </Stack>
-          )}
-        </Stack>
-      </Box>
-    </Box>
+        {/* Meta row */}
+        <div className="flex flex-wrap gap-4 text-xs text-foreground-muted dark:text-foreground-dark-muted">
+          <span><strong className="text-foreground dark:text-foreground-dark">0</strong> posts</span>
+          <span><strong className="text-foreground dark:text-foreground-dark">0</strong> followers</span>
+          <span><strong className="text-foreground dark:text-foreground-dark">0</strong> following</span>
+          {location && <span>📍 {location}</span>}
+          {memberSince && <span>Joined {memberSince}</span>}
+        </div>
+      </div>
+    </div>
   );
 }

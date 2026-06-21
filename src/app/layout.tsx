@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Permanent_Marker } from "next/font/google";
+import { Geist, Geist_Mono, Permanent_Marker, Kalam } from "next/font/google";
 import "@/styles/global.scss";
 import Providers from "../components/Providers";
 import AppChrome from "../components/layout/AppChrome";
@@ -19,6 +19,13 @@ const geistMono = Geist_Mono({
 const permanentMarker = Permanent_Marker({
   weight: "400",
   variable: "--font-permanent-marker",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const kalam = Kalam({
+  weight: ["300", "400", "700"],
+  variable: "--font-kalam",
   subsets: ["latin"],
   display: "swap",
 });
@@ -49,7 +56,7 @@ export default function RootLayout({
     <html lang="en">
       <body
         suppressHydrationWarning
-        className={`${geistSans.variable} ${geistMono.variable} ${permanentMarker.variable}`}
+        className={`${geistSans.variable} ${geistMono.variable} ${permanentMarker.variable} ${kalam.variable}`}
       >
         <Providers>
           <AppChrome>{children}</AppChrome>
